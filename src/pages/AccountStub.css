@@ -1,0 +1,8 @@
+.stub-crumb { font-size: 15px; color: var(--slate-light); margin-bottom: 12px; }
+.stub-crumb a { color: var(--signal); }
+.stub-crumb span:last-child { color: var(--ink); font-weight: 600; }
+
+.stub h1 { margin-bottom: 20px; }
+
+.stub-card { padding: 24px; max-width: 560px; font-size: 15px; color: var(--slate); }
+.stub-note { color: var(--slate-light); font-size: 15px; margin-top: 10px; }

@@ -1,0 +1,46 @@
+.myaddr-crumb { font-size: 13px; color: var(--slate-light); margin-bottom: 12px; }
+.myaddr-crumb a { color: var(--signal); }
+.myaddr-crumb span:last-child { color: var(--ink); font-weight: 600; }
+
+.myaddr h1 { margin-bottom: 20px; }
+
+.myaddr-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.myaddr-list { display: flex; flex-direction: column; gap: 12px; }
+.myaddr-empty { color: var(--slate-light); font-size: 14px; }
+
+.myaddr-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 18px;
+  align-items: flex-start;
+}
+.myaddr-item-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--signal-tint);
+  color: var(--signal);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.myaddr-item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.myaddr-item-head { display: flex; align-items: center; gap: 8px; }
+.myaddr-item-head strong { font-size: 14px; }
+.myaddr-item-info span { font-size: 13px; color: var(--slate); }
+
+.myaddr-item-actions { display: flex; gap: 4px; }
+.myaddr-item-actions button { color: var(--slate-light); padding: 6px; }
+.myaddr-item-actions button:hover { color: var(--signal); }
+
+.myaddr-form { padding: 20px; }
+.myaddr-form h3 { margin-bottom: 14px; font-size: 15px; }
+.myaddr-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+@media (max-width: 800px) {
+  .myaddr-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,239 @@
+.hero {
+  background: var(--ink);
+  color: #fff;
+  padding: 64px 0 80px;
+}
+
+.eyebrow {
+  color: var(--amber);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+/* Main hero heading */
+.hero-title {
+  font-size: 48px;
+  line-height: 1.15;
+  margin: 16px 0 18px;
+  max-width: 650px;
+  font-weight: 800;
+}
+
+/* Hero description */
+.hero-sub {
+  color: var(--slate-light);
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 580px;
+  margin-bottom: 30px;
+}
+
+/* Search box */
+.hero-search {
+  display: flex;
+  max-width: 560px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.hero-search input {
+  flex: 1;
+  border: none;
+  padding: 16px 18px;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.hero-search input:focus {
+  outline: none;
+}
+
+.hero-search .btn {
+  border-radius: 0;
+  padding: 16px 26px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* =========================================
+   HERO CAROUSEL — EQUAL LEFT/RIGHT SPACE
+========================================= */
+
+.hero-carousel {
+  width: calc(100% - 64px);
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Main catalog layout */
+.catalog {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  margin-top: 40px;
+
+  /* Equal space before Categories and after products */
+  width: calc(100% - 64px);
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 0;
+}
+
+/* Category filters */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filters h4 {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--slate-light);
+  margin-bottom: 12px;
+}
+
+/* Category names */
+.filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  padding: 13px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  color: var(--slate);
+}
+
+.filter-item:hover {
+  background: var(--paper-dim);
+}
+
+.filter-item.active {
+  background: var(--signal-tint);
+  color: var(--signal-dark);
+  font-weight: 700;
+}
+
+.filter-count {
+  font-size: 14px;
+  color: var(--slate-light);
+}
+
+/* Best Sellers heading */
+.catalog-heading {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+/* Results and sorting */
+.catalog-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  color: var(--slate);
+  font-size: 15px;
+}
+
+.catalog-toolbar select {
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* Product grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+.empty-state {
+  color: var(--slate-light);
+  padding: 48px 0;
+  text-align: center;
+  font-size: 17px;
+}
+
+/* Tablet */
+@media (max-width: 860px) {
+  .catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-size: 38px;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+  }
+
+  .catalog-heading {
+    font-size: 27px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 500px) {
+  .hero {
+    padding: 45px 20px 55px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+  }
+
+  .hero-search {
+    max-width: 100%;
+  }
+
+  /* Equal left and right space on mobile */
+  .hero-carousel {
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .catalog {
+    width: calc(100% - 32px);
+    margin-top: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+  }
+
+  .catalog-heading {
+    font-size: 25px;
+  }
+
+  .filter-item {
+    font-size: 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}

@@ -1,0 +1,801 @@
+/* ===================================
+   PRODUCT DETAIL - TRADIO STYLE
+=================================== */
+
+.pd {
+  width: 100%;
+  max-width: 1850px;
+  margin: 0 auto;
+  padding: 28px 52px 75px;
+}
+
+/* Loading */
+
+.pd-loading {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate);
+  font-size: 18px;
+}
+
+/* Back */
+
+.pd-back {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: var(--slate);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.pd-back:hover {
+  color: var(--signal);
+}
+
+/* ===================================
+   MAIN GRID
+=================================== */
+
+.pd-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(500px, 720px)
+    minmax(520px, 1fr);
+
+  gap: 50px;
+  align-items: start;
+}
+
+/* ===================================
+   IMAGE SECTION
+=================================== */
+
+.pd-gallery {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pd-image {
+  width: 100%;
+  height: 620px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: none;
+  border-radius: 12px;
+}
+
+.pd-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+.pd-no-image {
+  color: var(--slate-light);
+  font-size: 16px;
+}
+
+/* Thumbnails */
+
+.pd-thumbs {
+  display: flex;
+  gap: 12px;
+
+  padding-left: 4px;
+
+  overflow-x: auto;
+}
+
+.pd-thumb {
+  width: 76px;
+  height: 76px;
+
+  flex-shrink: 0;
+
+  padding: 3px;
+
+  background: #ffffff;
+
+  border: 1px solid #d5dce6;
+  border-radius: 9px;
+
+  overflow: hidden;
+
+  opacity: 0.75;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s,
+    opacity 0.2s;
+}
+
+.pd-thumb img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+.pd-thumb:hover {
+  opacity: 1;
+
+  border-color: var(--signal);
+}
+
+.pd-thumb-active {
+  opacity: 1;
+
+  border: 2px solid var(--signal);
+}
+
+/* ===================================
+   INFORMATION
+=================================== */
+
+.pd-info {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  padding-top: 8px;
+}
+
+.pd-title-row {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.pd-brand {
+  margin-top: 3px;
+
+  color: #687487;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.07em;
+}
+
+.pd-title {
+  margin: 2px 0 7px;
+
+  color: var(--ink);
+
+  font-size: 37px;
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+/* Rating */
+
+.pd-rating {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: var(--amber);
+
+  font-size: 16px;
+}
+
+.pd-rating-count {
+  color: var(--slate-light);
+}
+
+/* ===================================
+   PRICE
+=================================== */
+
+.pd-price-row {
+  display: flex;
+  align-items: baseline;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin: 5px 0;
+}
+
+.pd-price {
+  color: var(--ink);
+
+  font-size: 35px;
+  font-weight: 750;
+
+  line-height: 1;
+}
+
+.pd-mrp {
+  color: #8994a5;
+
+  font-size: 17px;
+
+  text-decoration: line-through;
+}
+
+.pd-per {
+  color: #728095;
+
+  font-size: 14px;
+}
+
+.pd-ids {
+  margin-bottom: 12px;
+
+  color: #778397;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+}
+
+/* ===================================
+   STOCK CARD
+=================================== */
+
+.pd-specs {
+  width: 100%;
+
+  min-height: 78px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 46px;
+
+  margin: 3px 0 10px;
+
+  padding: 16px 21px;
+
+  background: #ffffff;
+
+  border: 1px solid #d7dee8;
+  border-radius: 12px;
+
+  box-shadow:
+    0 5px 16px
+    rgba(15, 30, 55, 0.07);
+}
+
+.pd-specs {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0;
+  width: fit-content;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+.pd-specs > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+}
+
+.pd-specs > div + div {
+  border-left: 1px solid var(--paper-line);
+  padding-left: 14px;
+  margin-left: 14px;
+}
+
+.pd-specs span {
+  color: var(--slate-light);
+}
+
+.pd-specs b {
+  color: var(--ink);
+  font-size: 14px;
+}
+/* ===================================
+   QUANTITY
+=================================== */
+
+.pd-qty {
+  margin: 8px 0;
+}
+
+.pd-qty label {
+  display: block;
+
+  margin-bottom: 9px;
+
+  color: var(--slate);
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+.pd-qty-controls {
+  height: 43px;
+
+  display: inline-flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #d3dbe5;
+  border-radius: 8px;
+}
+
+.pd-qty-controls button {
+  width: 45px;
+  height: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--ink);
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.pd-qty-controls button:hover {
+  background: #f1f4f8;
+}
+
+.pd-qty-controls span {
+  width: 55px;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--ink);
+
+  font-size: 15px;
+
+  border-left:
+    1px solid #e0e5ec;
+
+  border-right:
+    1px solid #e0e5ec;
+}
+
+/* ===================================
+   CART BUTTONS
+=================================== */
+
+.pd-cta-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  width: 680px;
+}
+
+.pd-cta {
+  flex: 0 0 320px;
+  max-width: 320px;
+  height: 42px;
+  margin-bottom: 0;
+}
+/* ===================================
+   PINCODE
+=================================== */
+
+.pd-delivery {
+  width: 100%;
+  max-width: 440px;
+
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  margin-top: 7px;
+
+  padding:
+    5px
+    6px
+    5px
+    13px;
+
+  color: #778397;
+
+  background: #ffffff;
+
+  border:
+    1px solid #d5dce6;
+
+  border-radius: 8px;
+}
+
+.pd-delivery input {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 100%;
+
+  padding:
+    0
+    9px;
+
+  color: var(--ink);
+
+  background: transparent;
+
+  border: none;
+
+  font-size: 14px;
+}
+
+.pd-delivery input:focus {
+  outline: none;
+}
+
+.pd-delivery .btn {
+  height: 34px;
+
+  min-width: 70px;
+
+  padding:
+    0
+    13px;
+
+  font-size: 13px;
+}
+
+.pd-delivery-ok {
+  margin: 2px 0;
+
+  color: var(--verified);
+
+  font-size: 13px;
+}
+
+.pd-delivery-bad {
+  margin: 2px 0;
+
+  color: var(--danger);
+
+  font-size: 13px;
+}
+
+/* ===================================
+   VARIANTS
+=================================== */
+
+.pd-variants {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  column-gap: 42px;
+
+  row-gap: 25px;
+
+  margin:
+    22px
+    0
+    6px;
+}
+
+.pd-variant-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.pd-variant-label {
+  color: var(--ink);
+
+  font-size: 15px;
+
+  font-weight: 650;
+}
+
+.pd-variant-options {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 9px;
+}
+
+.pd-variant-chip {
+  min-height: 40px;
+
+  padding:
+    8px
+    16px;
+
+  color: #4d596b;
+
+  background: #ffffff;
+
+  border:
+    1px solid #d5dce6;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.pd-variant-chip:hover {
+  color: var(--signal);
+
+  border-color: var(--signal);
+}
+
+.pd-variant-chip-active {
+  color: #ffffff;
+
+  background: var(--signal);
+
+  border-color: var(--signal);
+
+  font-weight: 650;
+
+  box-shadow:
+    0 5px 12px
+    rgba(45, 91, 210, 0.22);
+}
+
+/* ===================================
+   NOTE
+=================================== */
+
+.pd-note {
+  max-width: 650px;
+
+  margin-top: 14px;
+
+  color: #778397;
+
+  font-size: 13px;
+
+  line-height: 1.65;
+}
+
+/* ===================================
+   OUT OF STOCK
+=================================== */
+
+.pd-oos-banner {
+  margin: 10px 0;
+
+  padding:
+    15px
+    18px;
+
+  color: var(--danger);
+
+  background: #fff1f1;
+
+  border:
+    1px solid #f2caca;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+/* ===================================
+   LOWER SECTIONS
+=================================== */
+
+.pd-section {
+  width: 100%;
+
+  margin-top: 50px;
+
+  padding-top: 29px;
+
+  border-top:
+    1px solid #d8dee7;
+}
+
+.pd-section h2 {
+  margin-bottom: 15px;
+
+  color: var(--ink);
+
+  font-size: 23px;
+
+  font-weight: 700;
+}
+
+.pd-overview {
+  max-width: 950px;
+
+  margin-bottom: 10px;
+
+  color: var(--slate);
+
+  font-size: 16px;
+
+  line-height: 1.75;
+}
+
+.pd-link {
+  color: var(--signal);
+
+  font-weight: 600;
+}
+
+.pd-no-reviews {
+  color: var(--slate-light);
+
+  font-size: 15px;
+}
+
+/* Questions */
+
+.pd-qa-head {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 14px;
+}
+
+.pd-qa-head h2 {
+  margin: 0;
+}
+
+.btn-sm {
+  padding:
+    9px
+    15px;
+
+  font-size: 13px;
+}
+
+/* ===================================
+   TABLET
+=================================== */
+
+@media (max-width: 1250px) {
+
+  .pd {
+    padding:
+      25px
+      32px
+      65px;
+  }
+
+  .pd-grid {
+    grid-template-columns:
+      minmax(420px, 1fr)
+      minmax(440px, 1fr);
+
+    gap: 35px;
+  }
+
+  .pd-image {
+    height: 540px;
+  }
+
+  .pd-title {
+    font-size: 32px;
+  }
+}
+
+/* ===================================
+   MOBILE
+=================================== */
+
+@media (max-width: 900px) {
+
+  .pd-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .pd-gallery {
+    max-width: 720px;
+  }
+
+  .pd-image {
+    height: 540px;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .pd {
+    padding:
+      18px
+      16px
+      50px;
+  }
+
+  .pd-image {
+    height: 390px;
+  }
+
+  .pd-title {
+    font-size: 28px;
+  }
+
+  .pd-price {
+    font-size: 30px;
+  }
+
+  .pd-cta-row {
+    grid-template-columns:
+      1fr;
+  }
+
+  .pd-variants {
+    grid-template-columns:
+      1fr;
+  }
+
+  .pd-specs {
+    gap: 28px;
+  }
+
+  .pd-qa-head {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 430px) {
+
+  .pd-image {
+    height: 325px;
+  }
+
+  .pd-specs {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 14px;
+  }
+
+  .pd-delivery {
+    max-width: 100%;
+  }
+}

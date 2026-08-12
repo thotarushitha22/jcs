@@ -1,0 +1,27 @@
+.sell-header { margin-bottom: 24px; }
+.sell-header h1 { margin-bottom: 8px; }
+.sell-header p { color: var(--slate); margin-bottom: 12px; max-width: 520px; }
+
+.sell-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.sell-form { padding: 24px; }
+.sell-form h3 { margin-bottom: 16px; }
+
+.sell-history h3 { font-size: 15px; color: var(--slate-light); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 12px; }
+.sell-req {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 780px) {
+  .sell-grid { grid-template-columns: 1fr; }
+}

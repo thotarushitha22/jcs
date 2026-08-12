@@ -1,0 +1,26 @@
+.support-crumb {
+  font-size: 15px;
+  color: var(--slate-light);
+  margin-bottom: 12px;
+}
+.support-crumb a { color: var(--signal); }
+.support-crumb span:last-child { color: var(--ink); font-weight: 600; }
+
+.support h1 { margin-bottom: 24px; }
+
+.support-card { padding: 24px; max-width: 560px; }
+.support-card h3 { margin-bottom: 18px; }
+
+.support-row {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--paper-line);
+}
+.support-row:first-of-type { border-top: none; padding-top: 0; }
+.support-row svg { color: var(--signal); flex-shrink: 0; margin-top: 2px; }
+
+.support-row > div { display: flex; flex-direction: column; gap: 2px; }
+.support-label { font-size: 14px; color: var(--slate-light); }
+.support-value { font-size: 15px; color: var(--ink); }
+.support-link:hover { color: var(--signal); }

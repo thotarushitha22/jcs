@@ -1,0 +1,515 @@
+/* =========================
+   NAVBAR
+========================= */
+
+.nav {
+  background: #fff;
+  border-bottom: 1px solid var(--paper-line);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* Top blue line */
+
+.nav-topbar {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--ink) 0%,
+    var(--signal) 100%
+  );
+}
+
+/* =========================
+   TOP NAVIGATION ROW
+========================= */
+
+.nav-row-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 76px;
+  padding: 0 32px;
+}
+
+/* Left section */
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+/* Search section gets maximum available space */
+
+.nav-search-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  min-width: 250px;
+  margin: 0 10px;
+}
+
+/* Right section */
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+/* =========================
+   JCS GLOBAL LOGO
+========================= */
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 800;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  background: var(--signal);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+/* =========================
+   DELIVERY LOCATION
+========================= */
+
+.nav-location {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--slate);
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.nav-location:hover {
+  background: var(--paper-dim);
+}
+
+.nav-location span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.35;
+}
+
+.nav-location small {
+  font-size: 13px;
+  color: var(--slate-light);
+}
+
+.nav-location strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* =========================
+   EXTENDED SEARCH BAR
+========================= */
+
+.nav-search {
+  width: 100%;
+  max-width: 850px;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: var(--paper-dim);
+  border-radius: var(--radius-sm);
+
+  padding: 14px 18px;
+
+  color: var(--slate-light);
+}
+
+.nav-search input {
+  flex: 1;
+  min-width: 0;
+
+  border: none;
+  background: transparent;
+
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.nav-search input::placeholder {
+  font-size: 16px;
+  color: var(--slate-light);
+}
+
+.nav-search input:focus {
+  outline: none;
+}
+
+/* =========================
+   LANGUAGE
+========================= */
+
+.nav-language {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* =========================
+   ACCOUNT
+========================= */
+
+.nav-account {
+  flex-shrink: 0;
+}
+
+.nav-account a {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.nav-account small {
+  font-size: 13px;
+  color: var(--slate-light);
+}
+
+.nav-account strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--signal);
+}
+
+/* =========================
+   NAVIGATION BUTTON
+========================= */
+
+.nav-btn {
+  padding: 11px 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* =========================
+   BOTTOM NAVIGATION ROW
+========================= */
+
+.nav-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 58px;
+
+  border-top: 1px solid var(--paper-line);
+
+  padding: 0 24px;
+}
+
+/* Navigation links */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.nav-links a {
+  color: var(--slate);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.nav-links a:hover {
+  color: var(--signal);
+}
+
+.nav-links a.active {
+  color: var(--signal);
+  font-weight: 700;
+}
+
+/* =========================
+   SELL TO JCS GLOBAL
+========================= */
+
+.sell-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  background: var(--verified-tint);
+  color: var(--verified);
+
+  font-size: 15px;
+  font-weight: 700;
+
+  padding: 9px 17px;
+
+  border-radius: 999px;
+}
+
+.sell-pill:hover {
+  background: #d0f0dc;
+}
+
+/* =========================
+   NAVIGATION ICONS
+========================= */
+
+.nav-actions {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.icon-btn {
+  position: relative;
+
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--slate);
+}
+
+.icon-btn:hover {
+  color: var(--signal);
+  background: var(--paper-dim);
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Cart count */
+
+.cart-count {
+  position: absolute;
+
+  top: -2px;
+  right: -2px;
+
+  background: var(--amber);
+  color: var(--ink);
+
+  font-family: var(--font-mono);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  line-height: 1;
+
+  padding: 4px 6px;
+
+  border-radius: 999px;
+
+  min-width: 18px;
+
+  text-align: center;
+}
+
+/* =========================
+   ACCOUNT DROPDOWN
+========================= */
+
+.account-menu-wrap {
+  position: relative;
+}
+
+.account-icon-btn.icon-btn {
+  color: var(--signal);
+}
+
+.account-menu {
+  position: absolute;
+
+  top: calc(100% + 10px);
+  right: 0;
+
+  background: #fff;
+
+  border: 1px solid var(--paper-line);
+
+  border-radius: var(--radius);
+
+  box-shadow:
+    0 4px 8px rgba(11, 18, 32, 0.08),
+    0 16px 32px -16px rgba(11, 18, 32, 0.25);
+
+  padding: 8px;
+
+  min-width: 200px;
+
+  z-index: 50;
+}
+
+.account-menu-item {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 16px;
+  font-weight: 500;
+
+  color: var(--ink);
+
+  text-align: left;
+}
+
+.account-menu-item:hover {
+  background: var(--paper-dim);
+}
+
+.account-menu-item svg {
+  width: 20px;
+  height: 20px;
+
+  color: var(--slate-light);
+
+  flex-shrink: 0;
+}
+
+/* =========================
+   LARGE DESKTOP
+========================= */
+
+@media (min-width: 1500px) {
+  .nav-search {
+    max-width: 950px;
+  }
+
+  .nav-row-top {
+    padding: 0 40px;
+  }
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 1100px) {
+  .nav-row-top {
+    padding: 0 24px;
+    gap: 14px;
+  }
+
+  .nav-search {
+    max-width: 600px;
+  }
+
+  .brand {
+    font-size: 24px;
+  }
+
+  .nav-location strong {
+    font-size: 14px;
+  }
+
+  .nav-right {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav-search {
+    display: none;
+  }
+
+  .nav-location span {
+    display: none;
+  }
+
+  .nav-row-top {
+    height: 70px;
+  }
+
+  .nav-account small,
+  .nav-account strong {
+    font-size: 13px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 720px) {
+  .nav-row-top {
+    height: 64px;
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .nav-row-bottom {
+    height: 54px;
+    padding: 0 16px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .brand {
+    font-size: 22px;
+  }
+
+  .brand-mark {
+    padding: 3px 7px;
+  }
+
+  .nav-right {
+    gap: 8px;
+  }
+
+  .nav-account {
+    display: none;
+  }
+
+  .sell-pill {
+    font-size: 13px;
+    padding: 8px 13px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}

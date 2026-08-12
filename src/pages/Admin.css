@@ -1,0 +1,45 @@
+.admin h1 { margin-bottom: 20px; }
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--paper-line);
+}
+.admin-tabs button {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate);
+  border-bottom: 2px solid transparent;
+}
+.admin-tabs button.active {
+  color: var(--signal);
+  border-bottom-color: var(--signal);
+}
+
+.admin-list { display: flex; flex-direction: column; gap: 12px; }
+
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  gap: 16px;
+}
+
+.admin-row-info { display: flex; flex-direction: column; gap: 4px; }
+.admin-row-title { font-weight: 600; font-size: 14px; }
+.admin-row-meta { font-size: 13px; color: var(--slate-light); }
+
+.admin-row select {
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  background: #fff;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.admin-empty { color: var(--slate-light); font-size: 15px; padding: 24px 0; }

@@ -1,0 +1,165 @@
+/* ===== JCS design tokens =====
+   Palette: deep-ink navy + paper base, signal-blue accent (trust/tech),
+   verified-green (KYC/verification), amber (auction/urgency).
+   Type: Space Grotesk (display) / Inter (body) / JetBrains Mono (specs, prices, stock).
+*/
+:root {
+  --ink: #0b1220;
+  --ink-soft: #141b2e;
+  --ink-line: #232b3f;
+
+  --paper: #f7f8fa;
+  --paper-dim: #eceef2;
+  --paper-line: #e2e5ea;
+
+  --slate: #47536b;
+  --slate-light: #8892a6;
+
+  --signal: #2452ff;
+  --signal-dark: #1636b8;
+  --signal-tint: #eaefff;
+
+  --verified: #16a34a;
+  --verified-tint: #e8f7ee;
+
+  --amber: #f59e0b;
+  --amber-tint: #fff4e0;
+
+  --danger: #dc2626;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 1px 2px rgba(11, 18, 32, 0.06), 0 8px 24px -12px rgba(11, 18, 32, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
+
+button { cursor: pointer; border: none; background: none; }
+
+img { max-width: 100%; display: block; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- layout helpers ---- */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page { flex: 1; padding: 40px 0 80px; }
+
+/* ---- buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--signal); color: #fff; }
+.btn-primary:hover { background: var(--signal-dark); }
+
+.btn-secondary { background: var(--ink); color: #fff; }
+.btn-secondary:hover { background: var(--ink-soft); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--paper-line);
+  color: var(--ink);
+}
+.btn-outline:hover { border-color: var(--signal); color: var(--signal); }
+
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- badges ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.badge-verified { background: var(--verified-tint); color: var(--verified); }
+.badge-pending { background: var(--amber-tint); color: #b45309; }
+.badge-rejected { background: #fee2e2; color: var(--danger); }
+
+/* ---- forms ---- */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--slate); }
+.field input, .field select, .field textarea {
+  padding: 11px 12px;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+  border-color: var(--signal);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+@media (max-width: 720px) {
+  .container { padding: 0 16px; }
+}

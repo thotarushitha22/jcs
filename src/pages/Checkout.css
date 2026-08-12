@@ -1,0 +1,137 @@
+.checkout h1 { margin-bottom: 20px; }
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.checkout-form { padding: 24px; }
+.checkout-form h3 { margin: 4px 0 16px; font-size: 16px; }
+.checkout-form h3:not(:first-child) { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--paper-line); }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.checkout-summary { padding: 20px; position: sticky; top: 84px; }
+.checkout-summary h3 { margin-bottom: 14px; font-size: 16px; }
+
+.checkout-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: var(--slate);
+  margin-bottom: 8px;
+}
+
+.checkout-error {
+  color: var(--danger);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--slate-light);
+  margin-top: 4px;
+}
+
+@media (max-width: 780px) {
+  .checkout-grid { grid-template-columns: 1fr; }
+  .row { grid-template-columns: 1fr; }
+}
+
+/* PIN code validation */
+
+.pincode-valid {
+  display: block;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.pincode-invalid {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+/* Payment options */
+
+.pay-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pay-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.pay-option:hover {
+  border-color: var(--signal);
+}
+
+.pay-option-active {
+  border-color: var(--signal);
+  background: var(--signal-tint);
+}
+
+.pay-option input {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: var(--signal);
+}
+
+.pay-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pay-option strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.pay-option small {
+  font-size: 12px;
+  color: var(--slate-light);
+}
+
+.required {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+/* UPI ID field, shown when UPI is selected */
+
+.upi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 15px 12px 43px;
+  margin-top: -4px;
+}
+.upi-field label { font-size: 12px; font-weight: 600; color: var(--slate); }
+.upi-field input {
+  padding: 10px 12px;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+/* Confirming-payment spinner */
+
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

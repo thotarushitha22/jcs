@@ -1,0 +1,23 @@
+.acc-info-crumb { font-size: 13px; color: var(--slate-light); margin-bottom: 12px; }
+.acc-info-crumb a { color: var(--signal); }
+.acc-info-crumb span:last-child { color: var(--ink); font-weight: 600; }
+
+.acc-info h1 { margin-bottom: 20px; }
+
+.acc-info-card { padding: 8px 24px; max-width: 480px; }
+
+.acc-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 14px;
+}
+.acc-info-row:last-child { border-bottom: none; }
+.acc-info-row span { color: var(--slate-light); }
+.acc-info-row strong { color: var(--ink); font-weight: 600; }
+.acc-info-capitalize { text-transform: capitalize; }
+
+.acc-info-note { font-size: 13px; color: var(--slate-light); margin-top: 16px; max-width: 480px; }
+.acc-info-note a { color: var(--signal); }

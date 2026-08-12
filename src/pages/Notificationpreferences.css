@@ -1,0 +1,66 @@
+.notif-crumb { font-size: 15px; color: var(--slate-light); margin-bottom: 12px; }
+.notif-crumb a { color: var(--signal); }
+.notif-crumb span:last-child { color: var(--ink); font-weight: 600; }
+
+.notif h1 { margin-bottom: 4px; }
+.notif-sub { color: var(--slate); font-size: 15px; margin-bottom: 24px; }
+
+.notif-card { padding: 20px; margin-bottom: 32px; }
+
+.notif-master { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.notif-master h4 { font-size: 15px; margin-bottom: 4px; }
+.notif-master p { font-size: 14px; color: var(--slate); line-height: 1.5; }
+
+.toggle {
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--paper-line);
+  position: relative;
+  transition: background 0.15s ease;
+}
+.toggle-on { background: var(--signal); }
+.toggle-dot {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+.toggle-on .toggle-dot { transform: translateX(20px); }
+
+.notif-heading { font-size: 16px; margin-bottom: 4px; }
+.notif-heading-sub { font-size: 15px; color: var(--slate); margin-bottom: 18px; max-width: 560px; }
+
+.notif-channels { display: flex; flex-direction: column; gap: 12px; }
+
+.notif-channel {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: var(--radius);
+}
+.notif-channel-green { background: var(--verified-tint); }
+.notif-channel-amber { background: var(--amber-tint); }
+.notif-channel-violet { background: #ede9fe; }
+
+.notif-channel-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notif-channel-icon-green { color: var(--verified); }
+.notif-channel-icon-amber { color: #b45309; }
+.notif-channel-icon-violet { color: #7c3aed; }
+
+.notif-channel h4 { font-size: 15px; margin-bottom: 4px; }
+.notif-channel p { font-size: 14px; color: var(--slate); line-height: 1.5; }

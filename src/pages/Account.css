@@ -1,0 +1,38 @@
+.account-crumb { font-size: 15px; color: var(--slate-light); }
+.account h1 { margin: 6px 0 24px; }
+
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.account-card {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.account-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(11,18,32,0.08), 0 16px 32px -16px rgba(11,18,32,0.2); }
+
+.account-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.account-icon-amber { background: var(--amber-tint); color: #b45309; }
+.account-icon-blue { background: var(--signal-tint); color: var(--signal); }
+.account-icon-rose { background: #fee2e2; color: var(--danger); }
+.account-icon-violet { background: #ede9fe; color: #7c3aed; }
+.account-icon-green { background: var(--verified-tint); color: var(--verified); }
+
+.account-card h4 { font-size: 15px; margin-bottom: 3px; }
+.account-card p { font-size: 14px; color: var(--slate); line-height: 1.5; }
+
+@media (max-width: 700px) {
+  .account-grid { grid-template-columns: 1fr; }
+}

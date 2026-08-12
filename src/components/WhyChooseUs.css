@@ -1,0 +1,46 @@
+.why-us { padding: 8px 0 64px; text-align: center; }
+.why-us h2 { font-size: 24px; margin-bottom: 8px; }
+.why-sub { color: var(--slate); font-size: 15px; margin-bottom: 32px; }
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: left;
+}
+
+.why-card {
+  display: flex;
+  gap: 14px;
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.why-card-green { background: var(--verified-tint); }
+.why-card-blue { background: var(--signal-tint); }
+.why-card-amber { background: var(--amber-tint); }
+.why-card-violet { background: #ede9fe; }
+
+.why-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.why-icon-green { color: var(--verified); }
+.why-icon-blue { color: var(--signal); }
+.why-icon-amber { color: #b45309; }
+.why-icon-violet { color: #7c3aed; }
+
+.why-card h4 { font-size: 15px; margin-bottom: 4px; }
+.why-card p { font-size: 14px; color: var(--slate); line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .why-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .why-grid { grid-template-columns: 1fr; }
+}

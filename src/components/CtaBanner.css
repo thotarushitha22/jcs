@@ -1,0 +1,13 @@
+.cta-banner {
+  background: var(--paper-dim);
+  padding: 56px 0;
+}
+
+.cta-inner {
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.cta-inner h2 { font-size: 24px; margin-bottom: 10px; }
+.cta-inner p { color: var(--slate); font-size: 15px; margin-bottom: 22px; }
