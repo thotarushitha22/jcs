@@ -12,7 +12,7 @@ export default function Register() {
 
   const [form, setForm] = useState({
     name: "",
-    Email: "",
+    email: "",
     password: "",
     confirmPassword: "",
     role: "buyer",
@@ -22,16 +22,17 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const update = (key) => (e) =>
-    setForm((f) => ({
-      ...f,
-      [key]: e.target.value,
-    }));
+  // Also clears any stale error banner the moment a field is edited,
+  // instead of leaving a failed-attempt message on screen while typing.
+  const update = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+    if (error) setError(null);
+  };
 
   const validate = () => {
     if (!form.name.trim()) return "Please enter your business name.";
-    if (!form.email.trim()) return "Please enter your Email.";
-    if (!EMAIL_RE.test(form.Email))
+    if (!form.email.trim()) return "Please enter your email.";
+    if (!EMAIL_RE.test(form.email.trim()))
       return "That doesn't look like a valid email address.";
     if (!form.password) return "Please choose a password.";
     if (form.password.length < 6)
@@ -67,6 +68,7 @@ export default function Register() {
 
       await register({
         ...payload,
+        email: payload.email.trim(),
         gstNumber: payload.gstNumber.trim()
           ? payload.gstNumber.trim().toUpperCase()
           : "",
