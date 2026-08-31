@@ -30,7 +30,7 @@ import Policies from "./pages/Policies";
 import OrderReports from "./pages/OrderReports";
 
 import Admin from "./pages/Admin";
-import MerchantDashboard from "./pages/MerchantdDashboard";
+import MerchantDashboard from "./pages/MerchantDashboard";
 
 // Role-based protection wrapper with console logging for troubleshooting
 function ProtectedRoute({ children, allowedRoles }) {
