@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   Headphones,
@@ -9,6 +9,7 @@ import {
   LogOut,
   PackagePlus,
   ShieldCheck,
+  Store,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -21,59 +22,44 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // Search text
-  const [searchText, setSearchText] = useState("");
-
-  // Account menu
+  // Initialize input state from URL search parameter so it persists when typing/reloading
+  const [searchText, setSearchText] = useState(searchParams.get("search") || "");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Close account menu when clicking outside
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUser = user || storedUser;
+  const userRole = String(currentUser?.role || "").toLowerCase();
+  const userEmail = String(currentUser?.email || "").toLowerCase();
+  
+  const isMerchant = userRole === "merchant" || userRole === "seller";
+  
+  // STRICT OVERRIDE: Only thotarushitha22@gmail.com can ever be admin
+  const isAdmin = userEmail === "thotarushitha22@gmail.com";
+
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
-
-    document.addEventListener(
-      "mousedown",
-      onClickOutside
-    );
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        onClickOutside
-      );
-    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  // Search products
   const handleSearch = (e) => {
     e.preventDefault();
-
     const query = searchText.trim();
-
-    // Do nothing when search is empty
-    if (!query) {
-      return;
+    // Navigate to the home page with the search query parameter
+    if (query) {
+      navigate(`/?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate(`/`);
     }
-
-    // Go to products page with search text
-    navigate(
-      `/products?search=${encodeURIComponent(query)}`
-    );
-
-    // Optional: clear the search box
-    // setSearchText("");
   };
 
-  // Sign out
   const handleSignOut = () => {
     logout();
     setMenuOpen(false);
@@ -84,197 +70,110 @@ export default function Navbar() {
     <header className="nav">
       <div className="nav-topbar" />
 
-      {/* =========================
-          TOP ROW
-      ========================= */}
-
       <div className="nav-row-top">
-
-        {/* Logo and location */}
-
         <div className="nav-left">
-          <Link
-            to="/"
-            className="brand"
-          >
-            <span className="brand-mark">
-              JCS
-            </span>
-
-            <span className="brand-word">
-              Global
-            </span>
+          <Link to="/" className="brand">
+            <span className="brand-mark">JCS</span>
+            <span className="brand-word">Global</span>
           </Link>
-
           <LocationPicker />
         </div>
 
-        {/* =========================
-            WORKING SEARCH BAR
-        ========================= */}
-
         <div className="nav-search-wrap">
-
-          <form
-            className="nav-search"
-            onSubmit={handleSearch}
-          >
+          <form className="nav-search" onSubmit={handleSearch}>
             <Search size={20} />
-
             <input
               type="search"
               value={searchText}
-              onChange={(e) =>
-                setSearchText(e.target.value)
-              }
+              onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search by product name, brand, or SKU"
               aria-label="Search products"
             />
-
           </form>
-
         </div>
-
-        {/* Language and account */}
 
         <div className="nav-right">
-
           <LanguagePicker />
-
           <div className="nav-account">
-
-            {user ? (
-
+            {currentUser?.email ? (
               <Link to="/account">
-
-                <small>
-                  Welcome
-                </small>
-
-                <strong>
-                  {user.email}
-                </strong>
-
+                <small>Welcome</small>
+                <strong>{currentUser.email}</strong>
               </Link>
-
             ) : (
-
-              <Link
-                to="/login"
-                className="btn btn-primary nav-btn"
-              >
+              <Link to="/login" className="btn btn-primary nav-btn">
                 Sign in
               </Link>
-
             )}
-
           </div>
-
         </div>
-
       </div>
 
-      {/* =========================
-          BOTTOM ROW
-      ========================= */}
-
       <div className="nav-row-bottom">
-
-        {/* Sell button */}
-
         <Link
-          to="/sell"
+          to={isMerchant ? "/merchant" : isAdmin ? "/admin" : "/sell"}
           className="sell-pill"
         >
           <PackagePlus size={16} />
-
-          Sell to JCSGlobal
-
+          {isMerchant
+            ? "Merchant Dashboard"
+            : isAdmin
+            ? "Admin Control"
+            : "Sell to JCSGlobal"}
         </Link>
 
-        {/* Navbar icons */}
-
         <div className="nav-actions">
-
-          {/* Support */}
-
-          <Link
-            to="/support"
-            className="icon-btn"
-            aria-label="Help and support"
-          >
+          <Link to="/support" className="icon-btn" aria-label="Help and support">
             <Headphones size={22} />
           </Link>
 
-          {/* Cart */}
-
-          <Link
-            to="/cart"
-            className="icon-btn cart-icon-btn"
-            aria-label="Cart"
-          >
+          <Link to="/cart" className="icon-btn cart-icon-btn" aria-label="Cart">
             <ShoppingCart size={22} />
-
-            {count > 0 && (
-              <span className="cart-count">
-                {count}
-              </span>
-            )}
-
+            {count > 0 && <span className="cart-count">{count}</span>}
           </Link>
 
-          {/* Logged-in account */}
-
-          {user ? (
-
-            <div
-              className="account-menu-wrap"
-              ref={menuRef}
-            >
-
+          {currentUser?.email ? (
+            <div className="account-menu-wrap" ref={menuRef}>
               <button
                 type="button"
                 className="icon-btn"
                 aria-label="Account menu"
-                onClick={() =>
-                  setMenuOpen((value) => !value)
-                }
+                onClick={() => setMenuOpen((prev) => !prev)}
               >
                 <UserRound size={22} />
               </button>
 
               {menuOpen && (
-
                 <div className="account-menu">
-
                   <Link
                     to="/account"
                     className="account-menu-item"
-                    onClick={() =>
-                      setMenuOpen(false)
-                    }
+                    onClick={() => setMenuOpen(false)}
                   >
                     <UserCircle size={18} />
-
                     My Account
-
                   </Link>
 
-                  {user?.role === "admin" && (
+                  {isMerchant && (
+                    <Link
+                      to="/merchant"
+                      className="account-menu-item"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <Store size={18} />
+                      Merchant Dashboard
+                    </Link>
+                  )}
 
+                  {isAdmin && (
                     <Link
                       to="/admin"
                       className="account-menu-item"
-                      onClick={() =>
-                        setMenuOpen(false)
-                      }
+                      onClick={() => setMenuOpen(false)}
                     >
                       <ShieldCheck size={18} />
-
-                      Admin
-
+                      Admin Dashboard
                     </Link>
-
                   )}
 
                   <button
@@ -283,33 +182,18 @@ export default function Navbar() {
                     onClick={handleSignOut}
                   >
                     <LogOut size={18} />
-
                     Sign Out
-
                   </button>
-
                 </div>
-
               )}
-
             </div>
-
           ) : (
-
-            <Link
-              to="/login"
-              className="icon-btn"
-              aria-label="Sign in"
-            >
+            <Link to="/login" className="icon-btn" aria-label="Sign in">
               <UserRound size={22} />
             </Link>
-
           )}
-
         </div>
-
       </div>
-
     </header>
   );
 }

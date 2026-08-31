@@ -109,7 +109,11 @@
   padding: 13px 12px;
   border-radius: var(--radius-sm);
   font-size: 18px;
-  color: var(--slate);
+  color: #111; /* Forced dark high-contrast text color */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
 }
 
 .filter-item:hover {

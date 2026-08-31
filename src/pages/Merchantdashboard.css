@@ -1,0 +1,487 @@
+.merchant-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+/* Sidebar Styling */
+.merchant-sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.sidebar-brand {
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.brand-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: #0284c7;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.brand-name {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.brand-sub {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.nav-item.active {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Main Workspace */
+.merchant-main {
+  flex: 1;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.merchant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.merchant-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-btn, .location-badge {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  cursor: pointer;
+}
+
+/* Cards & Metrics */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.metric-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon.today { background: #e0f2fe; color: #0284c7; }
+.metric-icon.week { background: #f3e8ff; color: #9333ea; }
+
+.metric-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 2px 0 0 0;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.tx-header-title h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+
+/* Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.merchant-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.merchant-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+}
+
+.merchant-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+.mono {
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.status-pill {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-pill.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* Fulfillment Actions */
+.fulfillment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.status-badge-current {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge-current.marked { background: #e0f2fe; color: #0369a1; }
+.status-badge-current.shipped { background: #fef3c7; color: #b45309; }
+.status-badge-current.delivered { background: #dcfce7; color: #15803d; }
+
+.action-buttons-group {
+  display: flex;
+  gap: 4px;
+}
+
+.fulfillment-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #334155;
+}
+
+.fulfillment-btn.active {
+  background: #0284c7;
+  color: white;
+  border-color: #0284c7;
+}
+
+/* Product Management Workspace */
+.merchant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media(max-width: 900px) {
+  .merchant-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.merchant-form h3, .merchant-list h3 {
+  margin-top: 0;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.field input, .field select, .field textarea {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: #0284c7;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.merchant-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 12px;
+  width: fit-content;
+}
+
+.merchant-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.merchant-thumb {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.merchant-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.merchant-thumb button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.merchant-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: #0284c7;
+  color: white;
+}
+
+.btn-outline {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+/* Medium Inventory Items Preview */
+.merchant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.merchant-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  margin-bottom: 0 !important;
+}
+
+.merchant-item img {
+  width: 120px !important;
+  height: 120px !important;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.merchant-no-image {
+  width: 120px !important;
+  height: 120px !important;
+  background: #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.merchant-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.merchant-item-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.merchant-item-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.merchant-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.merchant-item-actions button {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #475569;
+}
+
+.merchant-item-actions button:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.merchant-error {
+  color: #dc2626;
+  font-size: 12px;
+  background: #fef2f2;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.merchant-empty {
+  color: #64748b;
+  font-size: 13px;
+  font-style: italic;
+}

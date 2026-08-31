@@ -1,26 +1,32 @@
-import api from "./axios";
+import axios from "axios";
 
-export const createOrder = async (payload) => {
-  const { data } = await api.post("/orders", payload);
-  return data;
+// Change this URL to match your running backend server port (e.g., 5000, 3000, etc.)
+const API_URL = "http://localhost:5000/api/orders";
+
+export const fetchMyOrders = async (token) => {
+  const response = await axios.get(`${API_URL}/mine`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };
 
-export const fetchMyOrders = async () => {
-  const { data } = await api.get("/orders");
-  return data;
+export const fetchUserOrders = async (token) => {
+  const response = await axios.get(`${API_URL}/mine`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };
 
-export const fetchOrder = async (id) => {
-  const { data } = await api.get(`/orders/${id}`);
-  return data;
+export const fetchOrder = async (id, token) => {
+  const response = await axios.get(`${API_URL}/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };
 
-export const fetchAllOrders = async () => {
-  const { data } = await api.get("/orders/all");
-  return data;
-};
-
-export const updateOrderStatus = async (id, status) => {
-  const { data } = await api.put(`/orders/${id}/status`, { status });
-  return data;
+export const createOrder = async (orderData, token) => {
+  const response = await axios.post(API_URL, orderData, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };

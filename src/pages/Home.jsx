@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { fetchProducts, fetchCategories } from "../api/products";
+import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom"; // 1. Import useSearchParams
+import { fetchProducts } from "../api/products";
 import ProductCard from "../components/ProductCard";
 import HeroCarousel from "../components/HeroCarousel";
 import HowItWorks from "../components/HowItWorks";
@@ -7,24 +8,27 @@ import WhyChooseUs from "../components/WhyChooseUs";
 import CtaBanner from "../components/CtaBanner";
 import "./Home.css";
 
+// Your exact custom categories
+const myCategories = [
+  { id: "smartphones", name: "Smartphones", slug: "smartphones" },
+  { id: "laptops", name: "Laptops", slug: "laptops" },
+  { id: "tvs", name: "TVs", slug: "tvs" },
+  { id: "accessories", name: "Accessories", slug: "accessories" },
+];
+
 export default function Home() {
-  const [categories, setCategories] = useState([]);
+  const [searchParams] = useSearchParams(); // 2. Initialize search params
+  const urlSearchQuery = searchParams.get("search") || ""; // Get ?search= from URL
+
+  const [categories] = useState(myCategories);
   const [products, setProducts] = useState([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [activeCategory, setActiveCategory] = useState("all");
-  const [search, setSearch] = useState("");
   const [sort, setSort] = useState("relevance");
 
-  // Categories only need to load once.
-  useEffect(() => {
-    fetchCategories().then(setCategories).catch(() => {});
-  }, []);
-
-  // Products reload whenever a filter changes — the backend does the
-  // filtering/sorting, so this is a real API call each time, not local logic.
+  // Fetch products when API params change (including URL search query)
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -32,14 +36,52 @@ export default function Home() {
     const sortParam = sort === "relevance" ? undefined : sort;
     const categoryParam = activeCategory === "all" ? undefined : activeCategory;
 
-    fetchProducts({ category: categoryParam, search: search || undefined, sort: sortParam })
+    fetchProducts({ 
+      category: categoryParam, 
+      search: urlSearchQuery || undefined, 
+      sort: sortParam 
+    })
       .then((data) => {
-        setProducts(data.products);
-        setTotal(data.total);
+        const productList = Array.isArray(data) ? data : (data?.products || data?.data || []);
+        setProducts(productList);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [activeCategory, search, sort]);
+  }, [activeCategory, urlSearchQuery, sort]);
+
+  // Client-side filtering ensures instant & robust matching (category + local search fallback)
+  const filteredProducts = useMemo(() => {
+    let resultList = [...products];
+
+    // Filter by category if not "all"
+    if (activeCategory !== "all") {
+      resultList = resultList.filter((product) => {
+        if (!product.category) return false;
+        
+        const prodCategory = String(product.category).toLowerCase().trim();
+        const selected = activeCategory.toLowerCase().trim();
+
+        return (
+          prodCategory === selected ||
+          prodCategory.startsWith(selected) ||
+          selected.startsWith(prodCategory)
+        );
+      });
+    }
+
+    // Optional extra client-side safety filter for title, brand, or SKU matching
+    if (urlSearchQuery.trim()) {
+      const q = urlSearchQuery.toLowerCase().trim();
+      resultList = resultList.filter((product) => {
+        const title = (product.title || product.name || "").toLowerCase();
+        const brand = (product.brand || "").toLowerCase();
+        const sku = (product.sku || "").toLowerCase();
+        return title.includes(q) || brand.includes(q) || sku.includes(q);
+      });
+    }
+
+    return resultList;
+  }, [products, activeCategory, urlSearchQuery]);
 
   return (
     <div className="page">
@@ -66,9 +108,16 @@ export default function Home() {
         </aside>
 
         <div className="catalog-main">
-          <h2 className="catalog-heading">Best Sellers</h2>
+          <h2 className="catalog-heading">
+            {urlSearchQuery
+              ? `Search Results for "${urlSearchQuery}"`
+              : activeCategory === "all"
+              ? "Best Sellers"
+              : categories.find((c) => c.slug === activeCategory)?.name || "Best Sellers"}
+          </h2>
+          
           <div className="catalog-toolbar">
-            <span className="mono">{loading ? "Loading…" : `${total} results`}</span>
+            <span className="mono">{loading ? "Loading…" : `${filteredProducts.length} results`}</span>
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="relevance">Sort: Relevance</option>
               <option value="price-asc">Price: Low to high</option>
@@ -78,12 +127,12 @@ export default function Home() {
 
           {error && <p className="empty-state">Couldn't load products: {error}</p>}
 
-          {!error && !loading && products.length === 0 ? (
-            <p className="empty-state">No listings match that search. Try a different brand or category.</p>
+          {!error && !loading && filteredProducts.length === 0 ? (
+            <p className="empty-state">No listings match your search or category. Try clearing filters.</p>
           ) : (
             <div className="grid">
-              {products.map((p) => (
-                <ProductCard key={p.id} product={p} />
+              {filteredProducts.map((p, index) => (
+                <ProductCard key={p.id || p._id || index} product={p} />
               ))}
             </div>
           )}

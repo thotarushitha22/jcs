@@ -74,10 +74,14 @@ export default function ProductDetail() {
   const price = Number(product.price || 0);
   const mrp = Number(product.mrp || 0);
 
-  const gallery =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images
-      : [];
+  // Flexible gallery extraction to catch images, imageUrl, img, or images array
+  const gallery = (() => {
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      return product.images;
+    }
+    const singleImage = product.image || product.imageUrl || product.img;
+    return singleImage ? [singleImage] : [];
+  })();
 
   const outOfStock = Number(product.stock || 0) <= 0;
 
@@ -85,7 +89,6 @@ export default function ProductDetail() {
     if (outOfStock) return;
 
     addToCart(product, qty);
-
     setAdded(true);
 
     setTimeout(() => {

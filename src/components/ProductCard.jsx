@@ -8,8 +8,9 @@ export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  // Quantity state
   const [quantity, setQuantity] = useState(1);
+  const colors = product.variants?.colors || [];
+  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
 
   const price = Number(product.price);
   const mrp = Number(product.mrp);
@@ -19,22 +20,50 @@ export default function ProductCard({ product }) {
   const discountPct =
     mrp > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
-  const colors = product.variants?.colors || [];
   const storage = product.variants?.storage || [];
-
   const stock = Number(product.stock || 0);
   const isOutOfStock = stock <= 0;
 
-  const handleAddToCart = () => {
-    if (!isOutOfStock) {
-      addToCart(product, quantity);
+  // Standardized description so every card occupies the same vertical height
+  const description =
+    product.description ||
+    "High-performance device featuring advanced technology, sleek styling, and complete manufacturer warranty.";
+
+  // Helper check for active user authentication
+  const checkUserAuth = () => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    
+    if (!token && !storedUser) {
+      alert("Please sign in to place an order or add items to your cart.");
+      navigate("/login");
+      return false;
     }
+    return true;
+  };
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    
+    // Check if signed in first
+    if (!checkUserAuth()) return;
+
+    const productToAdd = selectedColor
+      ? { ...product, selectedColor }
+      : product;
+    addToCart(productToAdd, quantity);
   };
 
   const handleBuyNow = () => {
     if (isOutOfStock) return;
 
-    addToCart(product, quantity);
+    // Check if signed in first
+    if (!checkUserAuth()) return;
+
+    const productToAdd = selectedColor
+      ? { ...product, selectedColor }
+      : product;
+    addToCart(productToAdd, quantity);
     navigate("/cart");
   };
 
@@ -97,7 +126,6 @@ export default function ProductCard({ product }) {
 
         {/* Price */}
         <div className="p-price-row">
-
           <span className="p-price mono">
             ₹{price.toLocaleString("en-IN")}
           </span>
@@ -113,41 +141,37 @@ export default function ProductCard({ product }) {
               {discountPct}% off
             </span>
           )}
-
         </div>
 
-        {/* Product variants */}
-        <div className="p-meta">
+        {/* Color Variants Selection */}
+        {colors.length > 0 && (
+          <div className="p-color-picker">
+            <span className="p-color-label">Color:</span>
+            <div className="p-color-options">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`p-color-chip ${
+                    selectedColor === color ? "active" : ""
+                  }`}
+                  onClick={() => setSelectedColor(color)}
+                  title={color}
+                >
+                  {color}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-          {colors.length > 0 && (
-            <span>
-              Colors: {colors[0]}
-              {colors.length > 1
-                ? ` +${colors.length - 1} more`
-                : ""}
-            </span>
-          )}
-
-          {storage.length > 0 && (
-            <span>
-              Storage: {storage[0]}
-              {storage.length > 1
-                ? ` +${storage.length - 1} more`
-                : ""}
-            </span>
-          )}
-
-          {!colors.length && !storage.length && (
-            <span>
-              Product details available
-            </span>
-          )}
-
-        </div>
+        {/* Description to fill vertical space uniformly */}
+        <p className="p-desc">
+          {description}
+        </p>
 
         {/* Stock and delivery */}
         <div className="p-info-row">
-
           <span
             className={
               isOutOfStock
@@ -155,8 +179,7 @@ export default function ProductCard({ product }) {
                 : "p-stock"
             }
           >
-            <PackageCheck size={13} />
-
+            <PackageCheck size={11} />
             {isOutOfStock
               ? "Out of stock"
               : `${stock.toLocaleString("en-IN")} in stock`}
@@ -164,22 +187,19 @@ export default function ProductCard({ product }) {
 
           {!isOutOfStock && (
             <span className="p-dispatch">
-              <Truck size={13} />
+              <Truck size={11} />
               24 hrs
             </span>
           )}
-
         </div>
 
         {/* Quantity */}
         <div className="p-quantity">
-
           <span className="p-quantity-label">
             Quantity
           </span>
 
           <div className="p-quantity-controls">
-
             <button
               type="button"
               onClick={decreaseQuantity}
@@ -203,15 +223,13 @@ export default function ProductCard({ product }) {
             >
               +
             </button>
-
           </div>
-
         </div>
 
         {/* Buttons */}
         <div className="p-actions">
-
           <button
+            type="button"
             className="btn btn-outline p-btn"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
@@ -220,6 +238,7 @@ export default function ProductCard({ product }) {
           </button>
 
           <button
+            type="button"
             className="btn btn-primary p-btn"
             onClick={handleBuyNow}
             disabled={isOutOfStock}
@@ -228,7 +247,6 @@ export default function ProductCard({ product }) {
               ? "Unavailable"
               : "Buy Now"}
           </button>
-
         </div>
 
       </div>

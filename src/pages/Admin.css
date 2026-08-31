@@ -42,4 +42,19 @@
   text-transform: capitalize;
 }
 
+.admin-product-row img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.admin-delete-btn {
+  color: var(--slate-light);
+  padding: 8px;
+  flex-shrink: 0;
+}
+.admin-delete-btn:hover { color: var(--danger); }
+
 .admin-empty { color: var(--slate-light); font-size: 15px; padding: 24px 0; }

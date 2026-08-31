@@ -1,70 +1,79 @@
 .tracker {
   display: flex;
-  align-items: flex-start;
-  padding: 24px 8px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0;
 }
 
 .tracker-step {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  flex: 1;
+  position: relative;
 }
 
 .tracker-node {
   display: flex;
   align-items: center;
   width: 100%;
+  position: relative;
 }
 
 .tracker-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--paper-dim);
-  color: var(--slate-light);
+  background: #e2e8f0;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  z-index: 2;
   margin: 0 auto;
-  border: 2px solid transparent;
-  transition: background 0.2s ease, color 0.2s ease;
 }
-.tracker-icon-done { background: var(--verified-tint); color: var(--verified); }
-.tracker-icon-current { border-color: var(--verified); }
+
+/* Green Styling for Completed Steps */
+.tracker-icon-done,
+.tracker-icon-current {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
 
 .tracker-line {
-  flex: 1;
-  height: 2px;
-  background: var(--paper-line);
-  margin-top: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 1;
 }
-.tracker-line-done { background: var(--verified); }
+
+/* Green Progress Line */
+.tracker-line-done {
+  background: #10b981 !important;
+}
 
 .tracker-label {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  margin-top: 8px;
+  font-size: 13px;
+  text-align: center;
+  color: #0f172a;
 }
-.tracker-label strong { font-size: 13px; color: var(--ink); }
-.tracker-label-pending { color: var(--slate-light); font-weight: 500; }
-.tracker-label span { font-size: 11px; color: var(--slate-light); }
+
+.tracker-label-pending {
+  color: #94a3b8;
+}
 
 .tracker-cancelled {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   background: #fee2e2;
-  color: var(--danger);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-}
-.tracker-cancelled strong { display: block; font-size: 14px; }
-.tracker-cancelled span { font-size: 13px; opacity: 0.85; }
-
-@media (max-width: 480px) {
-  .tracker-label strong { font-size: 11px; }
+  color: #991b1b;
+  padding: 14px;
+  border-radius: 8px;
 }
