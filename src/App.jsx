@@ -108,7 +108,7 @@ export default function App() {
               }
             />
             <Route
-              path="/merchant-dashboard"
+              path="/merchant-Dashboard"
               element={
                 <ProtectedRoute allowedRoles={['merchant', 'admin', 'seller']}>
                   <MerchantDashboard />

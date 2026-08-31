@@ -434,7 +434,7 @@ export default function MerchantDashboard() {
         </header>
 
         {/* DASHBOARD TAB */}
-        {activeTab === "dashboard" && (
+        {activeTab === "Dashboard" && (
           <>
             <section className="metrics-grid">
               <div className="metric-card">
