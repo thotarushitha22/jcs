@@ -1,101 +1,136 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const AuthContext = createContext();
 
-// Dynamically use environment variable, fallback to Render backend
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
-  : "https://jcs-server-1.onrender.com/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://jcs-server-1.onrender.com/api";
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Restore login session
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+
     if (storedUser && token) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
+      } catch (error) {
+        console.error("Invalid stored user:", error);
+
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       }
     }
+
     setLoading(false);
   }, []);
 
+  // Login
   const login = async (credentials) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-      let { token, user: userData } = response.data;
+      console.log(
+        "Logging in to:",
+        `${API_BASE_URL}/auth/login`
+      );
 
-      // 🛡️ Force merchant role if email indicates it, or if it's your test email
-      const emailLower = credentials.email.toLowerCase();
-      if (
-        emailLower === "22@gmail.com" || 
-        emailLower.includes("merchant") || 
-        emailLower.includes("seller")
-      ) {
-        userData.role = "merchant";
+      const response = await api.post(
+        "/auth/login",
+        credentials
+      );
+
+      const { token, user: userData } = response.data;
+
+      if (!token) {
+        throw new Error(
+          "No authentication token received from server."
+        );
+      }
+
+      if (!userData) {
+        throw new Error(
+          "No user information received from server."
+        );
       }
 
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userData)
+      );
+
       setUser(userData);
+
       return response.data;
     } catch (error) {
-      console.warn("Backend error or unauthorized. Using mock login session override.");
-      
-      const emailLower = credentials.email.toLowerCase();
-      let userRole = "buyer";
-      
-      if (emailLower === "22@gmail.com" || emailLower.includes("merchant") || emailLower.includes("seller")) {
-        userRole = "merchant";
-      }
+      console.error(
+        "Login failed:",
+        error.response?.data || error.message
+      );
 
-      const mockUser = {
-        id: Date.now(),
-        email: credentials.email,
-        role: userRole,
-      };
-      
-      const mockToken = "mock-jwt-token-" + Date.now();
-      localStorage.setItem("token", mockToken);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
-      return { token: mockToken, user: mockUser };
+      // Do NOT create a fake/mock token
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      setUser(null);
+
+      throw error;
     }
   };
 
+  // Register
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+      console.log(
+        "Registering:",
+        `${API_BASE_URL}/auth/register`
+      );
+
+      const response = await api.post(
+        "/auth/register",
+        userData
+      );
+
       return response.data;
     } catch (error) {
-      console.warn("Backend offline during registration. Saving to local mock memory.");
-      
-      const mockUsers = JSON.parse(localStorage.getItem("mockUsers") || "{}");
-      mockUsers[userData.email.toLowerCase()] = {
-        email: userData.email,
-        role: userData.role === "seller" ? "merchant" : userData.role
-      };
-      localStorage.setItem("mockUsers", JSON.stringify(mockUsers));
+      console.error(
+        "Registration failed:",
+        error.response?.data || error.message
+      );
 
-      return { success: true, user: userData };
+      throw error;
     }
   };
 
+  // Logout
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
