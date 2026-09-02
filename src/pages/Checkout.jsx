@@ -68,8 +68,12 @@ export default function Checkout() {
     const statusText = isPaid ? "PAID" : "PENDING";
     const paymentLabel = isPaid ? "Razorpay Sandbox QR" : paymentMethod === "cod" ? "Cash on Delivery" : "Credit Terms";
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "https://jcs-server-1.onrender.com";
+    const generatedOrderId = "JCS-" + paymentMethod.toUpperCase() + "-" + Math.floor(10000 + Math.random() * 90000);
+
     const payload = {
-      order_id: "JCS-" + paymentMethod.toUpperCase() + "-" + Math.floor(10000 + Math.random() * 90000),
+      id: generatedOrderId,
+      order_id: generatedOrderId,
       orderItems: items.map(({ product, qty }) => ({
         product: product.id || product._id,
         title: product.title || product.name,
@@ -83,14 +87,12 @@ export default function Checkout() {
         qty: qty,
         price: product.price
       })),
-      shippingAddress: {
-        name: form.shippingName,
-        gstin: form.shippingGstin,
-        address: form.shippingAddress,
-        city: form.shippingCity,
-        pincode: form.shippingPincode,
-        phone: form.shippingPhone
-      },
+      shippingAddress: form.shippingAddress,
+      shippingName: form.shippingName,
+      shippingPhone: form.shippingPhone,
+      shippingCity: form.shippingCity,
+      shippingPincode: form.shippingPincode,
+      shippingGstin: form.shippingGstin,
       paymentMethod: paymentLabel,
       status: statusText,
       paymentStatus: statusText,
@@ -99,25 +101,31 @@ export default function Checkout() {
       itemsPrice: subtotal,
       taxPrice: gst,
       shippingPrice: 0,
+      createdAt: new Date().toISOString(),
     };
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/api/orders", payload, {
+      const token = localStorage.getItem("token") || JSON.parse(localStorage.getItem("user") || "{}")?.token;
+      
+      // 1. Sync with backend database
+      await axios.post(`${API_BASE_URL}/api/orders`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log("Order saved to live backend database successfully.");
     } catch (err) {
-      console.warn("Backend API sync failed, saving order locally as fallback:", err);
+      console.warn("Backend sync warning (saving locally as fallback):", err.response?.data || err.message);
     }
 
+    // 2. Save locally immediately so it renders on the orders list without a delay
     try {
       const existingLocalOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      existingLocalOrders.unshift(payload);
-      localStorage.setItem("orders", JSON.stringify(existingLocalOrders));
-    } catch (e) {
-      console.error("Local storage error:", e);
+      const updatedOrders = [payload, ...existingLocalOrders];
+      localStorage.setItem("orders", JSON.stringify(updatedOrders));
+      window.dispatchEvent(new Event("storage"));
+    } catch (localErr) {
+      console.error("Local storage save error:", localErr);
     }
-
+    
     clearCart();
     setPlacing(false);
 
@@ -411,7 +419,7 @@ export default function Checkout() {
               <button
                 type="button"
                 className="btn btn-primary"
-                style={{ flex: 1 }}
+                style={{ flex: 1, cursor: "pointer" }}
                 onClick={simulateQrPaymentCompletion}
                 disabled={processingPayment || qrScanned}
               >

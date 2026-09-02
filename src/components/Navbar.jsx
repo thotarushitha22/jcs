@@ -24,20 +24,21 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Initialize input state from URL search parameter so it persists when typing/reloading
   const [searchText, setSearchText] = useState(searchParams.get("search") || "");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const currentUser = user || storedUser;
+  // STRICT SESSION CHECK: Require a valid token so stale localStorage doesn't leak admin controls
+  const token = localStorage.getItem('token');
+  const currentUser = token ? (user || JSON.parse(localStorage.getItem('user') || '{}')) : null;
+
   const userRole = String(currentUser?.role || "").toLowerCase();
   const userEmail = String(currentUser?.email || "").toLowerCase();
   
   const isMerchant = userRole === "merchant" || userRole === "seller";
   
-  // STRICT OVERRIDE: Only thotarushitha22@gmail.com can ever be admin
-  const isAdmin = userEmail === "thotarushitha22@gmail.com";
+  // STRICT OVERRIDE: Only thotarushitha22@gmail.com with admin role can ever see admin controls
+  const isAdmin = token && userEmail === "thotarushitha22@gmail.com" && userRole === "admin";
 
   useEffect(() => {
     const onClickOutside = (e) => {
@@ -52,7 +53,6 @@ export default function Navbar() {
   const handleSearch = (e) => {
     e.preventDefault();
     const query = searchText.trim();
-    // Navigate to the home page with the search query parameter
     if (query) {
       navigate(`/?search=${encodeURIComponent(query)}`);
     } else {

@@ -9,53 +9,41 @@ export default function CustomerOrders() {
 
   useEffect(() => {
     const fetchOrders = async () => {
+      let backendOrders = [];
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/api/orders", {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || "https://jcs-server-1.onrender.com";
+        
+        const response = await axios.get(`${API_BASE_URL}/api/orders`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        const data = Array.isArray(response.data) ? response.data : response.data.orders || [];
-        // Accept backend data directly (even if empty, it's a successful database query)
-        filterAndSetOrders(data);
+        backendOrders = Array.isArray(response.data) ? response.data : response.data.orders || [];
       } catch (err) {
-        console.warn("Backend orders fetch failed, loading from local storage...", err);
-        const localOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-        filterAndSetOrders(localOrders);
-      } finally {
-        setLoading(false);
+        console.warn("Backend orders fetch failed, falling back to local storage...", err);
       }
+
+      // Combine with local orders to ensure newly created or modified orders always show up
+      const localOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      
+      // Merge unique orders by ID (preferring backend version if duplicated)
+      const combinedMap = new Map();
+      [...localOrders, ...backendOrders].forEach(ord => {
+        const key = ord.id || ord._id || ord.order_id;
+        if (key) combinedMap.set(String(key), ord);
+      });
+
+      const allOrders = Array.from(combinedMap.values());
+      filterAndSetOrders(allOrders);
+      setLoading(false);
     };
 
     const filterAndSetOrders = (allOrders) => {
       try {
-        const userInfo = JSON.parse(localStorage.getItem("userInfo") || localStorage.getItem("user") || "{}");
-        const userEmail = userInfo.email ? userInfo.email.toLowerCase().trim() : null;
-        const userId = userInfo.id || userInfo._id || null;
-
-        if (!userEmail && !userId) {
-          setOrders(allOrders);
-          return;
-        }
-
-        const myOrders = allOrders.filter((order) => {
-          const orderEmail = (order.email || order.userEmail || order.customerEmail || "").toLowerCase().trim();
-          const orderUserId = order.userId || order.user_id || order.customer_id || order.buyerId;
-
-          if (!orderEmail && !orderUserId) return true;
-          if (userEmail && orderEmail === userEmail) return true;
-          if (userId && String(orderUserId) === String(userId)) return true;
-          
-          return false;
-        });
-
-        if (myOrders.length === 0 && allOrders.length > 0) {
-          setOrders(allOrders);
-        } else {
-          setOrders(myOrders);
-        }
+        // If no strict separation is necessary or if we want users to see all relevant fetched orders:
+        setOrders(allOrders);
       } catch (e) {
-        console.error("Error filtering user orders:", e);
+        console.error("Error setting orders:", e);
         setOrders(allOrders);
       }
     };
@@ -65,7 +53,7 @@ export default function CustomerOrders() {
     const handleStorageChange = () => {
       const updatedLocalOrders = JSON.parse(localStorage.getItem("orders") || "[]");
       if (updatedLocalOrders.length > 0) {
-        filterAndSetOrders(updatedLocalOrders);
+        setOrders(updatedLocalOrders);
       }
     };
 
@@ -92,9 +80,9 @@ export default function CustomerOrders() {
         <div className="orders-list" style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "20px" }}>
           {orders.map((order) => {
             const rawId = String(order.order_id || order.id || "");
-            const orderId = rawId.replace("JCS-", "");
+            const displayId = rawId.replace("JCS-", "");
             
-            const orderStatus = String(order.status || order.paymentStatus || "").toUpperCase();
+            const orderStatus = String(order.status || order.paymentStatus || "PENDING").toUpperCase();
             const paymentMethodStr = String(order.paymentMethod || order.payment_method || "Cash on Delivery");
             
             const isOnlinePaid = paymentMethodStr.toLowerCase().includes("razorpay") || orderStatus === "PAID" || rawId.includes("RAZORPAY_SANDBOX");
@@ -117,7 +105,7 @@ export default function CustomerOrders() {
                   <div>
                     <h3 style={{ margin: 0, fontSize: "16px" }}>
                       <Link to={`/orders/${rawId}`} style={{ color: "#2563eb", textDecoration: "none" }}>
-                        Order JCS-{orderId.replace("JCS-", "")}
+                        Order JCS-{displayId.replace("JCS-", "")}
                       </Link>
                     </h3>
                     <span style={{ fontSize: "13px", color: "#64748b" }}>
@@ -143,7 +131,7 @@ export default function CustomerOrders() {
 
                   <div>
                     <span className={`badge status-${orderStatus.toLowerCase()}`} style={{ padding: "6px 12px", borderRadius: "20px", background: orderStatus === 'DELIVERED' ? '#d1fae5' : orderStatus === 'SHIPPED' ? '#e0f2fe' : orderStatus === 'CANCELLED' ? '#fee2e2' : '#fef3c7', color: orderStatus === 'DELIVERED' ? '#065f46' : orderStatus === 'SHIPPED' ? '#0369a1' : orderStatus === 'CANCELLED' ? '#991b1b' : '#92400e', fontSize: "12px", fontWeight: "600" }}>
-                      {orderStatus || "PENDING"}
+                      {orderStatus}
                     </span>
                   </div>
                 </div>

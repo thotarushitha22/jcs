@@ -32,6 +32,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../api/products";
+import { fetchMerchantOrders } from "../api/orders";
 import { uploadImage } from "../api/upload";
 
 import "./MerchantDashboard.css";
@@ -56,6 +57,18 @@ const emptyForm = {
   gstPercent: "18",
   overview: "",
   warranty: "",
+  simSlots: "",
+  colour: "",
+  waterResistant: "",
+  securityFeatures: "",
+  fastCharging: "",
+  networkGen: "",
+  screenSize: "",
+  weight: "",
+  storage: "",
+  rearCamera: "",
+  frontCamera: "",
+  ram: "",
 };
 
 const CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
@@ -93,6 +106,8 @@ export default function MerchantDashboard() {
     return <Navigate to="/" replace />;
   }
 
+  const userEmailKey = currentUser?.email ? String(currentUser.email) : "guest";
+
   useEffect(() => {
     let mounted = true;
 
@@ -100,22 +115,51 @@ export default function MerchantDashboard() {
       try {
         setError(null);
         
-        const savedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-        const initializedOrders = savedOrders.map((ord) => {
-          const currentPay = ord.paymentStatus || ord.status || ord.payment_status || "Success";
+        let rawOrders = [];
+        try {
+          const res = await fetchMerchantOrders();
+          rawOrders = Array.isArray(res) ? res : res?.data || res?.orders || JSON.parse(localStorage.getItem("orders") || "[]");
+        } catch (e) {
+          rawOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+        }
+
+        if (!Array.isArray(rawOrders)) {
+          rawOrders = [rawOrders].filter(Boolean);
+        }
+
+        // Resilient mapping checking multiple property names for amounts and IDs
+        let finalOrders = rawOrders.map((ord, idx) => {
+          const amount = Number(
+            ord.totalAmount || 
+            ord.total_amount || 
+            ord.totalPrice || 
+            ord.amount || 
+            ord.total || 
+            ord.price || 
+            0
+          );
+          const status = String(ord.paymentStatus || ord.status || "Success");
+          const orderId = ord.order_id || ord.orderId || ord._id || `JCS-${81670 + idx}`;
+          const userName = ord.shippingAddress?.name || ord.user_name || ord.customerName || currentUser.name || "Customer";
+          
           return {
             ...ord,
-            paymentStatus: currentPay
+            order_id: orderId,
+            total_amount: amount,
+            paymentStatus: status,
+            user_name: userName,
+            gateway: ord.paymentMethod || "JCS Global Cards"
           };
         });
 
         if (mounted) {
-          setOrders(initializedOrders);
+          setOrders(finalOrders);
           
-          const sum = initializedOrders.reduce((acc, curr) => {
-            const rawPay = String(curr.paymentStatus || "").trim().toLowerCase();
-            const isPaid = rawPay === "success" || rawPay === "paid" || rawPay === "completed" || rawPay === "succeeded";
-            return isPaid ? acc + Number(curr.total_amount || 0) : acc;
+          // Relaxed sum calculation: accounts for orders unless explicitly marked as failed/cancelled
+          const sum = finalOrders.reduce((acc, curr) => {
+            const rawPay = String(curr.paymentStatus || curr.status || "success").trim().toLowerCase();
+            const isFailed = rawPay.includes("fail") || rawPay.includes("cancel") || rawPay.includes("declined");
+            return !isFailed ? acc + Number(curr.total_amount || 0) : acc;
           }, 0);
           
           setTotalRevenue(sum);
@@ -146,7 +190,7 @@ export default function MerchantDashboard() {
       } catch (err) {
         if (!mounted) return;
         setCategories(customCategories);
-        setError(err?.response?.data?.message || "Could not load dashboard products.");
+        setError(err?.response?.data?.message || "Could not load dashboard information.");
       } finally {
         if (mounted) {
           setLoading(false);
@@ -159,7 +203,7 @@ export default function MerchantDashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [userEmailKey]);
 
   const update = (key) => (e) => {
     setForm((current) => ({
@@ -195,7 +239,6 @@ export default function MerchantDashboard() {
 
             return rawUrl;
           } catch (apiErr) {
-            console.warn("API upload failed, falling back to local object preview:", apiErr);
             return URL.createObjectURL(file);
           }
         })
@@ -258,6 +301,18 @@ export default function MerchantDashboard() {
       gstPercent: product.gstPercent ?? "18",
       overview: product.overview || product.description || "",
       warranty: product.warranty || "",
+      simSlots: product.simSlots || "",
+      colour: product.colour || "",
+      waterResistant: product.waterResistant || "",
+      securityFeatures: product.securityFeatures || "",
+      fastCharging: product.fastCharging || "",
+      networkGen: product.networkGen || "",
+      screenSize: product.screenSize || "",
+      weight: product.weight || "",
+      storage: product.storage || "",
+      rearCamera: product.rearCamera || "",
+      frontCamera: product.frontCamera || "",
+      ram: product.ram || "",
     });
 
     const existingImages =
@@ -352,19 +407,11 @@ export default function MerchantDashboard() {
     }
   };
 
-  // Prepare chart data dynamically from products and orders
-  const revenueChartData = orders.length > 0 ? orders.map((ord, idx) => ({
-    name: `Order #${idx + 1}`,
-    revenue: Number(ord.total_amount || 0)
-  })) : [
-    { name: "Mon", revenue: 4000 },
-    { name: "Tue", revenue: 8000 },
-    { name: "Wed", revenue: 12000 },
-    { name: "Thu", revenue: 15000 },
-    { name: "Fri", revenue: 23600 },
-  ];
+  const revenueChartData = orders.map((ord, idx) => ({
+    name: ord.order_id ? `#${String(ord.order_id).slice(-5)}` : `Order #${idx + 1}`,
+    revenue: Number(ord.total_amount || ord.amount || 0)
+  }));
 
-  // Group products by category name for the Pie chart
   const categoryCounts = products.reduce((acc, p) => {
     let rawCatId = p.categoryId || p.category?.id || p.category?._id || p.category || "Uncategorized";
     const foundCat = categories.find(
@@ -434,13 +481,13 @@ export default function MerchantDashboard() {
         </header>
 
         {/* DASHBOARD TAB */}
-        {activeTab === "Dashboard" && (
+        {activeTab === "dashboard" && (
           <>
             <section className="metrics-grid">
               <div className="metric-card">
                 <div className="metric-icon today"><Calendar size={18} /></div>
                 <div>
-                  <span className="metric-label">Today Revenue</span>
+                  <span className="metric-label">Total Revenue</span>
                   <h3 className="metric-value">₹{totalRevenue.toLocaleString("en-IN")}</h3>
                 </div>
               </div>
@@ -449,14 +496,12 @@ export default function MerchantDashboard() {
                 <div className="metric-icon week"><Calendar size={18} /></div>
                 <div>
                   <span className="metric-label">Total Orders</span>
-                  <h3 className="metric-value">{orders.length > 0 ? orders.length : 1}</h3>
+                  <h3 className="metric-value">{orders.length}</h3>
                 </div>
               </div>
             </section>
 
-            {/* ANALYTICS CHARTS SECTION */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px", marginBottom: "24px" }}>
-              {/* Area Graph: Revenue Trends */}
               <div className="card" style={{ padding: "20px" }}>
                 <h3 style={{ fontSize: "15px", marginBottom: "4px" }}>Revenue Overview</h3>
                 <p className="text-muted" style={{ fontSize: "12px", marginBottom: "16px" }}>Incoming sales progression</p>
@@ -478,7 +523,6 @@ export default function MerchantDashboard() {
                 </div>
               </div>
 
-              {/* Pie Chart: Inventory Category Breakdown */}
               <div className="card" style={{ padding: "20px" }}>
                 <h3 style={{ fontSize: "15px", marginBottom: "4px" }}>Inventory Distribution</h3>
                 <p className="text-muted" style={{ fontSize: "12px", marginBottom: "16px" }}>Products categorized by type</p>
@@ -525,25 +569,14 @@ export default function MerchantDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.length > 0 ? (
-                      orders.map((ord, i) => {
-                        return (
-                          <tr key={i}>
-                            <td>{ord.user_name || "kluniversity"}</td>
-                            <td>{ord.order_id || "JCS-81670"}</td>
-                            <td className="mono">₹{Number(ord.total_amount || 23600).toLocaleString("en-IN")}</td>
-                            <td>{ord.gateway || "JCS Global Cards"}</td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td>kluniversity</td>
-                        <td>JCS-81670</td>
-                        <td className="mono">₹23,600</td>
-                        <td>JCS Global Cards</td>
+                    {orders.map((ord, i) => (
+                      <tr key={i}>
+                        <td>{ord.user_name}</td>
+                        <td>{ord.order_id}</td>
+                        <td className="mono">₹{Number(ord.total_amount || 0).toLocaleString("en-IN")}</td>
+                        <td>{ord.gateway}</td>
                       </tr>
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -554,7 +587,7 @@ export default function MerchantDashboard() {
         {/* ORDERS MANAGEMENT TAB */}
         {activeTab === "orders" && (
           <div className="card transactions-section">
-            <h3>All Customer Orders</h3>
+            <h3>All Customer Orders ({orders.length})</h3>
             <p className="text-muted" style={{ fontSize: "12px", marginBottom: "16px" }}>
               View and manage all incoming customer orders.
             </p>
@@ -565,22 +598,22 @@ export default function MerchantDashboard() {
                     <th>Order Reference</th>
                     <th>Customer Name</th>
                     <th>Total Amount</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.length > 0 ? (
-                    orders.map((o, idx) => {
-                      return (
-                        <tr key={idx}>
-                          <td><strong>{o.order_id || "JCS-81670"}</strong></td>
-                          <td>{o.user_name || "kluniversity"}</td>
-                          <td className="mono">₹{Number(o.total_amount || 23600).toLocaleString("en-IN")}</td>
-                        </tr>
-                      );
-                    })
+                    orders.map((o, idx) => (
+                      <tr key={idx}>
+                        <td><strong>{o.order_id}</strong></td>
+                        <td>{o.user_name}</td>
+                        <td className="mono">₹{Number(o.total_amount || 0).toLocaleString("en-IN")}</td>
+                        <td><span style={{ color: "#10b981", fontWeight: 500 }}>{o.paymentStatus}</span></td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="merchant-empty">No orders found.</td>
+                      <td colSpan="4" className="merchant-empty">No orders found.</td>
                     </tr>
                   )}
                 </tbody>
@@ -603,14 +636,14 @@ export default function MerchantDashboard() {
                   required
                   value={form.title}
                   onChange={update("title")}
-                  placeholder="Galaxy A55 5G — 128GB"
+                  placeholder="Enter product title..."
                 />
               </div>
 
               <div className="row">
                 <div className="field">
                   <label>Brand</label>
-                  <input value={form.brand} onChange={update("brand")} />
+                  <input value={form.brand} onChange={update("brand")} placeholder="Enter brand..." />
                 </div>
 
                 <div className="field">
@@ -633,6 +666,78 @@ export default function MerchantDashboard() {
                       );
                     })}
                   </select>
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 1 */}
+              <div className="row">
+                <div className="field">
+                  <label>Colour</label>
+                  <input value={form.colour} onChange={update("colour")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>Storage Capacity</label>
+                  <input value={form.storage} onChange={update("storage")} placeholder="" />
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 2 */}
+              <div className="row">
+                <div className="field">
+                  <label>RAM</label>
+                  <input value={form.ram} onChange={update("ram")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>Broadband Generation</label>
+                  <input value={form.networkGen} onChange={update("networkGen")} placeholder="" />
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 3 */}
+              <div className="row">
+                <div className="field">
+                  <label>SIM Slots</label>
+                  <input value={form.simSlots} onChange={update("simSlots")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>Screen Size</label>
+                  <input value={form.screenSize} onChange={update("screenSize")} placeholder="" />
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 4 */}
+              <div className="row">
+                <div className="field">
+                  <label>Rear Camera Resolution</label>
+                  <input value={form.rearCamera} onChange={update("rearCamera")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>Front Camera Resolution</label>
+                  <input value={form.frontCamera} onChange={update("frontCamera")} placeholder="" />
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 5 */}
+              <div className="row">
+                <div className="field">
+                  <label>Security Features</label>
+                  <input value={form.securityFeatures} onChange={update("securityFeatures")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>Weight</label>
+                  <input value={form.weight} onChange={update("weight")} placeholder="" />
+                </div>
+              </div>
+
+              {/* SPECIFICATION EXTRA FIELDS ROW 6 */}
+              <div className="row">
+                <div className="field">
+                  <label>Water Resistant</label>
+                  <input value={form.waterResistant} onChange={update("waterResistant")} placeholder="" />
+                </div>
+                <div className="field">
+                  <label>With Fast Charging</label>
+                  <input value={form.fastCharging} onChange={update("fastCharging")} placeholder="" />
                 </div>
               </div>
 

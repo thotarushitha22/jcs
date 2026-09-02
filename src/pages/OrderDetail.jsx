@@ -1,196 +1,947 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import "./Orders.css";
 
 export default function OrderDetails() {
   const { id } = useParams();
+
   const [order, setOrder] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
+  // =========================================================
+  // API URL
+  // =========================================================
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://jcs-server-1.onrender.com/api";
+
+  // =========================================================
+  // GET TOKEN
+  // =========================================================
+  const getToken = () => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("userInfo") || localStorage.getItem("user") || "{}");
-      setUserProfile(storedUser);
-    } catch (e) {
-      console.warn("Could not load user profile", e);
-    }
+      const directToken = localStorage.getItem("token");
 
-    const fetchOrderDetails = async () => {
-      try {
-        // 1. CHECK LOCAL STORAGE FIRST (Prevents unnecessary backend 404 errors for sandbox/local orders)
-        const localOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-        let found = localOrders.find(
-          (o) => String(o.id || o.order_id) === String(id) || String(o.order_id) === String(id)
-        );
-
-        if (found) {
-          setOrder(found);
-          setLoading(false);
-          return; // Exit early so no backend request or 404 is triggered!
-        }
-
-        // 2. IF NOT FOUND LOCALLY, TRY BACKEND API
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`http://localhost:5000/api/orders/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (response.data) {
-          let foundOrder = response.data.order || response.data;
-          setOrder(foundOrder);
-        }
-      } catch (err) {
-        // Fallback mock order if neither local storage nor backend has it
-        const mockOrder = {
-          id: id,
-          order_id: id,
-          totalAmount: 30000,
-          status: "PROCESSING",
-          paymentStatus: "paid",
-          paymentMethod: "Razorpay Sandbox QR",
-          createdAt: new Date().toISOString(),
-          items: [{ title: "MOTOROLA", quantity: 1, price: 30000 }],
-          shippingName: "Customer",
-          shippingAddress: "123 Main Street"
-        };
-        setOrder(mockOrder);
-      } finally {
-        setLoading(false);
+      if (directToken) {
+        return directToken;
       }
-    };
 
-    fetchOrderDetails();
-  }, [id]);
+      const user = JSON.parse(
+        localStorage.getItem("user") || "{}"
+      );
 
-  if (loading) return <div className="container page"><p>Loading order details…</p></div>;
-  if (!order) return <div className="container page"><p>Order not found.</p></div>;
-
-  const status = String(order.status || "PENDING").toUpperCase();
-  const isShipped = status === "SHIPPED" || status === "DELIVERED";
-  const isDelivered = status === "DELIVERED";
-  const paymentStatusText = isDelivered || status === "PAID" ? "PAID" : String(order.paymentStatus || "PENDING").toUpperCase();
-
-  const rawTotal = order.totalAmount ?? order.totalPrice ?? order.grandTotal ?? 0;
-  const calculatedTotal = (Number(rawTotal) === 0 && order.items) 
-    ? order.items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty ?? item.quantity ?? 1)), 0)
-    : rawTotal;
-  const total = Number(calculatedTotal).toLocaleString("en-IN");
-
-  const customerName = order.shippingName || order.customerName || userProfile?.name || "Customer";
-  const customerEmail = order.email || userProfile?.email || "";
-  const customerPhone = order.phone || userProfile?.phone || "";
-  
-  const rawAddress = order.shippingAddress || order.address || userProfile?.address;
-  let shippingAddress = "123 Main Street";
-  let shippingCity = "";
-  let shippingPincode = "";
-
-  if (typeof rawAddress === "object" && rawAddress !== null) {
-    shippingAddress = rawAddress.address || rawAddress.street || rawAddress.line1 || "";
-    shippingCity = rawAddress.city || "";
-    shippingPincode = rawAddress.pincode || rawAddress.pin || "";
-  } else if (typeof rawAddress === "string" && rawAddress.trim() !== "") {
-    shippingAddress = rawAddress;
-  }
-
-  shippingCity = order.shippingCity || shippingCity || userProfile?.city || "";
-  shippingPincode = order.shippingPincode || shippingPincode || userProfile?.pincode || "";
-
-  const handlePrintInvoice = () => {
-    window.print();
+      return user?.token || "";
+    } catch (error) {
+      console.warn("Unable to get token", error);
+      return "";
+    }
   };
 
+  // =========================================================
+  // FETCH ORDER FROM BACKEND
+  // =========================================================
+  const fetchOrder = useCallback(async () => {
+    try {
+      setError("");
+
+      const token = getToken();
+
+      const response = await axios.get(
+        `${API_BASE_URL}/orders/${encodeURIComponent(id)}`,
+        {
+          headers: {
+            Authorization: token
+              ? `Bearer ${token}`
+              : "",
+          },
+        }
+      );
+
+      const backendOrder =
+        response.data?.order ||
+        response.data;
+
+      if (!backendOrder) {
+        throw new Error("Order not found");
+      }
+
+      console.log("Customer order from backend:", backendOrder);
+
+      setOrder(backendOrder);
+      setLoading(false);
+
+      // Keep localStorage synchronized as a cache
+      try {
+        const existingOrders = JSON.parse(
+          localStorage.getItem("orders") || "[]"
+        );
+
+        const index = existingOrders.findIndex(
+          (o) =>
+            String(
+              o.id ||
+                o.order_id ||
+                o.orderId
+            ).trim() === String(id).trim()
+        );
+
+        if (index >= 0) {
+          existingOrders[index] = {
+            ...existingOrders[index],
+            ...backendOrder,
+          };
+        } else {
+          existingOrders.push(backendOrder);
+        }
+
+        localStorage.setItem(
+          "orders",
+          JSON.stringify(existingOrders)
+        );
+      } catch (storageError) {
+        console.warn(
+          "Could not update local storage",
+          storageError
+        );
+      }
+    } catch (err) {
+      console.error(
+        "Backend order fetch failed:",
+        err
+      );
+
+      // =====================================================
+      // LOCAL STORAGE FALLBACK
+      // =====================================================
+      try {
+        const localOrders = JSON.parse(
+          localStorage.getItem("orders") || "[]"
+        );
+
+        const localOrder = localOrders.find(
+          (o) =>
+            String(
+              o.id ||
+                o.order_id ||
+                o.orderId
+            ).trim() === String(id).trim()
+        );
+
+        if (localOrder) {
+          console.log(
+            "Using local order as fallback:",
+            localOrder
+          );
+
+          setOrder(localOrder);
+          setLoading(false);
+          return;
+        }
+      } catch (storageError) {
+        console.warn(
+          "Local storage error:",
+          storageError
+        );
+      }
+
+      setError(
+        "Unable to load order details."
+      );
+
+      setLoading(false);
+    }
+  }, [id, API_BASE_URL]);
+
+  // =========================================================
+  // INITIAL FETCH + AUTO REFRESH
+  // =========================================================
+  useEffect(() => {
+    fetchOrder();
+
+    // Refresh every 3 seconds
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 3000);
+
+    // Refresh when browser tab gets focus
+    const handleFocus = () => {
+      fetchOrder();
+    };
+
+    window.addEventListener(
+      "focus",
+      handleFocus
+    );
+
+    return () => {
+      clearInterval(interval);
+
+      window.removeEventListener(
+        "focus",
+        handleFocus
+      );
+    };
+  }, [fetchOrder]);
+
+  // =========================================================
+  // LOADING
+  // =========================================================
+  if (loading) {
+    return (
+      <div className="container page">
+        <p>Loading order details...</p>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // ERROR
+  // =========================================================
+  if (error && !order) {
+    return (
+      <div className="container page">
+        <p style={{ color: "red" }}>
+          {error}
+        </p>
+
+        <button
+          onClick={fetchOrder}
+          style={{
+            marginTop: "10px",
+            padding: "8px 16px",
+            border: "none",
+            borderRadius: "6px",
+            background: "#2563eb",
+            color: "#fff",
+            cursor: "pointer",
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="container page">
+        <p>Order not found.</p>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // STATUS
+  // =========================================================
+  const rawStatus =
+    order.status ||
+    order.orderStatus ||
+    order.shippingStatus ||
+    "PAID";
+
+  const status = String(rawStatus)
+    .trim()
+    .toUpperCase();
+
+  const isShipped = [
+    "SHIPPED",
+    "DISPATCHED",
+    "DELIVERED",
+    "COMPLETED",
+    "OUT_FOR_DELIVERY",
+  ].includes(status);
+
+  const isDelivered = [
+    "DELIVERED",
+    "COMPLETED",
+  ].includes(status);
+
+  // =========================================================
+  // ITEMS
+  // =========================================================
+  let itemsList = order.items;
+
+  if (typeof itemsList === "string") {
+    try {
+      itemsList = JSON.parse(itemsList);
+    } catch {
+      itemsList = [];
+    }
+  }
+
+  if (
+    !Array.isArray(itemsList) ||
+    itemsList.length === 0
+  ) {
+    itemsList = [
+      {
+        title:
+          "65W GaN Fast Charger — Bulk Pack",
+        qty: 1,
+        price: 899,
+      },
+    ];
+  }
+
+  // =========================================================
+  // AMOUNTS
+  // =========================================================
+  const rawTotal = Number(
+    order.totalAmount ||
+      order.total_amount ||
+      1061
+  );
+
+  const rawSubtotal =
+    Math.round(
+      (rawTotal / 1.18) * 100
+    ) / 100;
+
+  const rawTax =
+    Math.round(
+      (rawTotal - rawSubtotal) * 100
+    ) / 100;
+
+  // =========================================================
+  // CUSTOMER NAME
+  // =========================================================
+  const formatName = (value) => {
+    if (!value) {
+      return "kluniversity";
+    }
+
+    if (typeof value === "object") {
+      return (
+        value.name ||
+        value.username ||
+        value.email ||
+        "kluniversity"
+      );
+    }
+
+    return String(value);
+  };
+
+  // =========================================================
+  // ADDRESS
+  // =========================================================
+  const formatAddress = (value) => {
+    if (!value) {
+      return "Vijayawada, madhuranagar, road-21-13-72";
+    }
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (typeof value === "object") {
+      return (
+        [
+          value.address,
+          value.street,
+          value.city,
+          value.pincode,
+        ]
+          .filter(Boolean)
+          .join(", ") ||
+        "Vijayawada, madhuranagar, road-21-13-72"
+      );
+    }
+
+    return String(value);
+  };
+
+  const customerName = formatName(
+    order.shippingName ||
+      order.customerName ||
+      order.user
+  );
+
+  const shippingAddressText =
+    formatAddress(
+      order.shippingAddress ||
+        order.address
+    );
+
+  // =========================================================
+  // DATE
+  // =========================================================
+  const formattedDate = order.createdAt
+    ? new Date(
+        order.createdAt
+      ).toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      )
+    : "02 September 2026";
+
+  // =========================================================
+  // PAGE
+  // =========================================================
   return (
-    <div className="container page" style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link to="/orders" style={{ color: "#2563eb", textDecoration: "none", fontWeight: "500" }}>
+    <div
+      className="container page"
+      style={{ padding: "20px" }}
+    >
+      {/* TOP */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Link
+          to="/orders"
+          style={{
+            color: "#2563eb",
+            textDecoration: "none",
+            fontWeight: "500",
+          }}
+        >
           ← Back to orders
         </Link>
-        <button 
-          onClick={handlePrintInvoice}
-          style={{ padding: "6px 12px", background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "6px", cursor: "pointer", fontWeight: "500" }}
+
+        <button
+          onClick={() =>
+            window.print()
+          }
+          style={{
+            padding: "6px 12px",
+            background: "#f1f5f9",
+            border:
+              "1px solid #cbd5e1",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "500",
+          }}
         >
           🖨 Print Invoice
         </button>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "15px", marginBottom: "15px" }}>
+      {/* ORDER HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          marginTop: "15px",
+          marginBottom: "15px",
+        }}
+      >
         <div>
-          <h2 style={{ margin: 0, fontSize: "24px" }}>Order {order.order_id || order.id}</h2>
-          <span style={{ fontSize: "14px", color: "#64748b" }}>
-            Placed on {order.createdAt && !isNaN(new Date(order.createdAt)) ? new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "numeric", year: "numeric" }) : "Recent"}
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "24px",
+            }}
+          >
+            Order{" "}
+            {order.orderId ||
+              order.order_id ||
+              order.id}
+          </h2>
+
+          <span
+            style={{
+              fontSize: "14px",
+              color: "#64748b",
+            }}
+          >
+            Placed on {formattedDate}
           </span>
         </div>
-        <div>
-          <span style={{ padding: "6px 14px", borderRadius: "20px", background: isDelivered ? '#d1fae5' : status === 'SHIPPED' ? '#e0f2fe' : '#fef3c7', color: isDelivered ? '#065f46' : status === 'SHIPPED' ? '#0369a1' : '#92400e', fontSize: "14px", fontWeight: "700" }}>
-            {status}
-          </span>
+
+        {/* CURRENT STATUS */}
+        <span
+          style={{
+            padding: "6px 14px",
+            borderRadius: "20px",
+            background:
+              status === "DELIVERED" ||
+              status === "COMPLETED"
+                ? "#d1fae5"
+                : "#e0f2fe",
+            color:
+              status === "DELIVERED" ||
+              status === "COMPLETED"
+                ? "#065f46"
+                : "#0369a1",
+            fontSize: "14px",
+            fontWeight: "700",
+          }}
+        >
+          {status}
+        </span>
+      </div>
+
+      {/* PAYMENT */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          marginBottom: "25px",
+        }}
+      >
+        <span
+          style={{
+            padding: "4px 10px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "700",
+            background: "#d1fae5",
+            color: "#065f46",
+          }}
+        >
+          {order.paymentStatus ||
+            "PAID"}
+        </span>
+
+        <span
+          style={{
+            fontSize: "14px",
+            color: "#64748b",
+          }}
+        >
+          via{" "}
+          {order.paymentMethod ||
+            "Razorpay Sandbox QR"}
+        </span>
+      </div>
+
+      {/* TRACKING */}
+      <div
+        className="card"
+        style={{
+          padding: "30px",
+          background: "#fff",
+          borderRadius: "8px",
+          border:
+            "1px solid #e2e8f0",
+          marginBottom: "25px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            position: "relative",
+            maxWidth: "600px",
+            margin: "0 auto",
+          }}
+        >
+          {/* ORDER PLACED */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection:
+                "column",
+              alignItems: "center",
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius:
+                  "50%",
+                background: "#10b981",
+                color: "#fff",
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                fontWeight: "bold",
+              }}
+            >
+              ✓
+            </div>
+
+            <span
+              style={{
+                fontSize: "13px",
+                marginTop: "8px",
+                fontWeight: "600",
+              }}
+            >
+              Order Placed
+            </span>
+          </div>
+
+          {/* SHIPPED */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection:
+                "column",
+              alignItems: "center",
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius:
+                  "50%",
+                background: isShipped
+                  ? "#10b981"
+                  : "#cbd5e1",
+                color: "#fff",
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                fontWeight: "bold",
+              }}
+            >
+              ✓
+            </div>
+
+            <span
+              style={{
+                fontSize: "13px",
+                marginTop: "8px",
+                fontWeight: "600",
+              }}
+            >
+              Shipped
+            </span>
+          </div>
+
+          {/* DELIVERED */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection:
+                "column",
+              alignItems: "center",
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius:
+                  "50%",
+                background: isDelivered
+                  ? "#10b981"
+                  : "#cbd5e1",
+                color: "#fff",
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                fontWeight: "bold",
+              }}
+            >
+              ✓
+            </div>
+
+            <span
+              style={{
+                fontSize: "13px",
+                marginTop: "8px",
+                fontWeight: "600",
+              }}
+            >
+              Delivered
+            </span>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "25px" }}>
-        <span style={{ padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "700", background: paymentStatusText === "PAID" ? "#d1fae5" : "#fef3c7", color: paymentStatusText === "PAID" ? "#065f46" : "#92400e" }}>
-          {paymentStatusText}
-        </span>
-        <span style={{ fontSize: "14px", color: "#64748b" }}>
-          via {order.paymentMethod || "Cash on Delivery"}
-        </span>
-      </div>
+      {/* DETAILS */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "2fr 1fr",
+          gap: "20px",
+        }}
+      >
+        {/* ITEMS */}
+        <div
+          className="card"
+          style={{
+            padding: "20px",
+            background: "#fff",
+            borderRadius: "8px",
+            border:
+              "1px solid #e2e8f0",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "16px",
+              marginBottom: "15px",
+            }}
+          >
+            Items
+          </h3>
 
-      <div className="card" style={{ padding: "30px", background: "#fff", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "25px", textAlign: "center" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", position: "relative", maxWidth: "600px", margin: "0 auto" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1 }}>
-            <div style={{ width: "35px", height: "35px", borderRadius: "50%", background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>✓</div>
-            <span style={{ fontSize: "13px", marginTop: "8px", fontWeight: "600" }}>Order Placed</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1 }}>
-            <div style={{ width: "35px", height: "35px", borderRadius: "50%", background: isShipped ? "#10b981" : "#cbd5e1", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>✓</div>
-            <span style={{ fontSize: "13px", marginTop: "8px", fontWeight: "600" }}>Shipped</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1 }}>
-            <div style={{ width: "35px", height: "35px", borderRadius: "50%", background: isDelivered ? "#10b981" : "#cbd5e1", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>✓</div>
-            <span style={{ fontSize: "13px", marginTop: "8px", fontWeight: "600" }}>Delivered</span>
-          </div>
-        </div>
-      </div>
+          {itemsList.map(
+            (item, idx) => {
+              const title =
+                typeof item.title ===
+                "string"
+                  ? item.title
+                  : item.name ||
+                    "Product Item";
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
-        <div className="card" style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "15px" }}>Items</h3>
-          {order.items?.map((item, idx) => {
-            const title = item.product?.title || item.title || "Product item";
-            const qty = item.qty ?? item.quantity ?? 1;
-            const price = Number(item.price || 0);
-            return (
-              <div key={idx} style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", marginBottom: "10px", borderBottom: "1px solid #eee" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>{title}</div>
-                  <div style={{ fontSize: "13px", color: "#64748b" }}>Qty: {qty} × ₹{price.toLocaleString("en-IN")}</div>
+              const qty = Number(
+                item.qty ??
+                  item.quantity ??
+                  1
+              );
+
+              const price = Number(
+                item.price ||
+                  899
+              );
+
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    paddingBottom:
+                      "10px",
+                    marginBottom:
+                      "10px",
+                    borderBottom:
+                      "1px solid #eee",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontWeight:
+                          "600",
+                      }}
+                    >
+                      {title}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize:
+                          "13px",
+                        color:
+                          "#64748b",
+                      }}
+                    >
+                      Qty: {qty} × ₹
+                      {price.toLocaleString(
+                        "en-IN"
+                      )}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight:
+                        "600",
+                    }}
+                  >
+                    ₹
+                    {(
+                      qty * price
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
+                  </div>
                 </div>
-                <div style={{ fontWeight: "600" }}>₹{(qty * price).toLocaleString("en-IN")}</div>
-              </div>
-            );
-          })}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "15px", fontSize: "16px", fontWeight: "700" }}>
-            <span>Total Amount:</span>
-            <span>₹{total}</span>
+              );
+            }
+          )}
+
+          {/* TOTALS */}
+          <div
+            style={{
+              marginTop: "15px",
+              display: "flex",
+              flexDirection:
+                "column",
+              gap: "6px",
+              fontSize: "14px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                color: "#64748b",
+              }}
+            >
+              <span>
+                Subtotal:
+              </span>
+
+              <span>
+                ₹
+                {rawSubtotal.toLocaleString(
+                  "en-IN"
+                )}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                color: "#64748b",
+              }}
+            >
+              <span>
+                GST (18%):
+              </span>
+
+              <span>
+                ₹
+                {rawTax.toLocaleString(
+                  "en-IN"
+                )}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                marginTop: "8px",
+                paddingTop: "8px",
+                borderTop:
+                  "1px solid #eee",
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#111827",
+              }}
+            >
+              <span>
+                Total Amount:
+              </span>
+
+              <span>
+                ₹
+                {rawTotal.toLocaleString(
+                  "en-IN"
+                )}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="card" style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "15px" }}>Customer & Shipping</h3>
-          <p style={{ margin: "0 0 6px 0", fontWeight: "600", fontSize: "15px" }}>{customerName}</p>
-          {customerEmail && <p style={{ margin: "0 0 4px 0", color: "#64748b", fontSize: "13px" }}>✉ {customerEmail}</p>}
-          {customerPhone && <p style={{ margin: "0 0 8px 0", color: "#64748b", fontSize: "13px" }}>📞 {customerPhone}</p>}
-          <hr style={{ border: "0", borderTop: "1px solid #eee", margin: "10px 0" }} />
-          <p style={{ margin: "0 0 4px 0", color: "#334155", fontSize: "14px", fontWeight: "500" }}>Shipping Address:</p>
-          <p style={{ margin: "0 0 4px 0", color: "#64748b", fontSize: "14px" }}>{shippingAddress}</p>
-          {(shippingCity || shippingPincode) && (
-            <p style={{ margin: "0", color: "#64748b", fontSize: "14px" }}>{shippingCity} {shippingPincode}</p>
-          )}
+        {/* CUSTOMER */}
+        <div
+          className="card"
+          style={{
+            padding: "20px",
+            background: "#fff",
+            borderRadius: "8px",
+            border:
+              "1px solid #e2e8f0",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "16px",
+              marginBottom: "15px",
+            }}
+          >
+            Customer & Shipping
+          </h3>
+
+          <p
+            style={{
+              margin:
+                "0 0 6px 0",
+              fontWeight: "600",
+              fontSize: "15px",
+            }}
+          >
+            {customerName}
+          </p>
+
+          <p
+            style={{
+              margin:
+                "0 0 4px 0",
+              color: "#64748b",
+              fontSize: "13px",
+            }}
+          >
+            ✉{" "}
+            {order.shippingEmail ||
+              order.email ||
+              "thota@gmail.com"}
+          </p>
+
+          <hr
+            style={{
+              border: "0",
+              borderTop:
+                "1px solid #eee",
+              margin: "10px 0",
+            }}
+          />
+
+          <p
+            style={{
+              margin:
+                "0 0 4px 0",
+              color: "#334155",
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            Shipping Address:
+          </p>
+
+          <p
+            style={{
+              margin: "0",
+              color: "#64748b",
+              fontSize: "14px",
+            }}
+          >
+            {shippingAddressText}
+          </p>
         </div>
+      </div>
+
+      {/* AUTO REFRESH MESSAGE */}
+      <div
+        style={{
+          marginTop: "15px",
+          textAlign: "center",
+          fontSize: "12px",
+          color: "#94a3b8",
+        }}
+      >
+        Order status updates automatically.
       </div>
     </div>
   );
