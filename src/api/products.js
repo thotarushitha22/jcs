@@ -1,149 +1,481 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://jcs-server-1.onrender.com/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://jcs-server-1.onrender.com/api";
+
+/* =========================================================
+   PUBLIC PRODUCTS
+   Only approved/public products
+========================================================= */
 
 export const fetchProducts = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/products`, { timeout: 25000 });
-    console.log("Data received from Render backend:", response.data);
+    const response = await axios.get(
+      `${API_BASE_URL}/products`,
+      {
+        timeout: 25000,
+      }
+    );
 
-    const rawData = response.data;
-    return Array.isArray(rawData) ? rawData : rawData?.products || rawData?.data || [];
+    console.log(
+      "Products received:",
+      response.data
+    );
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (Array.isArray(data?.products)) {
+      return data.products;
+    }
+
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+
+    return [];
   } catch (error) {
-    console.error("Failed to fetch products from Render backend:", error);
-    const localProducts = JSON.parse(localStorage.getItem("jcs_products") || "[]");
-    return localProducts.length > 0 ? localProducts : [];
+    console.error(
+      "Failed to fetch public products:",
+      error.response?.data || error.message
+    );
+
+    const localProducts = JSON.parse(
+      localStorage.getItem("jcs_products") || "[]"
+    );
+
+    return Array.isArray(localProducts)
+      ? localProducts
+      : [];
   }
 };
 
+
+/* =========================================================
+   SINGLE PRODUCT
+========================================================= */
+
 export const fetchProduct = async (id) => {
   try {
-    const all = await fetchProducts();
-    const product = all.find((p) => String(p.id || p._id) === String(id));
-    
+    const products = await fetchProducts();
+
+    const product = products.find(
+      (p) =>
+        String(p.id || p._id) ===
+        String(id)
+    );
+
     if (!product) {
-      throw new Error("Product not found");
+      throw new Error(
+        "Product not found"
+      );
     }
 
     let parsedImages = [];
+
     try {
-      parsedImages = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
-    } catch (e) {
-      parsedImages = [product.image_url || product.imageUrl];
+      if (Array.isArray(product.images)) {
+        parsedImages = product.images;
+      } else if (
+        typeof product.images === "string"
+      ) {
+        parsedImages = JSON.parse(
+          product.images
+        );
+      }
+    } catch {
+      parsedImages = [];
+    }
+
+    if (!Array.isArray(parsedImages)) {
+      parsedImages = [];
+    }
+
+    if (parsedImages.length === 0) {
+      const image =
+        product.image ||
+        product.image_url ||
+        product.imageUrl;
+
+      if (image) {
+        parsedImages = [image];
+      }
     }
 
     return {
       ...product,
-      images: Array.isArray(parsedImages) ? parsedImages.filter(Boolean) : [product.image_url].filter(Boolean),
+      images: parsedImages.filter(Boolean),
     };
   } catch (error) {
-    console.error("API fetchProduct error:", error);
+    console.error(
+      "fetchProduct error:",
+      error
+    );
+
     throw error;
   }
 };
 
-export const fetchRelatedProducts = async (id) => {
+
+/* =========================================================
+   RELATED PRODUCTS
+========================================================= */
+
+export const fetchRelatedProducts = async (
+  id
+) => {
   try {
-    const products = await fetchProducts();
-    return products.filter((p) => String(p.id || p._id) !== String(id)).slice(0, 4);
+    const products =
+      await fetchProducts();
+
+    return products
+      .filter(
+        (product) =>
+          String(
+            product.id || product._id
+          ) !== String(id)
+      )
+      .slice(0, 4);
   } catch (error) {
+    console.error(
+      "fetchRelatedProducts error:",
+      error
+    );
+
     return [];
   }
 };
 
+
+/* =========================================================
+   CATEGORIES
+========================================================= */
+
 export const fetchCategories = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/categories`, { timeout: 25000 });
-    if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
-      return response.data;
+    const response = await axios.get(
+      `${API_BASE_URL}/categories`,
+      {
+        timeout: 25000,
+      }
+    );
+
+    const data = response.data;
+
+    const categories =
+      Array.isArray(data)
+        ? data
+        : data?.categories ||
+          data?.data ||
+          [];
+
+    if (
+      Array.isArray(categories) &&
+      categories.length > 0
+    ) {
+      return categories;
     }
   } catch (error) {
-    // Fallback if categories route fails
+    console.warn(
+      "Categories API failed:",
+      error.message
+    );
   }
 
   return [
-    { id: "smartphones", name: "Smartphones" },
-    { id: "laptops", name: "Laptops" },
-    { id: "tvs", name: "TVs" },
-    { id: "accessories", name: "Accessories" }
+    {
+      id: "smartphones",
+      name: "Smartphones",
+    },
+    {
+      id: "laptops",
+      name: "Laptops",
+    },
+    {
+      id: "tvs",
+      name: "TVs",
+    },
+    {
+      id: "accessories",
+      name: "Accessories",
+    },
   ];
 };
 
-export const fetchMyProducts = async (token) => {
+
+/* =========================================================
+   MERCHANT PRODUCTS
+   IMPORTANT:
+   Uses /products/my-products
+========================================================= */
+
+export const fetchMyProducts = async (
+  token
+) => {
   try {
-    const authToken = token || localStorage.getItem("token");
-    const response = await axios.get(`${API_BASE_URL}/merchant/products`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      timeout: 25000
-    });
-    const rawData = response.data;
-    return Array.isArray(rawData) ? rawData : rawData?.products || rawData?.data || [];
+    const authToken =
+      token ||
+      localStorage.getItem("token");
+
+    if (!authToken) {
+      throw new Error(
+        "Authentication token missing"
+      );
+    }
+
+    const response = await axios.get(
+      `${API_BASE_URL}/products/my-products`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${authToken}`,
+        },
+        timeout: 25000,
+      }
+    );
+
+    console.log(
+      "Merchant products:",
+      response.data
+    );
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (Array.isArray(data?.products)) {
+      return data.products;
+    }
+
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+
+    return [];
   } catch (error) {
-    const products = await fetchProducts();
-    return products;
+    console.error(
+      "Failed to fetch merchant products:",
+      error.response?.data ||
+        error.message
+    );
+
+    // Do NOT fall back to public products.
+    // Pending products must remain visible
+    // to the merchant.
+
+    return [];
   }
 };
 
-export const createProduct = async (productData, token) => {
-  try {
-    const authToken = token || localStorage.getItem("token");
-    const response = await axios.post(`${API_BASE_URL}/products`, productData, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      timeout: 25000
-    });
-    return response.data;
-  } catch (error) {
-    console.warn("Backend offline. Saving new product locally.");
-    const localProducts = JSON.parse(localStorage.getItem("jcs_products") || "[]");
-    const newEntry = { ...productData, id: Date.now() };
-    localProducts.push(newEntry);
-    localStorage.setItem("jcs_products", JSON.stringify(localProducts));
-    return newEntry;
-  }
-};
 
-export const updateProduct = async (id, productData, token) => {
+/* =========================================================
+   CREATE PRODUCT
+========================================================= */
+
+export const createProduct = async (
+  productData,
+  token
+) => {
   try {
-    const authToken = token || localStorage.getItem("token");
-    const response = await axios.put(`${API_BASE_URL}/products/${id}`, productData, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      timeout: 25000
-    });
+    const authToken =
+      token ||
+      localStorage.getItem("token");
+
+    if (!authToken) {
+      throw new Error(
+        "Authentication token missing"
+      );
+    }
+
+    const response = await axios.post(
+      `${API_BASE_URL}/products`,
+      productData,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${authToken}`,
+          "Content-Type":
+            "application/json",
+        },
+        timeout: 25000,
+      }
+    );
+
+    console.log(
+      "Product created:",
+      response.data
+    );
+
     return response.data;
   } catch (error) {
-    console.error("API updateProduct error:", error);
+    console.error(
+      "createProduct error:",
+      error.response?.data ||
+        error.message
+    );
+
     throw error;
   }
 };
 
-export const deleteProduct = async (id, token) => {
+
+/* =========================================================
+   UPDATE PRODUCT
+========================================================= */
+
+export const updateProduct = async (
+  id,
+  productData,
+  token
+) => {
   try {
-    const authToken = token || localStorage.getItem("token");
-    const response = await axios.delete(`${API_BASE_URL}/products/${id}`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      timeout: 25000
-    });
+    const authToken =
+      token ||
+      localStorage.getItem("token");
+
+    if (!authToken) {
+      throw new Error(
+        "Authentication token missing"
+      );
+    }
+
+    const response = await axios.put(
+      `${API_BASE_URL}/products/${id}`,
+      productData,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${authToken}`,
+          "Content-Type":
+            "application/json",
+        },
+        timeout: 25000,
+      }
+    );
+
+    console.log(
+      "Product updated:",
+      response.data
+    );
+
     return response.data;
   } catch (error) {
-    console.warn("Backend offline. Deleting product locally.");
-    const localProducts = JSON.parse(localStorage.getItem("jcs_products") || "[]");
-    const updated = localProducts.filter(p => String(p.id || p._id) !== String(id));
-    localStorage.setItem("jcs_products", JSON.stringify(updated));
-    return { success: true };
+    console.error(
+      "updateProduct error:",
+      error.response?.data ||
+        error.message
+    );
+
+    throw error;
   }
 };
 
-export const fetchAllUsers = async (token) => {
+
+/* =========================================================
+   DELETE PRODUCT
+========================================================= */
+
+export const deleteProduct = async (
+  id,
+  token
+) => {
   try {
-    const authToken = token || localStorage.getItem("token");
-    const response = await __await_axios_get_helper(`${API_BASE_URL}/admin/users`, authToken);
-    return Array.isArray(response) ? response : response?.users || response?.data || [];
+    const authToken =
+      token ||
+      localStorage.getItem("token");
+
+    if (!authToken) {
+      throw new Error(
+        "Authentication token missing"
+      );
+    }
+
+    const response = await axios.delete(
+      `${API_BASE_URL}/products/${id}`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${authToken}`,
+        },
+        timeout: 25000,
+      }
+    );
+
+    console.log(
+      "Product deleted:",
+      response.data
+    );
+
+    return response.data;
   } catch (error) {
-    return JSON.parse(localStorage.getItem("jcs_users") || "[]");
+    console.error(
+      "deleteProduct error:",
+      error.response?.data ||
+        error.message
+    );
+
+    throw error;
   }
 };
 
-async function __await_axios_get_helper(url, token) {
-  const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` }, timeout: 25000 });
-  return res.data;
-}
+
+/* =========================================================
+   ADMIN USERS
+========================================================= */
+
+export const fetchAllUsers = async (
+  token
+) => {
+  try {
+    const authToken =
+      token ||
+      localStorage.getItem("token");
+
+    if (!authToken) {
+      throw new Error(
+        "Authentication token missing"
+      );
+    }
+
+    const response = await axios.get(
+      `${API_BASE_URL}/admin/users`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${authToken}`,
+        },
+        timeout: 25000,
+      }
+    );
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    return (
+      data?.users ||
+      data?.data ||
+      []
+    );
+  } catch (error) {
+    console.error(
+      "fetchAllUsers error:",
+      error.response?.data ||
+        error.message
+    );
+
+    return JSON.parse(
+      localStorage.getItem(
+        "jcs_users"
+      ) || "[]"
+    );
+  }
+};
