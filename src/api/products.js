@@ -1,18 +1,74 @@
 import axios from "axios";
 
+/* =========================================================
+   API BASE URL
+========================================================= */
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   "https://jcs-server-1.onrender.com/api";
 
+// Make sure we have exactly:
+// https://jcs-server-1.onrender.com/api
+const API_URL = API_BASE_URL.replace(/\/+$/, "").endsWith("/api")
+  ? API_BASE_URL.replace(/\/+$/, "")
+  : `${API_BASE_URL.replace(/\/+$/, "")}/api`;
+
+
+/* =========================================================
+   AUTH TOKEN
+========================================================= */
+
+const getAuthToken = (token) => {
+  if (token) {
+    return token;
+  }
+
+  const storedToken = localStorage.getItem("token");
+
+  if (storedToken) {
+    return storedToken;
+  }
+
+  try {
+    const user = JSON.parse(
+      localStorage.getItem("user") || "{}"
+    );
+
+    return user?.token || null;
+  } catch {
+    return null;
+  }
+};
+
+
+/* =========================================================
+   AUTH HEADERS
+========================================================= */
+
+const getAuthHeaders = (token) => {
+  const authToken = getAuthToken(token);
+
+  return {
+    headers: {
+      Authorization: authToken
+        ? `Bearer ${authToken}`
+        : "",
+      "Content-Type": "application/json",
+    },
+  };
+};
+
+
 /* =========================================================
    PUBLIC PRODUCTS
-   Only approved/public products
+   GET /api/products
 ========================================================= */
 
 export const fetchProducts = async () => {
   try {
     const response = await axios.get(
-      `${API_BASE_URL}/products`,
+      `${API_URL}/products`,
       {
         timeout: 25000,
       }
@@ -41,7 +97,8 @@ export const fetchProducts = async () => {
   } catch (error) {
     console.error(
       "Failed to fetch public products:",
-      error.response?.data || error.message
+      error.response?.data ||
+        error.message
     );
 
     const localProducts = JSON.parse(
@@ -57,6 +114,7 @@ export const fetchProducts = async () => {
 
 /* =========================================================
    SINGLE PRODUCT
+   GET /api/products/:id
 ========================================================= */
 
 export const fetchProduct = async (id) => {
@@ -153,12 +211,13 @@ export const fetchRelatedProducts = async (
 
 /* =========================================================
    CATEGORIES
+   GET /api/categories
 ========================================================= */
 
 export const fetchCategories = async () => {
   try {
     const response = await axios.get(
-      `${API_BASE_URL}/categories`,
+      `${API_URL}/categories`,
       {
         timeout: 25000,
       }
@@ -209,8 +268,7 @@ export const fetchCategories = async () => {
 
 /* =========================================================
    MERCHANT PRODUCTS
-   IMPORTANT:
-   Uses /products/my-products
+   GET /api/products/my-products
 ========================================================= */
 
 export const fetchMyProducts = async (
@@ -218,8 +276,7 @@ export const fetchMyProducts = async (
 ) => {
   try {
     const authToken =
-      token ||
-      localStorage.getItem("token");
+      getAuthToken(token);
 
     if (!authToken) {
       throw new Error(
@@ -228,7 +285,7 @@ export const fetchMyProducts = async (
     }
 
     const response = await axios.get(
-      `${API_BASE_URL}/products/my-products`,
+      `${API_URL}/products/my-products`,
       {
         headers: {
           Authorization:
@@ -265,10 +322,6 @@ export const fetchMyProducts = async (
         error.message
     );
 
-    // Do NOT fall back to public products.
-    // Pending products must remain visible
-    // to the merchant.
-
     return [];
   }
 };
@@ -276,6 +329,7 @@ export const fetchMyProducts = async (
 
 /* =========================================================
    CREATE PRODUCT
+   POST /api/products
 ========================================================= */
 
 export const createProduct = async (
@@ -284,8 +338,7 @@ export const createProduct = async (
 ) => {
   try {
     const authToken =
-      token ||
-      localStorage.getItem("token");
+      getAuthToken(token);
 
     if (!authToken) {
       throw new Error(
@@ -294,7 +347,7 @@ export const createProduct = async (
     }
 
     const response = await axios.post(
-      `${API_BASE_URL}/products`,
+      `${API_URL}/products`,
       productData,
       {
         headers: {
@@ -327,6 +380,7 @@ export const createProduct = async (
 
 /* =========================================================
    UPDATE PRODUCT
+   PUT /api/products/:id
 ========================================================= */
 
 export const updateProduct = async (
@@ -336,8 +390,7 @@ export const updateProduct = async (
 ) => {
   try {
     const authToken =
-      token ||
-      localStorage.getItem("token");
+      getAuthToken(token);
 
     if (!authToken) {
       throw new Error(
@@ -346,7 +399,7 @@ export const updateProduct = async (
     }
 
     const response = await axios.put(
-      `${API_BASE_URL}/products/${id}`,
+      `${API_URL}/products/${id}`,
       productData,
       {
         headers: {
@@ -379,6 +432,7 @@ export const updateProduct = async (
 
 /* =========================================================
    DELETE PRODUCT
+   DELETE /api/products/:id
 ========================================================= */
 
 export const deleteProduct = async (
@@ -387,8 +441,7 @@ export const deleteProduct = async (
 ) => {
   try {
     const authToken =
-      token ||
-      localStorage.getItem("token");
+      getAuthToken(token);
 
     if (!authToken) {
       throw new Error(
@@ -397,7 +450,7 @@ export const deleteProduct = async (
     }
 
     const response = await axios.delete(
-      `${API_BASE_URL}/products/${id}`,
+      `${API_URL}/products/${id}`,
       {
         headers: {
           Authorization:
@@ -427,6 +480,7 @@ export const deleteProduct = async (
 
 /* =========================================================
    ADMIN USERS
+   GET /api/admin/users
 ========================================================= */
 
 export const fetchAllUsers = async (
@@ -434,8 +488,7 @@ export const fetchAllUsers = async (
 ) => {
   try {
     const authToken =
-      token ||
-      localStorage.getItem("token");
+      getAuthToken(token);
 
     if (!authToken) {
       throw new Error(
@@ -444,7 +497,7 @@ export const fetchAllUsers = async (
     }
 
     const response = await axios.get(
-      `${API_BASE_URL}/admin/users`,
+      `${API_URL}/admin/users`,
       {
         headers: {
           Authorization:
