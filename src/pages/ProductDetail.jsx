@@ -166,7 +166,11 @@ export default function ProductDetail() {
     (Array.isArray(product.colour) ? product.colour : product.colour ? [product.colour] : []);
 
   // Category-based dynamic highlights
-  const categoryLower = (product.category || "").toLowerCase();
+  const categoryLower = String(
+  product.category?.name ||
+  product.category ||
+  ""
+).toLowerCase();
   
   const getHighlights = () => {
     if (categoryLower.includes("laptop") || categoryLower.includes("notebook")) {
