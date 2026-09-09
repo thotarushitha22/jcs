@@ -6,6 +6,7 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 25000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -55,7 +56,7 @@ export const registerUser = async (userData) => {
   return response.data;
 };
 
-// Products
+// Products (All)
 export const fetchProducts = async (category = "") => {
   const query =
     category && category.toLowerCase() !== "all"
@@ -65,6 +66,53 @@ export const fetchProducts = async (category = "") => {
   const response = await api.get(`/products${query}`);
 
   return response.data;
+};
+
+/* =========================================================
+   SINGLE PRODUCT
+   GET /api/products/:id
+========================================================= */
+export const fetchProduct = async (id) => {
+  try {
+    const response = await api.get(`/products/${id}`);
+
+    const data = response.data;
+
+    // Support different backend response formats
+    const product = data?.product || data?.data || data;
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    // Parse images if backend returns JSON string
+    let parsedImages = product.images;
+
+    if (typeof parsedImages === "string") {
+      try {
+        parsedImages = JSON.parse(parsedImages);
+      } catch {
+        parsedImages = [parsedImages];
+      }
+    }
+
+    if (!Array.isArray(parsedImages)) {
+      parsedImages = [];
+    }
+
+    return {
+      ...product,
+      images: parsedImages.filter(Boolean),
+    };
+  } catch (error) {
+    console.error("fetchProduct error:", error);
+
+    if (error.response?.status === 404) {
+      throw new Error("Product not found");
+    }
+
+    throw error;
+  }
 };
 
 // Create product

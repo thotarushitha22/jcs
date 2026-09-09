@@ -12,6 +12,7 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -25,6 +26,7 @@ import {
 } from "recharts";
 
 import { useAuth } from "../context/AuthContext";
+
 import {
   fetchCategories,
   fetchMyProducts,
@@ -32,17 +34,40 @@ import {
   updateProduct,
   deleteProduct,
 } from "../api/products";
+
 import { fetchMerchantOrders } from "../api/orders";
 import { uploadImage } from "../api/upload";
 
 import "./MerchantDashboard.css";
 
+
+/* =========================================================
+   CUSTOM CATEGORIES
+========================================================= */
+
 const customCategories = [
-  { id: "smartphones", name: "Smartphones" },
-  { id: "laptops", name: "Laptops" },
-  { id: "tvs", name: "TVs" },
-  { id: "accessories", name: "Accessories" },
+  {
+    id: "smartphones",
+    name: "Smartphones",
+  },
+  {
+    id: "laptops",
+    name: "Laptops",
+  },
+  {
+    id: "tvs",
+    name: "TVs",
+  },
+  {
+    id: "accessories",
+    name: "Accessories",
+  },
 ];
+
+
+/* =========================================================
+   EMPTY PRODUCT FORM
+========================================================= */
 
 const emptyForm = {
   title: "",
@@ -51,12 +76,20 @@ const emptyForm = {
   mrp: "",
   stock: "",
   moq: "1",
+
   categoryId: "",
+
   sku: "",
   model: "",
+
   gstPercent: "18",
+
+  /* Product content */
   overview: "",
+  highlights: "",
   warranty: "",
+
+  /* Specifications */
   simSlots: "",
   colour: "",
   waterResistant: "",
@@ -69,7 +102,14 @@ const emptyForm = {
   rearCamera: "",
   frontCamera: "",
   ram: "",
+  processor: "",
+  battery: "",
 };
+
+
+/* =========================================================
+   CHART COLORS
+========================================================= */
 
 const CHART_COLORS = [
   "#3b82f6",
@@ -79,24 +119,36 @@ const CHART_COLORS = [
   "#8b5cf6",
 ];
 
+
 export default function MerchantDashboard() {
+
+  /* =======================================================
+     AUTH
+  ======================================================= */
+
   const { user } = useAuth();
 
-  /*
-   * Read the stored user safely.
-   */
   let storedUser = {};
 
   try {
-    storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    storedUser = JSON.parse(
+      localStorage.getItem("user") || "{}"
+    );
   } catch (error) {
-    console.warn("Could not parse stored user:", error);
+    console.warn(
+      "Could not parse stored user:",
+      error
+    );
+
     storedUser = {};
   }
 
-  const currentUser = user || storedUser;
+  const currentUser =
+    user || storedUser;
 
-  const role = String(currentUser?.role || "")
+  const role = String(
+    currentUser?.role || ""
+  )
     .trim()
     .toLowerCase();
 
@@ -105,10 +157,11 @@ export default function MerchantDashboard() {
     role === "seller" ||
     role === "admin";
 
-  /*
-   * IMPORTANT:
-   * Get the token from all possible locations used by the application.
-   */
+
+  /* =======================================================
+     TOKEN
+  ======================================================= */
+
   const merchantToken =
     currentUser?.token ||
     currentUser?.accessToken ||
@@ -117,205 +170,297 @@ export default function MerchantDashboard() {
     localStorage.getItem("token") ||
     null;
 
-  const userEmailKey = currentUser?.email
-    ? String(currentUser.email)
-    : "guest";
 
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const userEmailKey =
+    currentUser?.email
+      ? String(currentUser.email)
+      : "guest";
 
-  const [categories, setCategories] = useState(customCategories);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const [orders, setOrders] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
+  /* =======================================================
+     STATE
+  ======================================================= */
 
-  const [form, setForm] = useState(emptyForm);
-  const [images, setImages] = useState([]);
+  const [activeTab, setActiveTab] =
+    useState("dashboard");
 
-  const [uploading, setUploading] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [categories, setCategories] =
+    useState(customCategories);
 
-  /*
-   * FIX:
-   * useEffect must always be called before conditional returns.
-   */
+  const [products, setProducts] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [orders, setOrders] =
+    useState([]);
+
+  const [totalRevenue, setTotalRevenue] =
+    useState(0);
+
+  const [form, setForm] =
+    useState({ ...emptyForm });
+
+  const [images, setImages] =
+    useState([]);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [editingId, setEditingId] =
+    useState(null);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState(null);
+
+
+  /* =======================================================
+     LOAD DASHBOARD DATA
+  ======================================================= */
+
   useEffect(() => {
+
     let mounted = true;
 
     const loadData = async () => {
+
       try {
+
         if (!mounted) return;
 
         setLoading(true);
         setError(null);
 
-        /*
-         * -----------------------------------------
-         * LOAD ORDERS
-         * -----------------------------------------
-         */
+
+        /* ---------------------------------------------------
+           LOAD ORDERS
+        --------------------------------------------------- */
+
         let rawOrders = [];
 
         try {
-          const res = await fetchMerchantOrders();
 
-          rawOrders = Array.isArray(res)
-            ? res
-            : res?.data ||
-              res?.orders ||
-              [];
+          const res =
+            await fetchMerchantOrders();
 
-          /*
-           * Only use local storage if the API gives
-           * no usable array.
-           */
+          rawOrders =
+            Array.isArray(res)
+              ? res
+              : res?.data ||
+                res?.orders ||
+                [];
+
           if (!Array.isArray(rawOrders)) {
             rawOrders = [];
           }
 
-          if (rawOrders.length === 0) {
-            try {
-              const localOrders = JSON.parse(
-                localStorage.getItem("orders") || "[]"
-              );
 
-              if (Array.isArray(localOrders)) {
-                rawOrders = localOrders;
+          /* Local fallback */
+
+          if (rawOrders.length === 0) {
+
+            try {
+
+              const localOrders =
+                JSON.parse(
+                  localStorage.getItem(
+                    "orders"
+                  ) || "[]"
+                );
+
+              if (
+                Array.isArray(
+                  localOrders
+                )
+              ) {
+                rawOrders =
+                  localOrders;
               }
+
             } catch (storageError) {
+
               console.warn(
                 "Could not read local orders:",
                 storageError
               );
+
             }
           }
+
         } catch (orderError) {
+
           console.warn(
             "Merchant orders API failed:",
             orderError
           );
 
           try {
-            const localOrders = JSON.parse(
-              localStorage.getItem("orders") || "[]"
-            );
 
-            rawOrders = Array.isArray(localOrders)
-              ? localOrders
-              : [];
-          } catch (storageError) {
+            const localOrders =
+              JSON.parse(
+                localStorage.getItem(
+                  "orders"
+                ) || "[]"
+              );
+
+            rawOrders =
+              Array.isArray(
+                localOrders
+              )
+                ? localOrders
+                : [];
+
+          } catch {
             rawOrders = [];
           }
+
         }
 
-        /*
-         * -----------------------------------------
-         * NORMALIZE ORDERS
-         * -----------------------------------------
-         */
-        const finalOrders = rawOrders.map((ord, idx) => {
-          const amount = Number(
-            ord?.totalAmount ||
-              ord?.total_amount ||
-              ord?.totalPrice ||
-              ord?.amount ||
-              ord?.total ||
-              ord?.price ||
-              0
+
+        /* ---------------------------------------------------
+           NORMALIZE ORDERS
+        --------------------------------------------------- */
+
+        const finalOrders =
+          rawOrders.map(
+            (ord, idx) => {
+
+              const amount =
+                Number(
+                  ord?.totalAmount ||
+                    ord?.total_amount ||
+                    ord?.totalPrice ||
+                    ord?.amount ||
+                    ord?.total ||
+                    ord?.price ||
+                    0
+                );
+
+              const status =
+                String(
+                  ord?.paymentStatus ||
+                    ord?.status ||
+                    "Success"
+                );
+
+              const orderId =
+                ord?.order_id ||
+                ord?.orderId ||
+                ord?._id ||
+                `JCS-${81670 + idx}`;
+
+              const userName =
+                ord?.shippingAddress?.name ||
+                ord?.user_name ||
+                ord?.customerName ||
+                currentUser?.name ||
+                "Customer";
+
+              return {
+                ...ord,
+
+                order_id:
+                  orderId,
+
+                total_amount:
+                  amount,
+
+                paymentStatus:
+                  status,
+
+                user_name:
+                  userName,
+
+                gateway:
+                  ord?.paymentMethod ||
+                  "JCS Global Cards",
+              };
+            }
           );
 
-          const status = String(
-            ord?.paymentStatus ||
-              ord?.status ||
-              "Success"
-          );
-
-          const orderId =
-            ord?.order_id ||
-            ord?.orderId ||
-            ord?._id ||
-            `JCS-${81670 + idx}`;
-
-          const userName =
-            ord?.shippingAddress?.name ||
-            ord?.user_name ||
-            ord?.customerName ||
-            currentUser?.name ||
-            "Customer";
-
-          return {
-            ...ord,
-            order_id: orderId,
-            total_amount: amount,
-            paymentStatus: status,
-            user_name: userName,
-            gateway:
-              ord?.paymentMethod ||
-              "JCS Global Cards",
-          };
-        });
 
         if (mounted) {
+
           setOrders(finalOrders);
 
-          /*
-           * Calculate revenue.
-           * Failed/cancelled/declined orders are excluded.
-           */
-          const sum = finalOrders.reduce(
-            (acc, curr) => {
-              const rawPay = String(
-                curr?.paymentStatus ||
-                  curr?.status ||
-                  "success"
-              )
-                .trim()
-                .toLowerCase();
 
-              const isFailed =
-                rawPay.includes("fail") ||
-                rawPay.includes("cancel") ||
-                rawPay.includes("declined");
+          /* Calculate revenue */
 
-              if (isFailed) {
-                return acc;
-              }
+          const sum =
+            finalOrders.reduce(
+              (acc, curr) => {
 
-              return (
-                acc +
-                Number(curr?.total_amount || 0)
-              );
-            },
-            0
-          );
+                const rawPay =
+                  String(
+                    curr?.paymentStatus ||
+                      curr?.status ||
+                      "success"
+                  )
+                    .trim()
+                    .toLowerCase();
+
+                const isFailed =
+                  rawPay.includes(
+                    "fail"
+                  ) ||
+                  rawPay.includes(
+                    "cancel"
+                  ) ||
+                  rawPay.includes(
+                    "declined"
+                  );
+
+                if (isFailed) {
+                  return acc;
+                }
+
+                return (
+                  acc +
+                  Number(
+                    curr?.total_amount ||
+                      0
+                  )
+                );
+              },
+              0
+            );
 
           setTotalRevenue(sum);
         }
 
-        /*
-         * -----------------------------------------
-         * LOAD CATEGORIES + MERCHANT PRODUCTS
-         * -----------------------------------------
-         *
-         * Token is explicitly passed.
-         */
-        const [catResult, prodResult] =
+
+        /* ---------------------------------------------------
+           LOAD CATEGORIES + PRODUCTS
+        --------------------------------------------------- */
+
+        const [
+          catResult,
+          prodResult,
+        ] =
           await Promise.allSettled([
             fetchCategories(),
-            fetchMyProducts(merchantToken),
+            fetchMyProducts(
+              merchantToken
+            ),
           ]);
+
 
         if (!mounted) return;
 
-        /*
-         * -----------------------------------------
-         * CATEGORIES
-         * -----------------------------------------
-         */
-        if (catResult.status === "fulfilled") {
+
+        /* ---------------------------------------------------
+           CATEGORIES
+        --------------------------------------------------- */
+
+        if (
+          catResult.status ===
+          "fulfilled"
+        ) {
+
           const rawCats =
             catResult.value?.data ||
             catResult.value ||
@@ -325,45 +470,77 @@ export default function MerchantDashboard() {
             Array.isArray(rawCats) &&
             rawCats.length > 0
           ) {
-            setCategories(rawCats);
+            setCategories(
+              rawCats
+            );
           } else {
-            setCategories(customCategories);
+            setCategories(
+              customCategories
+            );
           }
+
         } else {
-          setCategories(customCategories);
+
+          setCategories(
+            customCategories
+          );
+
         }
 
-        /*
-         * -----------------------------------------
-         * PRODUCTS
-         * -----------------------------------------
-         */
-        if (prodResult.status === "fulfilled") {
+
+        /* ---------------------------------------------------
+           PRODUCTS
+        --------------------------------------------------- */
+
+        if (
+          prodResult.status ===
+          "fulfilled"
+        ) {
+
           const rawProds =
             prodResult.value?.data ||
             prodResult.value ||
             [];
 
-          if (Array.isArray(rawProds)) {
-            setProducts(rawProds);
+          if (
+            Array.isArray(rawProds)
+          ) {
+
+            setProducts(
+              rawProds
+            );
+
           } else {
+
             setProducts([]);
+
           }
+
         } else {
+
           console.error(
             "Could not load merchant products:",
             prodResult.reason
           );
 
           const apiMessage =
-            prodResult.reason?.response?.data?.message ||
-            prodResult.reason?.message ||
+            prodResult.reason
+              ?.response
+              ?.data
+              ?.message ||
+            prodResult.reason
+              ?.message ||
             "Could not load your products.";
 
           setProducts([]);
-          setError(apiMessage);
+
+          setError(
+            apiMessage
+          );
         }
+
       } catch (err) {
+
         console.error(
           "Merchant dashboard loading error:",
           err
@@ -371,7 +548,10 @@ export default function MerchantDashboard() {
 
         if (!mounted) return;
 
-        setCategories(customCategories);
+        setCategories(
+          customCategories
+        );
+
         setProducts([]);
 
         setError(
@@ -379,567 +559,1056 @@ export default function MerchantDashboard() {
             err?.message ||
             "Could not load dashboard information."
         );
+
       } finally {
+
         if (mounted) {
           setLoading(false);
         }
+
       }
     };
 
+
     loadData();
+
 
     return () => {
       mounted = false;
     };
-  }, [userEmailKey, merchantToken]);
 
-  /*
-   * -----------------------------------------
-   * FORM UPDATE
-   * -----------------------------------------
-   */
+  }, [
+    userEmailKey,
+    merchantToken,
+  ]);
+
+
+  /* =======================================================
+     FORM UPDATE
+  ======================================================= */
+
   const update = (key) => (e) => {
+
     setForm((current) => ({
       ...current,
       [key]: e.target.value,
     }));
+
   };
 
-  /*
-   * -----------------------------------------
-   * IMAGE UPLOAD
-   * -----------------------------------------
-   */
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files || []);
 
-    if (files.length === 0) return;
+  /* =======================================================
+     IMAGE UPLOAD
+  ======================================================= */
 
-    setUploading(true);
-    setError(null);
+  const handleFileSelect =
+    async (e) => {
 
-    try {
-      const uploadedUrls = await Promise.all(
-        files.map(async (file) => {
-          try {
-            const res = await uploadImage(file);
-
-            let rawUrl =
-              typeof res === "string"
-                ? res
-                : res?.url ||
-                  res?.secure_url ||
-                  res?.data?.url ||
-                  res?.filePath ||
-                  res?.path ||
-                  "";
-
-            /*
-             * If backend returns a relative URL,
-             * convert it to an absolute URL.
-             */
-            if (
-              rawUrl &&
-              typeof rawUrl === "string" &&
-              rawUrl.startsWith("/")
-            ) {
-              const apiBase =
-                import.meta.env.VITE_API_URL ||
-                "http://localhost:5000";
-
-              const cleanBase = apiBase.replace(
-                /\/+$/,
-                ""
-              );
-
-              rawUrl = `${cleanBase}${rawUrl}`;
-            }
-
-            /*
-             * If upload API does not return a URL,
-             * show a local preview.
-             */
-            if (
-              !rawUrl ||
-              typeof rawUrl !== "string"
-            ) {
-              rawUrl = URL.createObjectURL(file);
-            }
-
-            return rawUrl;
-          } catch (apiErr) {
-            console.warn(
-              "Individual image upload failed:",
-              apiErr
-            );
-
-            /*
-             * Keep local preview so the UI does not
-             * completely break when upload fails.
-             */
-            return URL.createObjectURL(file);
-          }
-        })
-      );
-
-      const validUrls = uploadedUrls.filter(Boolean);
-
-      setImages((previous) => [
-        ...previous,
-        ...validUrls,
-      ]);
-    } catch (err) {
-      console.error(
-        "Image upload failed:",
-        err
-      );
-
-      setError(
-        "Image upload failed. Please try again."
-      );
-    } finally {
-      setUploading(false);
-
-      /*
-       * Allow selecting the same file again.
-       */
-      e.target.value = "";
-    }
-  };
-
-  /*
-   * -----------------------------------------
-   * REMOVE IMAGE
-   * -----------------------------------------
-   */
-  const removeImage = (url) => {
-    setImages((previous) =>
-      previous.filter((image) => image !== url)
-    );
-  };
-
-  /*
-   * -----------------------------------------
-   * RESET FORM
-   * -----------------------------------------
-   */
-  const resetForm = () => {
-    setForm({ ...emptyForm });
-    setImages([]);
-    setEditingId(null);
-    setError(null);
-  };
-
-  /*
-   * -----------------------------------------
-   * EDIT PRODUCT
-   * -----------------------------------------
-   */
-  const startEdit = (product) => {
-    const realId =
-      product?._id ||
-      product?.id;
-
-    if (!realId) {
-      alert(
-        "Error: Product identifier missing."
-      );
-      return;
-    }
-
-    setEditingId(realId);
-    setActiveTab("products");
-
-    let catId =
-      product?.category?.id ||
-      product?.category?._id ||
-      product?.categoryId ||
-      "";
-
-    if (!catId && product?.category) {
-      const match = categories.find(
-        (c) =>
-          String(c?.name || "").toLowerCase() ===
-          String(product.category).toLowerCase()
-      );
-
-      if (match) {
-        catId =
-          match.id ||
-          match._id ||
-          match.slug ||
-          "";
-      }
-    }
-
-    setForm({
-      title:
-        product?.title ||
-        product?.name ||
-        "",
-      brand: product?.brand || "",
-      price: product?.price ?? "",
-      mrp: product?.mrp ?? "",
-      stock: product?.stock ?? "",
-      moq: product?.moq ?? "1",
-      categoryId: catId,
-      sku: product?.sku || "",
-      model: product?.model || "",
-      gstPercent:
-        product?.gstPercent ?? "18",
-      overview:
-        product?.overview ||
-        product?.description ||
-        "",
-      warranty:
-        product?.warranty || "",
-      simSlots:
-        product?.simSlots || "",
-      colour:
-        product?.colour || "",
-      waterResistant:
-        product?.waterResistant || "",
-      securityFeatures:
-        product?.securityFeatures || "",
-      fastCharging:
-        product?.fastCharging || "",
-      networkGen:
-        product?.networkGen || "",
-      screenSize:
-        product?.screenSize || "",
-      weight:
-        product?.weight || "",
-      storage:
-        product?.storage || "",
-      rearCamera:
-        product?.rearCamera || "",
-      frontCamera:
-        product?.frontCamera || "",
-      ram:
-        product?.ram || "",
-    });
-
-    const existingImages =
-      Array.isArray(product?.images) &&
-      product.images.length > 0
-        ? product.images
-        : product?.image
-        ? [product.image]
-        : [];
-
-    setImages(existingImages);
-    setError(null);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  /*
-   * -----------------------------------------
-   * SUBMIT PRODUCT
-   * -----------------------------------------
-   */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-
-    /*
-     * Make sure we actually have a token.
-     */
-    if (!merchantToken) {
-      setError(
-        "Your login session has expired. Please log in again."
-      );
-      return;
-    }
-
-    if (images.length === 0) {
-      setError(
-        "Add at least one product photo before submitting."
-      );
-      return;
-    }
-
-    if (!form.categoryId) {
-      setError(
-        "Please select a category."
-      );
-      return;
-    }
-
-    if (
-      !form.price ||
-      Number(form.price) < 0
-    ) {
-      setError(
-        "Please enter a valid product price."
-      );
-      return;
-    }
-
-    /*
-     * Build payload.
-     */
-    const payload = {
-      ...form,
-
-      title: form.title,
-      name: form.title,
-
-      price: Number(form.price),
-
-      mrp:
-        Number(form.mrp) ||
-        Number(form.price),
-
-      stock:
-        Number(form.stock) || 0,
-
-      moq:
-        Number(form.moq) || 1,
-
-      gstPercent:
-        Number(form.gstPercent) || 18,
-
-      categoryId: isNaN(
-        Number(form.categoryId)
-      )
-        ? form.categoryId
-        : Number(form.categoryId),
-
-      images,
-      image: images[0] || null,
-    };
-
-    setSaving(true);
-
-    try {
-      /*
-       * -----------------------------------------
-       * UPDATE EXISTING PRODUCT
-       * -----------------------------------------
-       */
-      if (editingId) {
-        const updated = await updateProduct(
-          editingId,
-          payload,
-          merchantToken
+      const files =
+        Array.from(
+          e.target.files || []
         );
-
-        /*
-         * Support multiple response shapes.
-         */
-        const updatedItem =
-          updated?.product ||
-          updated?.data?.product ||
-          updated?.data ||
-          updated;
-
-        if (!updatedItem) {
-          throw new Error(
-            "Product was updated but no product data was returned."
-          );
-        }
-
-        setProducts((previous) =>
-          previous.map((product) => {
-            const productId =
-              product?._id ||
-              product?.id;
-
-            return String(productId) ===
-              String(editingId)
-              ? updatedItem
-              : product;
-          })
-        );
-      } else {
-        /*
-         * -----------------------------------------
-         * CREATE NEW PRODUCT
-         * -----------------------------------------
-         */
-        const created = await createProduct(
-          payload,
-          merchantToken
-        );
-
-        const createdItem =
-          created?.product ||
-          created?.data?.product ||
-          created?.data ||
-          created;
-
-        if (!createdItem) {
-          throw new Error(
-            "Product was created but no product data was returned."
-          );
-        }
-
-        setProducts((previous) => [
-          createdItem,
-          ...previous,
-        ]);
-      }
-
-      /*
-       * Reset form after successful save.
-       */
-      resetForm();
-    } catch (err) {
-      console.error(
-        "Product save error:",
-        err
-      );
-
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Could not save this listing.";
-
-      setError(message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  /*
-   * -----------------------------------------
-   * DELETE PRODUCT
-   * -----------------------------------------
-   */
-  const handleDelete = async (id) => {
-    if (!id) {
-      alert(
-        "Error: Product identifier missing."
-      );
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Remove this listing? This can't be undone."
-    );
-
-    if (!confirmed) return;
-
-    if (!merchantToken) {
-      alert(
-        "Your login session has expired. Please log in again."
-      );
-      return;
-    }
-
-    try {
-      await deleteProduct(
-        id,
-        merchantToken
-      );
-
-      setProducts((previous) =>
-        previous.filter((product) => {
-          const productId =
-            product?._id ||
-            product?.id;
-
-          return (
-            String(productId) !==
-            String(id)
-          );
-        })
-      );
 
       if (
-        editingId &&
-        String(editingId) === String(id)
+        files.length === 0
       ) {
-        resetForm();
+        return;
       }
-    } catch (err) {
-      console.error(
-        "Product delete error:",
-        err
-      );
 
-      alert(
-        err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          err?.message ||
-          "Could not delete this listing."
-      );
-    }
-  };
+      setUploading(true);
+      setError(null);
 
-  /*
-   * -----------------------------------------
-   * CHART DATA
-   * -----------------------------------------
-   */
-  const revenueChartData = orders.map(
-    (ord, idx) => ({
-      name: ord.order_id
-        ? `#${String(
-            ord.order_id
-          ).slice(-5)}`
-        : `Order #${idx + 1}`,
 
-      revenue: Number(
-        ord.total_amount ||
-          ord.amount ||
-          0
-      ),
-    })
-  );
+      try {
 
-  /*
-   * -----------------------------------------
-   * CATEGORY COUNTS
-   * -----------------------------------------
-   */
-  const categoryCounts = products.reduce(
-    (acc, p) => {
-      const rawCatId =
-        p?.categoryId ||
-        p?.category?.id ||
-        p?.category?._id ||
-        p?.category ||
-        "Uncategorized";
+        const uploadedUrls =
+          await Promise.all(
+            files.map(
+              async (file) => {
 
-      const foundCat =
-        categories.find(
-          (c) =>
-            String(c?.id) ===
-              String(rawCatId) ||
-            String(c?.name || "")
-              .toLowerCase() ===
-              String(rawCatId)
-                .toLowerCase()
+                try {
+
+                  const res =
+                    await uploadImage(
+                      file
+                    );
+
+                  let rawUrl =
+                    typeof res ===
+                    "string"
+                      ? res
+                      : res?.url ||
+                        res?.secure_url ||
+                        res?.data?.url ||
+                        res?.filePath ||
+                        res?.path ||
+                        "";
+
+
+                  if (
+                    rawUrl &&
+                    typeof rawUrl ===
+                      "string" &&
+                    rawUrl.startsWith(
+                      "/"
+                    )
+                  ) {
+
+                    const apiBase =
+                      import.meta.env
+                        .VITE_API_URL ||
+                      "http://localhost:5000";
+
+                    const cleanBase =
+                      apiBase.replace(
+                        /\/+$/,
+                        ""
+                      );
+
+                    rawUrl =
+                      `${cleanBase}${rawUrl}`;
+                  }
+
+
+                  if (
+                    !rawUrl ||
+                    typeof rawUrl !==
+                      "string"
+                  ) {
+
+                    rawUrl =
+                      URL.createObjectURL(
+                        file
+                      );
+
+                  }
+
+                  return rawUrl;
+
+                } catch (
+                  apiErr
+                ) {
+
+                  console.warn(
+                    "Individual image upload failed:",
+                    apiErr
+                  );
+
+                  return URL.createObjectURL(
+                    file
+                  );
+                }
+
+              }
+            )
+          );
+
+
+        const validUrls =
+          uploadedUrls.filter(
+            Boolean
+          );
+
+
+        setImages(
+          (previous) => [
+            ...previous,
+            ...validUrls,
+          ]
         );
 
-      const catName = foundCat
-        ? foundCat.name
-        : String(rawCatId);
+      } catch (err) {
 
-      acc[catName] =
-        (acc[catName] || 0) + 1;
+        console.error(
+          "Image upload failed:",
+          err
+        );
 
-      return acc;
-    },
-    {}
-  );
+        setError(
+          "Image upload failed. Please try again."
+        );
+
+      } finally {
+
+        setUploading(false);
+
+        e.target.value = "";
+
+      }
+    };
+
+
+  /* =======================================================
+     REMOVE IMAGE
+  ======================================================= */
+
+  const removeImage =
+    (url) => {
+
+      setImages(
+        (previous) =>
+          previous.filter(
+            (image) =>
+              image !== url
+          )
+      );
+
+    };
+
+
+  /* =======================================================
+     RESET FORM
+  ======================================================= */
+
+  const resetForm = () => {
+
+    setForm({
+      ...emptyForm,
+    });
+
+    setImages([]);
+
+    setEditingId(null);
+
+    setError(null);
+
+  };
+
+
+  /* =======================================================
+     CONVERT HIGHLIGHTS TO TEXT
+  ======================================================= */
+
+  const highlightsToText =
+    (highlights) => {
+
+      if (
+        Array.isArray(
+          highlights
+        )
+      ) {
+
+        return highlights
+          .map((item) => {
+
+            if (
+              typeof item ===
+              "string"
+            ) {
+              return item;
+            }
+
+            return (
+              item?.text ||
+              item?.value ||
+              item?.title ||
+              ""
+            );
+
+          })
+          .filter(Boolean)
+          .join("\n");
+      }
+
+
+      if (
+        typeof highlights ===
+        "string"
+      ) {
+        return highlights;
+      }
+
+
+      return "";
+    };
+
+
+  /* =======================================================
+     EDIT PRODUCT
+  ======================================================= */
+
+  const startEdit =
+    (product) => {
+
+      const realId =
+        product?._id ||
+        product?.id;
+
+
+      if (!realId) {
+
+        alert(
+          "Error: Product identifier missing."
+        );
+
+        return;
+      }
+
+
+      setEditingId(
+        realId
+      );
+
+      setActiveTab(
+        "products"
+      );
+
+
+      /* ---------------------------------------------------
+         CATEGORY
+      --------------------------------------------------- */
+
+      let catId =
+        product?.category?.id ||
+        product?.category?._id ||
+        product?.categoryId ||
+        "";
+
+
+      if (
+        !catId &&
+        product?.category
+      ) {
+
+        const categoryText =
+          typeof product.category ===
+          "object"
+            ? product.category?.name
+            : product.category;
+
+
+        const match =
+          categories.find(
+            (c) =>
+              String(
+                c?.name || ""
+              ).toLowerCase() ===
+              String(
+                categoryText || ""
+              ).toLowerCase()
+          );
+
+
+        if (match) {
+
+          catId =
+            match.id ||
+            match._id ||
+            match.slug ||
+            "";
+
+        }
+      }
+
+
+      /* ---------------------------------------------------
+         FORM
+      --------------------------------------------------- */
+
+      setForm({
+
+        title:
+          product?.title ||
+          product?.name ||
+          "",
+
+        brand:
+          product?.brand ||
+          "",
+
+        price:
+          product?.price ??
+          "",
+
+        mrp:
+          product?.mrp ??
+          "",
+
+        stock:
+          product?.stock ??
+          "",
+
+        moq:
+          product?.moq ??
+          "1",
+
+        categoryId:
+          catId,
+
+        sku:
+          product?.sku ||
+          "",
+
+        model:
+          product?.model ||
+          "",
+
+        gstPercent:
+          product?.gstPercent ??
+          "18",
+
+
+        /* IMPORTANT */
+
+        overview:
+          product?.overview ||
+          product?.description ||
+          "",
+
+
+        highlights:
+          highlightsToText(
+            product?.highlights
+          ),
+
+
+        warranty:
+          product?.warranty ||
+          "",
+
+
+        /* Specifications */
+
+        simSlots:
+          product?.simSlots ||
+          "",
+
+        colour:
+          product?.colour ||
+          product?.color ||
+          "",
+
+        waterResistant:
+          product?.waterResistant ||
+          "",
+
+        securityFeatures:
+          product?.securityFeatures ||
+          "",
+
+        fastCharging:
+          product?.fastCharging ||
+          "",
+
+        networkGen:
+          product?.networkGen ||
+          "",
+
+        screenSize:
+          product?.screenSize ||
+          "",
+
+        weight:
+          product?.weight ||
+          "",
+
+        storage:
+          product?.storage ||
+          product?.storageCapacity ||
+          "",
+
+        rearCamera:
+          product?.rearCamera ||
+          "",
+
+        frontCamera:
+          product?.frontCamera ||
+          "",
+
+        ram:
+          product?.ram ||
+          product?.memory ||
+          "",
+
+        processor:
+          product?.processor ||
+          "",
+
+        battery:
+          product?.battery ||
+          "",
+
+      });
+
+
+      /* ---------------------------------------------------
+         EXISTING IMAGES
+      --------------------------------------------------- */
+
+      const existingImages =
+        Array.isArray(
+          product?.images
+        ) &&
+        product.images.length > 0
+          ? product.images
+          : product?.image
+          ? [product.image]
+          : [];
+
+
+      setImages(
+        existingImages
+      );
+
+      setError(null);
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+    };
+
+
+  /* =======================================================
+     SUBMIT PRODUCT
+  ======================================================= */
+
+  const handleSubmit =
+    async (e) => {
+
+      e.preventDefault();
+
+      setError(null);
+
+
+      /* ---------------------------------------------------
+         AUTH CHECK
+      --------------------------------------------------- */
+
+      if (!merchantToken) {
+
+        setError(
+          "Your login session has expired. Please log in again."
+        );
+
+        return;
+      }
+
+
+      /* ---------------------------------------------------
+         IMAGE CHECK
+      --------------------------------------------------- */
+
+      if (
+        images.length === 0
+      ) {
+
+        setError(
+          "Add at least one product photo before submitting."
+        );
+
+        return;
+      }
+
+
+      /* ---------------------------------------------------
+         CATEGORY CHECK
+      --------------------------------------------------- */
+
+      if (
+        !form.categoryId
+      ) {
+
+        setError(
+          "Please select a category."
+        );
+
+        return;
+      }
+
+
+      /* ---------------------------------------------------
+         PRICE CHECK
+      --------------------------------------------------- */
+
+      if (
+        !form.price ||
+        Number(form.price) < 0
+      ) {
+
+        setError(
+          "Please enter a valid product price."
+        );
+
+        return;
+      }
+
+
+      /* ---------------------------------------------------
+         HIGHLIGHTS
+
+         Merchant enters:
+
+         50MP AI Camera
+         5000mAh Battery
+         8GB RAM
+         256GB Storage
+
+         Backend receives:
+
+         [
+           { icon: "✓", text: "50MP AI Camera" },
+           { icon: "✓", text: "5000mAh Battery" },
+           ...
+         ]
+      --------------------------------------------------- */
+
+      const highlights =
+        String(
+          form.highlights || ""
+        )
+          .split("\n")
+          .map(
+            (item) =>
+              item.trim()
+          )
+          .filter(Boolean)
+          .map((text) => ({
+            icon: "✓",
+            text,
+          }));
+
+
+      /* ---------------------------------------------------
+         CATEGORY ID
+      --------------------------------------------------- */
+
+      const numericCategoryId =
+        Number(
+          form.categoryId
+        );
+
+      const finalCategoryId =
+        Number.isNaN(
+          numericCategoryId
+        )
+          ? form.categoryId
+          : numericCategoryId;
+
+
+      /* ---------------------------------------------------
+         PAYLOAD
+      --------------------------------------------------- */
+
+      const payload = {
+
+        /* Basic fields */
+
+        ...form,
+
+        title:
+          form.title.trim(),
+
+        name:
+          form.title.trim(),
+
+        brand:
+          form.brand.trim(),
+
+        price:
+          Number(form.price),
+
+        mrp:
+          Number(form.mrp) ||
+          Number(form.price),
+
+        stock:
+          Number(form.stock) ||
+          0,
+
+        moq:
+          Number(form.moq) ||
+          1,
+
+        gstPercent:
+          Number(
+            form.gstPercent
+          ) || 18,
+
+
+        /* Category */
+
+        categoryId:
+          finalCategoryId,
+
+        category:
+          finalCategoryId,
+
+
+        /* -------------------------------------------------
+           OVERVIEW
+
+           Save the same merchant text in both fields
+           so either backend/frontend naming works.
+        ------------------------------------------------- */
+
+        overview:
+          form.overview.trim(),
+
+        description:
+          form.overview.trim(),
+
+
+        /* -------------------------------------------------
+           HIGHLIGHTS
+
+           THIS IS THE IMPORTANT FIX.
+        ------------------------------------------------- */
+
+        highlights,
+
+
+        /* -------------------------------------------------
+           IMAGES
+        ------------------------------------------------- */
+
+        images,
+
+        image:
+          images[0] || null,
+
+      };
+
+
+      setSaving(true);
+
+
+      try {
+
+        /* -------------------------------------------------
+           UPDATE
+        ------------------------------------------------- */
+
+        if (editingId) {
+
+          const updated =
+            await updateProduct(
+              editingId,
+              payload,
+              merchantToken
+            );
+
+
+          const updatedItem =
+            updated?.product ||
+            updated?.data?.product ||
+            updated?.data ||
+            updated;
+
+
+          if (!updatedItem) {
+
+            throw new Error(
+              "Product was updated but no product data was returned."
+            );
+
+          }
+
+
+          setProducts(
+            (previous) =>
+              previous.map(
+                (product) => {
+
+                  const productId =
+                    product?._id ||
+                    product?.id;
+
+
+                  return String(
+                    productId
+                  ) ===
+                    String(
+                      editingId
+                    )
+                    ? updatedItem
+                    : product;
+
+                }
+              )
+          );
+
+        } else {
+
+          /* -----------------------------------------------
+             CREATE
+          ------------------------------------------------ */
+
+          const created =
+            await createProduct(
+              payload,
+              merchantToken
+            );
+
+
+          const createdItem =
+            created?.product ||
+            created?.data?.product ||
+            created?.data ||
+            created;
+
+
+          if (!createdItem) {
+
+            throw new Error(
+              "Product was created but no product data was returned."
+            );
+
+          }
+
+
+          setProducts(
+            (previous) => [
+              createdItem,
+              ...previous,
+            ]
+          );
+
+        }
+
+
+        /* -------------------------------------------------
+           SUCCESS
+        ------------------------------------------------- */
+
+        resetForm();
+
+        setActiveTab(
+          "products"
+        );
+
+      } catch (err) {
+
+        console.error(
+          "Product save error:",
+          err
+        );
+
+
+        const message =
+          err?.response?.data
+            ?.message ||
+          err?.response?.data
+            ?.error ||
+          err?.message ||
+          "Could not save this listing.";
+
+
+        setError(
+          message
+        );
+
+      } finally {
+
+        setSaving(false);
+
+      }
+
+    };
+
+
+  /* =======================================================
+     DELETE PRODUCT
+  ======================================================= */
+
+  const handleDelete =
+    async (id) => {
+
+      if (!id) {
+
+        alert(
+          "Error: Product identifier missing."
+        );
+
+        return;
+      }
+
+
+      const confirmed =
+        window.confirm(
+          "Remove this listing? This can't be undone."
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      if (!merchantToken) {
+
+        alert(
+          "Your login session has expired. Please log in again."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        await deleteProduct(
+          id,
+          merchantToken
+        );
+
+
+        setProducts(
+          (previous) =>
+            previous.filter(
+              (product) => {
+
+                const productId =
+                  product?._id ||
+                  product?.id;
+
+                return (
+                  String(
+                    productId
+                  ) !==
+                  String(id)
+                );
+
+              }
+            )
+        );
+
+
+        if (
+          editingId &&
+          String(editingId) ===
+            String(id)
+        ) {
+
+          resetForm();
+
+        }
+
+      } catch (err) {
+
+        console.error(
+          "Product delete error:",
+          err
+        );
+
+
+        alert(
+          err?.response?.data
+            ?.message ||
+            err?.response?.data
+              ?.error ||
+            err?.message ||
+            "Could not delete this listing."
+        );
+
+      }
+
+    };
+
+
+  /* =======================================================
+     CHART DATA
+  ======================================================= */
+
+  const revenueChartData =
+    orders.map(
+      (ord, idx) => ({
+        name:
+          ord.order_id
+            ? `#${String(
+                ord.order_id
+              ).slice(-5)}`
+            : `Order #${idx + 1}`,
+
+        revenue:
+          Number(
+            ord.total_amount ||
+              ord.amount ||
+              0
+          ),
+      })
+    );
+
+
+  /* =======================================================
+     CATEGORY COUNTS
+  ======================================================= */
+
+  const categoryCounts =
+    products.reduce(
+      (acc, p) => {
+
+        const rawCatId =
+          p?.categoryId ||
+          p?.category?.id ||
+          p?.category?._id ||
+          p?.category ||
+          "Uncategorized";
+
+
+        const categoryName =
+          typeof rawCatId ===
+          "object"
+            ? rawCatId?.name
+            : rawCatId;
+
+
+        const foundCat =
+          categories.find(
+            (c) =>
+              String(c?.id) ===
+                String(
+                  rawCatId
+                ) ||
+              String(
+                c?.name || ""
+              ).toLowerCase() ===
+                String(
+                  categoryName || ""
+                ).toLowerCase()
+          );
+
+
+        const catName =
+          foundCat
+            ? foundCat.name
+            : String(
+                categoryName ||
+                  "Uncategorized"
+              );
+
+
+        acc[catName] =
+          (acc[catName] || 0) +
+          1;
+
+
+        return acc;
+
+      },
+      {}
+    );
+
 
   const pieChartData =
-    Object.keys(categoryCounts).length >
-    0
-      ? Object.keys(categoryCounts).map(
+    Object.keys(
+      categoryCounts
+    ).length > 0
+
+      ? Object.keys(
+          categoryCounts
+        ).map(
           (key) => ({
             name: key,
             value:
-              categoryCounts[key],
+              categoryCounts[
+                key
+              ],
           })
         )
+
       : [
           {
             name: "Smartphones",
@@ -955,42 +1624,61 @@ export default function MerchantDashboard() {
           },
         ];
 
-  /*
-   * -----------------------------------------
-   * AUTH REDIRECTS
-   * -----------------------------------------
-   *
-   * These are AFTER useEffect so Hooks remain
-   * in the same order on every render.
-   */
-  if (!currentUser || !currentUser.email) {
+
+  /* =======================================================
+     AUTH REDIRECT
+  ======================================================= */
+
+  if (
+    !currentUser ||
+    !currentUser.email
+  ) {
+
     return (
       <Navigate
         to="/login"
         replace
       />
     );
+
   }
 
+
   if (!isMerchant) {
+
     return (
       <Navigate
         to="/"
         replace
       />
     );
+
   }
 
+
+  /* =======================================================
+     UI
+  ======================================================= */
+
   return (
+
     <div className="merchant-layout">
-      {/* SIDEBAR NAVIGATION */}
+
+
+      {/* ===================================================
+          SIDEBAR
+      =================================================== */}
+
       <aside className="merchant-sidebar">
+
         <div className="sidebar-brand">
+
           <div className="brand-logo-icon">
             JC
           </div>
 
           <div>
+
             <span className="brand-name">
               JCS Global
             </span>
@@ -998,13 +1686,18 @@ export default function MerchantDashboard() {
             <span className="brand-sub">
               Business
             </span>
+
           </div>
+
         </div>
 
+
         <nav className="sidebar-nav">
+
           <button
             className={`nav-item ${
-              activeTab === "dashboard"
+              activeTab ===
+              "dashboard"
                 ? "active"
                 : ""
             }`}
@@ -1016,29 +1709,39 @@ export default function MerchantDashboard() {
           >
             <LayoutDashboard
               size={16}
-            />{" "}
+            />
+
+            {" "}
             DASHBOARD
           </button>
 
+
           <button
             className={`nav-item ${
-              activeTab === "orders"
+              activeTab ===
+              "orders"
                 ? "active"
                 : ""
             }`}
             onClick={() =>
-              setActiveTab("orders")
+              setActiveTab(
+                "orders"
+              )
             }
           >
             <ShoppingBag
               size={16}
-            />{" "}
+            />
+
+            {" "}
             ORDERS
           </button>
 
+
           <button
             className={`nav-item ${
-              activeTab === "products"
+              activeTab ===
+              "products"
                 ? "active"
                 : ""
             }`}
@@ -1050,20 +1753,35 @@ export default function MerchantDashboard() {
           >
             <Package
               size={16}
-            />{" "}
+            />
+
+            {" "}
             MANAGE PRODUCTS
           </button>
+
         </nav>
+
       </aside>
 
-      {/* MAIN CONTAINER */}
+
+      {/* ===================================================
+          MAIN
+      =================================================== */}
+
       <main className="merchant-main">
+
+
+        {/* HEADER */}
+
         <header className="merchant-header">
+
           <h2>
             Merchant Dashboard
           </h2>
 
+
           <div className="header-actions">
+
             <button
               className="icon-btn"
               aria-label="Notifications"
@@ -1071,46 +1789,71 @@ export default function MerchantDashboard() {
               <Bell size={16} />
             </button>
 
+
             <div className="location-badge">
-              <MapPin size={16} />
+              <MapPin
+                size={16}
+              />
             </div>
+
           </div>
+
         </header>
 
-        {/* DASHBOARD TAB */}
+
+        {/* =================================================
+            DASHBOARD TAB
+        ================================================= */}
+
         {activeTab ===
           "dashboard" && (
+
           <>
+
             <section className="metrics-grid">
+
               <div className="metric-card">
+
                 <div className="metric-icon today">
+
                   <Calendar
                     size={18}
                   />
+
                 </div>
 
                 <div>
+
                   <span className="metric-label">
                     Total Revenue
                   </span>
 
                   <h3 className="metric-value">
+
                     ₹
                     {totalRevenue.toLocaleString(
                       "en-IN"
                     )}
+
                   </h3>
+
                 </div>
+
               </div>
 
+
               <div className="metric-card">
+
                 <div className="metric-icon week">
+
                   <Calendar
                     size={18}
                   />
+
                 </div>
 
                 <div>
+
                   <span className="metric-label">
                     Total Orders
                   </span>
@@ -1118,9 +1861,13 @@ export default function MerchantDashboard() {
                   <h3 className="metric-value">
                     {orders.length}
                   </h3>
+
                 </div>
+
               </div>
+
             </section>
+
 
             <div
               style={{
@@ -1132,12 +1879,17 @@ export default function MerchantDashboard() {
                   "24px",
               }}
             >
+
+
+              {/* REVENUE */}
+
               <div
                 className="card"
                 style={{
                   padding: "20px",
                 }}
               >
+
                 <h3
                   style={{
                     fontSize: "15px",
@@ -1147,6 +1899,7 @@ export default function MerchantDashboard() {
                 >
                   Revenue Overview
                 </h3>
+
 
                 <p
                   className="text-muted"
@@ -1160,13 +1913,16 @@ export default function MerchantDashboard() {
                   progression
                 </p>
 
+
                 <div
                   style={{
                     width: "100%",
                     height: "240px",
                   }}
                 >
+
                   <ResponsiveContainer>
+
                     <AreaChart
                       data={
                         revenueChartData
@@ -1178,7 +1934,9 @@ export default function MerchantDashboard() {
                         bottom: 0,
                       }}
                     >
+
                       <defs>
+
                         <linearGradient
                           id="colorRev"
                           x1="0"
@@ -1186,6 +1944,7 @@ export default function MerchantDashboard() {
                           x2="0"
                           y2="1"
                         >
+
                           <stop
                             offset="5%"
                             stopColor="#3b82f6"
@@ -1201,8 +1960,11 @@ export default function MerchantDashboard() {
                               0
                             }
                           />
+
                         </linearGradient>
+
                       </defs>
+
 
                       <XAxis
                         dataKey="name"
@@ -1217,6 +1979,7 @@ export default function MerchantDashboard() {
 
                       <Tooltip />
 
+
                       <Area
                         type="monotone"
                         dataKey="revenue"
@@ -1224,10 +1987,17 @@ export default function MerchantDashboard() {
                         fillOpacity={1}
                         fill="url(#colorRev)"
                       />
+
                     </AreaChart>
+
                   </ResponsiveContainer>
+
                 </div>
+
               </div>
+
+
+              {/* INVENTORY */}
 
               <div
                 className="card"
@@ -1235,6 +2005,7 @@ export default function MerchantDashboard() {
                   padding: "20px",
                 }}
               >
+
                 <h3
                   style={{
                     fontSize: "15px",
@@ -1244,6 +2015,7 @@ export default function MerchantDashboard() {
                 >
                   Inventory Distribution
                 </h3>
+
 
                 <p
                   className="text-muted"
@@ -1257,6 +2029,7 @@ export default function MerchantDashboard() {
                   by type
                 </p>
 
+
                 <div
                   style={{
                     width: "100%",
@@ -1268,8 +2041,11 @@ export default function MerchantDashboard() {
                       "center",
                   }}
                 >
+
                   <ResponsiveContainer>
+
                     <PieChart>
+
                       <Pie
                         data={
                           pieChartData
@@ -1296,11 +2072,13 @@ export default function MerchantDashboard() {
                           )}%`
                         }
                       >
+
                         {pieChartData.map(
                           (
                             entry,
                             index
                           ) => (
+
                             <Cell
                               key={`cell-${index}`}
                               fill={
@@ -1310,24 +2088,38 @@ export default function MerchantDashboard() {
                                 ]
                               }
                             />
+
                           )
                         )}
+
                       </Pie>
 
                       <Tooltip />
+
                     </PieChart>
+
                   </ResponsiveContainer>
+
                 </div>
+
               </div>
+
             </div>
 
+
+            {/* ORDERS */}
+
             <section className="transactions-section card">
+
               <div className="tx-header-title">
+
                 <h3>
                   Customer Orders &
                   Delivery Management
                 </h3>
+
               </div>
+
 
               <p
                 className="text-muted"
@@ -1341,29 +2133,43 @@ export default function MerchantDashboard() {
                 customer orders.
               </p>
 
+
               <div className="table-responsive">
+
                 <table className="merchant-table">
+
                   <thead>
+
                     <tr>
+
                       <th>
                         Customer Name
                       </th>
+
                       <th>
                         Order No
                       </th>
+
                       <th>
                         Amount
                       </th>
+
                       <th>
                         Gateway
                       </th>
+
                     </tr>
+
                   </thead>
 
+
                   <tbody>
+
                     {orders.map(
                       (ord, i) => (
+
                         <tr key={i}>
+
                           <td>
                             {
                               ord.user_name
@@ -1377,6 +2183,7 @@ export default function MerchantDashboard() {
                           </td>
 
                           <td className="mono">
+
                             ₹
                             {Number(
                               ord.total_amount ||
@@ -1384,6 +2191,7 @@ export default function MerchantDashboard() {
                             ).toLocaleString(
                               "en-IN"
                             )}
+
                           </td>
 
                           <td>
@@ -1391,24 +2199,39 @@ export default function MerchantDashboard() {
                               ord.gateway
                             }
                           </td>
+
                         </tr>
+
                       )
                     )}
+
                   </tbody>
+
                 </table>
+
               </div>
+
             </section>
+
           </>
+
         )}
 
-        {/* ORDERS MANAGEMENT TAB */}
+
+        {/* =================================================
+            ORDERS TAB
+        ================================================= */}
+
         {activeTab ===
           "orders" && (
+
           <div className="card transactions-section">
+
             <h3>
               All Customer Orders (
               {orders.length})
             </h3>
+
 
             <p
               className="text-muted"
@@ -1422,10 +2245,15 @@ export default function MerchantDashboard() {
               incoming customer orders.
             </p>
 
+
             <div className="table-responsive">
+
               <table className="merchant-table">
+
                 <thead>
+
                   <tr>
+
                     <th>
                       Order Reference
                     </th>
@@ -1438,16 +2266,25 @@ export default function MerchantDashboard() {
                       Total Amount
                     </th>
 
-                    <th>Status</th>
+                    <th>
+                      Status
+                    </th>
+
                   </tr>
+
                 </thead>
 
+
                 <tbody>
+
                   {orders.length >
                   0 ? (
+
                     orders.map(
                       (o, idx) => (
+
                         <tr key={idx}>
+
                           <td>
                             <strong>
                               {
@@ -1463,6 +2300,7 @@ export default function MerchantDashboard() {
                           </td>
 
                           <td className="mono">
+
                             ₹
                             {Number(
                               o.total_amount ||
@@ -1470,9 +2308,11 @@ export default function MerchantDashboard() {
                             ).toLocaleString(
                               "en-IN"
                             )}
+
                           </td>
 
                           <td>
+
                             <span
                               style={{
                                 color:
@@ -1485,12 +2325,18 @@ export default function MerchantDashboard() {
                                 o.paymentStatus
                               }
                             </span>
+
                           </td>
+
                         </tr>
+
                       )
                     )
+
                   ) : (
+
                     <tr>
+
                       <td
                         colSpan="4"
                         className="merchant-empty"
@@ -1498,29 +2344,49 @@ export default function MerchantDashboard() {
                         No orders
                         found.
                       </td>
+
                     </tr>
+
                   )}
+
                 </tbody>
+
               </table>
+
             </div>
+
           </div>
+
         )}
 
-        {/* PRODUCTS MANAGEMENT TAB */}
+
+        {/* =================================================
+            PRODUCTS TAB
+        ================================================= */}
+
         {activeTab ===
           "products" && (
+
           <div className="merchant-grid">
+
+
+            {/* =================================================
+                PRODUCT FORM
+            ================================================= */}
+
             <form
               className="card merchant-form"
               onSubmit={
                 handleSubmit
               }
             >
+
               <h3>
                 {editingId
                   ? "Edit listing"
                   : "Add a new product"}
               </h3>
+
 
               {error && (
                 <p className="merchant-error">
@@ -1528,37 +2394,54 @@ export default function MerchantDashboard() {
                 </p>
               )}
 
+
+              {/* PRODUCT TITLE */}
+
               <div className="field">
+
                 <label>
                   Product title
                 </label>
 
                 <input
                   required
-                  value={form.title}
+                  value={
+                    form.title
+                  }
                   onChange={update(
                     "title"
                   )}
                   placeholder="Enter product title..."
                 />
+
               </div>
 
+
+              {/* BRAND + CATEGORY */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Brand
                   </label>
 
                   <input
-                    value={form.brand}
+                    value={
+                      form.brand
+                    }
                     onChange={update(
                       "brand"
                     )}
                     placeholder="Enter brand..."
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Category
                   </label>
@@ -1572,15 +2455,17 @@ export default function MerchantDashboard() {
                       "categoryId"
                     )}
                   >
+
                     <option
-                      key="default-select"
                       value=""
                     >
                       Select category
                     </option>
 
+
                     {categories.map(
                       (category) => {
+
                         const catId =
                           category.id ||
                           category._id ||
@@ -1588,25 +2473,39 @@ export default function MerchantDashboard() {
 
                         const catName =
                           category.name ||
-                          category.title;
+                          category.title ||
+                          category.slug;
 
                         return (
+
                           <option
                             key={catId}
                             value={catId}
                           >
                             {catName}
                           </option>
+
                         );
+
                       }
                     )}
+
                   </select>
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 1 */}
+
+              {/* =================================================
+                  SPECIFICATIONS
+              ================================================= */}
+
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Colour
                   </label>
@@ -1618,11 +2517,14 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "colour"
                     )}
-                    placeholder=""
+                    placeholder="e.g. Blaze Blue"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Storage Capacity
                   </label>
@@ -1634,28 +2536,37 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "storage"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 128GB"
                   />
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 2 */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     RAM
                   </label>
 
                   <input
-                    value={form.ram}
+                    value={
+                      form.ram
+                    }
                     onChange={update(
                       "ram"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 8GB RAM"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Broadband Generation
                   </label>
@@ -1667,14 +2578,18 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "networkGen"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 5G"
                   />
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 3 */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     SIM Slots
                   </label>
@@ -1686,11 +2601,14 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "simSlots"
                     )}
-                    placeholder=""
+                    placeholder="e.g. Dual SIM"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Screen Size
                   </label>
@@ -1702,14 +2620,18 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "screenSize"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 6.67 inch"
                   />
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 4 */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Rear Camera Resolution
                   </label>
@@ -1721,11 +2643,14 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "rearCamera"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 50MP"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Front Camera Resolution
                   </label>
@@ -1737,14 +2662,18 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "frontCamera"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 16MP"
                   />
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 5 */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Security Features
                   </label>
@@ -1756,11 +2685,14 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "securityFeatures"
                     )}
-                    placeholder=""
+                    placeholder="e.g. Fingerprint Sensor"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     Weight
                   </label>
@@ -1772,14 +2704,18 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "weight"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 190g"
                   />
+
                 </div>
+
               </div>
 
-              {/* SPECIFICATION EXTRA FIELDS ROW 6 */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Water Resistant
                   </label>
@@ -1791,11 +2727,14 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "waterResistant"
                     )}
-                    placeholder=""
+                    placeholder="e.g. IP68"
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     With Fast Charging
                   </label>
@@ -1807,13 +2746,66 @@ export default function MerchantDashboard() {
                     onChange={update(
                       "fastCharging"
                     )}
-                    placeholder=""
+                    placeholder="e.g. 67W"
                   />
+
                 </div>
+
               </div>
 
+
+              {/* PROCESSOR + BATTERY */}
+
               <div className="row">
+
                 <div className="field">
+
+                  <label>
+                    Processor
+                  </label>
+
+                  <input
+                    value={
+                      form.processor
+                    }
+                    onChange={update(
+                      "processor"
+                    )}
+                    placeholder="e.g. Snapdragon 7 Gen 3"
+                  />
+
+                </div>
+
+
+                <div className="field">
+
+                  <label>
+                    Battery
+                  </label>
+
+                  <input
+                    value={
+                      form.battery
+                    }
+                    onChange={update(
+                      "battery"
+                    )}
+                    placeholder="e.g. 5000mAh"
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* =================================================
+                  PRICE
+              ================================================= */}
+
+              <div className="row">
+
+                <div className="field">
+
                   <label>
                     Price (₹)
                   </label>
@@ -1822,14 +2814,19 @@ export default function MerchantDashboard() {
                     required
                     type="number"
                     min="0"
-                    value={form.price}
+                    value={
+                      form.price
+                    }
                     onChange={update(
                       "price"
                     )}
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     MRP (₹)
                   </label>
@@ -1837,16 +2834,25 @@ export default function MerchantDashboard() {
                   <input
                     type="number"
                     min="0"
-                    value={form.mrp}
+                    value={
+                      form.mrp
+                    }
                     onChange={update(
                       "mrp"
                     )}
                   />
+
                 </div>
+
               </div>
 
+
+              {/* STOCK */}
+
               <div className="row">
+
                 <div className="field">
+
                   <label>
                     Stock
                   </label>
@@ -1861,9 +2867,12 @@ export default function MerchantDashboard() {
                       "stock"
                     )}
                   />
+
                 </div>
 
+
                 <div className="field">
+
                   <label>
                     MOQ
                   </label>
@@ -1871,38 +2880,125 @@ export default function MerchantDashboard() {
                   <input
                     type="number"
                     min="1"
-                    value={form.moq}
+                    value={
+                      form.moq
+                    }
                     onChange={update(
                       "moq"
                     )}
                   />
+
                 </div>
+
               </div>
 
+
+              {/* =================================================
+                  OVERVIEW
+              ================================================= */}
+
               <div className="field">
+
                 <label>
-                  Overview /
-                  Description
+                  Overview / Description
                 </label>
 
                 <textarea
-                  rows="3"
+                  rows="5"
                   value={
                     form.overview
                   }
                   onChange={update(
                     "overview"
                   )}
-                  placeholder="Write a brief overview of the product features..."
+                  placeholder="Write the complete product overview here..."
                 />
+
               </div>
 
+
+              {/* =================================================
+                  PRODUCT HIGHLIGHTS
+              ================================================= */}
+
               <div className="field">
+
+                <label>
+                  Product Highlights
+                </label>
+
+                <textarea
+                  rows="7"
+                  value={
+                    form.highlights
+                  }
+                  onChange={update(
+                    "highlights"
+                  )}
+                  placeholder={`50MP AI Camera
+5000mAh Battery
+8GB RAM
+256GB Storage
+67W Fast Charging`}
+                />
+
+                <small
+                  style={{
+                    display:
+                      "block",
+                    marginTop:
+                      "6px",
+                    fontSize:
+                      "12px",
+                    opacity:
+                      0.7,
+                  }}
+                >
+                  Enter one highlight
+                  per line. These
+                  will appear in
+                  Product Details.
+                </small>
+
+              </div>
+
+
+              {/* =================================================
+                  WARRANTY
+              ================================================= */}
+
+              <div className="field">
+
+                <label>
+                  Warranty
+                </label>
+
+                <input
+                  value={
+                    form.warranty
+                  }
+                  onChange={update(
+                    "warranty"
+                  )}
+                  placeholder="e.g. 1 Year Manufacturer Warranty"
+                />
+
+              </div>
+
+
+              {/* =================================================
+                  IMAGES
+              ================================================= */}
+
+              <div className="field">
+
                 <label>
                   Product photos
                 </label>
 
+
                 <label className="btn btn-outline merchant-upload-btn">
+
                   <Upload
                     size={15}
                   />
@@ -1910,6 +3006,7 @@ export default function MerchantDashboard() {
                   {uploading
                     ? "Uploading…"
                     : "Choose photo(s)"}
+
 
                   <input
                     type="file"
@@ -1923,21 +3020,28 @@ export default function MerchantDashboard() {
                       uploading
                     }
                   />
+
                 </label>
+
 
                 {images.length >
                   0 && (
+
                   <div className="merchant-thumbs">
+
                     {images.map(
                       (url) => (
+
                         <div
                           className="merchant-thumb"
                           key={url}
                         >
+
                           <img
                             src={url}
                             alt="Product preview"
                           />
+
 
                           <button
                             type="button"
@@ -1948,18 +3052,31 @@ export default function MerchantDashboard() {
                             }
                             aria-label="Remove image"
                           >
+
                             <X
                               size={12}
                             />
+
                           </button>
+
                         </div>
+
                       )
                     )}
+
                   </div>
+
                 )}
+
               </div>
 
+
+              {/* =================================================
+                  ACTIONS
+              ================================================= */}
+
               <div className="merchant-form-actions">
+
                 <button
                   type="submit"
                   className="btn btn-primary"
@@ -1968,14 +3085,18 @@ export default function MerchantDashboard() {
                     uploading
                   }
                 >
+
                   {saving
                     ? "Saving…"
                     : editingId
                     ? "Save changes"
                     : "Add product"}
+
                 </button>
 
+
                 {editingId && (
+
                   <button
                     type="button"
                     className="btn btn-outline"
@@ -1988,38 +3109,56 @@ export default function MerchantDashboard() {
                   >
                     Cancel edit
                   </button>
+
                 )}
+
               </div>
+
             </form>
 
+
+            {/* =================================================
+                INVENTORY LIST
+            ================================================= */}
+
             <div className="merchant-list">
+
               <h3>
                 Your inventory
                 listings (
                 {products.length})
               </h3>
 
+
               {loading && (
+
                 <p className="merchant-empty">
                   Loading…
                 </p>
+
               )}
+
 
               {!loading &&
                 products.length ===
                   0 && (
+
                   <p className="merchant-empty">
                     No listings yet —
                     add your first
                     product.
                   </p>
+
                 )}
+
 
               {products.map(
                 (product) => {
+
                   const pId =
                     product?._id ||
                     product?.id;
+
 
                   const displayImg =
                     Array.isArray(
@@ -2031,12 +3170,17 @@ export default function MerchantDashboard() {
                       ? product.images[0]
                       : product?.image;
 
+
                   return (
+
                     <div
                       className="card merchant-item"
                       key={pId}
                     >
+
+
                       {displayImg ? (
+
                         <img
                           src={
                             displayImg
@@ -2047,33 +3191,48 @@ export default function MerchantDashboard() {
                             "Product"
                           }
                         />
+
                       ) : (
+
                         <div className="merchant-no-image">
                           No image
                         </div>
+
                       )}
 
+
                       <div className="merchant-item-info">
+
                         <span className="merchant-item-title">
+
                           {product?.title ||
                             product?.name}
+
                         </span>
 
+
                         <span className="merchant-item-meta">
+
                           ₹
                           {Number(
                             product?.price ||
                               0
                           ).toLocaleString(
                             "en-IN"
-                          )}{" "}
-                          · Stock{" "}
+                          )}
+
+                          {" · Stock "}
+
                           {product?.stock ??
                             0}
+
                         </span>
+
                       </div>
 
+
                       <div className="merchant-item-actions">
+
                         <button
                           type="button"
                           onClick={() =>
@@ -2083,10 +3242,13 @@ export default function MerchantDashboard() {
                           }
                           aria-label="Edit"
                         >
+
                           <Pencil
                             size={15}
                           />
+
                         </button>
+
 
                         <button
                           type="button"
@@ -2097,19 +3259,31 @@ export default function MerchantDashboard() {
                           }
                           aria-label="Delete"
                         >
+
                           <Trash2
                             size={15}
                           />
+
                         </button>
+
                       </div>
+
                     </div>
+
                   );
+
                 }
               )}
+
             </div>
+
           </div>
+
         )}
+
       </main>
+
     </div>
+
   );
 }
