@@ -12,7 +12,8 @@
   "dependencies": {
     "axios": "^1.19.0",
     "chart.js": "^4.5.1",
-    "lucide-react": "^1.28.0",
+    "driver.js": "^1.8.0",
+    "lucide-react": "^1.46.0",
     "react": "^19.2.7",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.7",

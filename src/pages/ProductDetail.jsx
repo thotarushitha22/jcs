@@ -25,7 +25,7 @@ export default function ProductDetail() {
 
   const [selected, setSelected] = useState({
     storage: "",
-    colors: ""
+    colors: "",
   });
 
   useEffect(() => {
@@ -38,28 +38,36 @@ export default function ProductDetail() {
           ...data,
           variants: data.variants || {
             storage: ["128 GB", "256 GB", "512 GB"],
-            colors: ["Midnight Black", "Frost Silver", "Ocean Blue"]
-          }
+            colors: ["Midnight Black", "Frost Silver", "Ocean Blue"],
+          },
         };
 
         setProduct(productData);
         setQty(1);
         setActiveImage(0);
-        
-        const storageOptions = 
-          productData.variants?.storage || 
-          productData.variants?.gb || 
-          (Array.isArray(productData.storage) ? productData.storage : productData.storage ? [productData.storage] : []);
 
-        const colorOptions = 
-          productData.variants?.colors || 
-          productData.variants?.colour || 
-          productData.variants?.colorOptions || 
-          (Array.isArray(productData.colour) ? productData.colour : productData.colour ? [productData.colour] : []);
-        
+        const storageOptions =
+          productData.variants?.storage ||
+          productData.variants?.gb ||
+          (Array.isArray(productData.storage)
+            ? productData.storage
+            : productData.storage
+              ? [productData.storage]
+              : []);
+
+        const colorOptions =
+          productData.variants?.colors ||
+          productData.variants?.colour ||
+          productData.variants?.colorOptions ||
+          (Array.isArray(productData.colour)
+            ? productData.colour
+            : productData.colour
+              ? [productData.colour]
+              : []);
+
         setSelected({
           storage: storageOptions[0] || "",
-          colors: colorOptions[0] || ""
+          colors: colorOptions[0] || "",
         });
       })
       .catch((err) => {
@@ -98,22 +106,45 @@ export default function ProductDetail() {
   }
 
   const price = Number(product.price || 0);
-  const mrp = Number(product.mrp || product.mrpPrice || product.originalPrice || 0);
+  const mrp = Number(
+    product.mrp ||
+      product.mrpPrice ||
+      product.originalPrice ||
+      0
+  );
 
   const gallery = (() => {
-    if (Array.isArray(product.images) && product.images.length > 0) {
+    if (
+      Array.isArray(product.images) &&
+      product.images.length > 0
+    ) {
       return product.images;
     }
-    const singleImage = product.image || product.imageUrl || product.img;
+
+    const singleImage =
+      product.image ||
+      product.imageUrl ||
+      product.img;
+
     return singleImage ? [singleImage] : [];
   })();
 
-  const outOfStock = Number(product.stock || 0) <= 0;
+  const outOfStock =
+    Number(product.stock || 0) <= 0;
 
   const handleAdd = () => {
     if (outOfStock) return;
-    addToCart({ ...product, selectedVariants: selected }, qty);
+
+    addToCart(
+      {
+        ...product,
+        selectedVariants: selected,
+      },
+      qty
+    );
+
     setAdded(true);
+
     setTimeout(() => {
       setAdded(false);
     }, 1800);
@@ -121,7 +152,15 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (outOfStock) return;
-    addToCart({ ...product, selectedVariants: selected }, qty);
+
+    addToCart(
+      {
+        ...product,
+        selectedVariants: selected,
+      },
+      qty
+    );
+
     navigate("/cart");
   };
 
@@ -130,11 +169,14 @@ export default function ProductDetail() {
   };
 
   const decreaseQuantity = () => {
-    setQty((currentQty) => Math.max(1, currentQty - 1));
+    setQty((currentQty) =>
+      Math.max(1, currentQty - 1)
+    );
   };
 
   const checkDelivery = (event) => {
     event.preventDefault();
+
     if (/^[1-6][0-9]{5}$/.test(pincode)) {
       setDeliveryStatus("ok");
     } else {
@@ -149,73 +191,211 @@ export default function ProductDetail() {
     }));
   };
 
-  const prodOverview = product.overview || product.description || product.details || product.about;
-  const prodColour = product.colour || product.color;
-  const prodStorage = product.storage || product.storageCapacity || product.gb;
-  const prodRam = product.ram || product.memory;
+  const prodOverview =
+    product.overview ||
+    product.description ||
+    product.details ||
+    product.about;
 
-  const variantStorage = 
-    product.variants?.storage || 
-    product.variants?.gb || 
-    (Array.isArray(product.storage) ? product.storage : product.storage ? [product.storage] : []);
+  const prodColour =
+    product.colour || product.color;
 
-  const variantColors = 
-    product.variants?.colors || 
-    product.variants?.colour || 
-    product.variants?.colorOptions || 
-    (Array.isArray(product.colour) ? product.colour : product.colour ? [product.colour] : []);
+  const prodStorage =
+    product.storage ||
+    product.storageCapacity ||
+    product.gb;
 
-  // Category-based dynamic highlights
+  const prodRam =
+    product.ram || product.memory;
+
+  const variantStorage =
+    product.variants?.storage ||
+    product.variants?.gb ||
+    (Array.isArray(product.storage)
+      ? product.storage
+      : product.storage
+        ? [product.storage]
+        : []);
+
+  const variantColors =
+    product.variants?.colors ||
+    product.variants?.colour ||
+    product.variants?.colorOptions ||
+    (Array.isArray(product.colour)
+      ? product.colour
+      : product.colour
+        ? [product.colour]
+        : []);
+
   const categoryLower = String(
-  product.category?.name ||
-  product.category ||
-  ""
-).toLowerCase();
-  
+    product.category?.name ||
+      product.category ||
+      ""
+  ).toLowerCase();
+
+  /* =========================================
+     PRODUCT HIGHLIGHTS
+  ========================================= */
+
   const getHighlights = () => {
-    if (categoryLower.includes("laptop") || categoryLower.includes("notebook")) {
+    if (
+      categoryLower.includes("laptop") ||
+      categoryLower.includes("notebook")
+    ) {
       return [
-        { icon: "⚡", text: `${prodRam || "16 GB RAM"} | ${prodStorage || "512 GB SSD"}` },
-        { icon: "💻", text: product.processor || "High Performance Processor" },
-        { icon: "🖥️", text: product.screenSize || "15.6 inch Display" },
-        { icon: "🔋", text: product.battery || "Long-lasting Battery Life" },
-        { icon: "🪶", text: product.weight || "Lightweight & Portable Build" }
-      ];
-    } else if (categoryLower.includes("tv") || categoryLower.includes("television")) {
-      return [
-        { icon: "📺", text: product.screenSize || "55 inch 4K UHD Display" },
-        { icon: "🔊", text: product.audio || "Dolby Audio & Surround Sound" },
-        { icon: "🔌", text: product.ports || "Multiple HDMI & USB Ports" },
-        { icon: "🌐", text: product.os || "Smart TV OS with Built-in Apps" }
-      ];
-    } else if (categoryLower.includes("accessory") || categoryLower.includes("accessories") || categoryLower.includes("audio")) {
-      return [
-        { icon: "🎧", text: product.connectivity || "Wireless Bluetooth Connectivity" },
-        { icon: "🔋", text: product.battery || "Extended Playback Hours" },
-        { icon: "🛡️", text: product.build || "Ergonomic & Durable Design" }
-      ];
-    } else {
-      return [
-        { icon: "⚡", text: `${prodRam || "4 GB RAM"} | ${prodStorage || "64 GB ROM"}` },
-        { icon: "💻", text: product.processor || "Octa Core Processor" },
-        { icon: "📷", text: product.rearCamera || "50MP + 2MP Rear Camera" },
-        { icon: "📸", text: product.frontCamera || "8MP Front Camera" },
-        { icon: "📱", text: product.screenSize || "6.7 inch display" },
-        { icon: "🔋", text: product.battery || "5000 mAh Battery" }
+        {
+          icon: "⚡",
+          text: `${prodRam || "4GB"} | ${
+            prodStorage || "64GB"
+          }`,
+        },
+        {
+          icon: "💻",
+          text:
+            product.processor ||
+            "Intel Celeron N4020",
+        },
+        {
+          icon: "📷",
+          text:
+            product.rearCamera || "N/A",
+        },
+        {
+          icon: "📸",
+          text:
+            product.frontCamera || "HD Webcam",
+        },
+        {
+          icon: "📱",
+          text:
+            product.screenSize ||
+            "11.6 inch HD",
+        },
+        {
+          icon: "🔋",
+          text:
+            product.battery ||
+            "Long-lasting battery",
+        },
       ];
     }
+
+    if (
+      categoryLower.includes("tv") ||
+      categoryLower.includes("television")
+    ) {
+      return [
+        {
+          icon: "📺",
+          text:
+            product.screenSize ||
+            "55 inch 4K UHD Display",
+        },
+        {
+          icon: "🔊",
+          text:
+            product.audio ||
+            "Dolby Audio & Surround Sound",
+        },
+        {
+          icon: "🔌",
+          text:
+            product.ports ||
+            "Multiple HDMI & USB Ports",
+        },
+        {
+          icon: "🌐",
+          text:
+            product.os ||
+            "Smart TV OS with Built-in Apps",
+        },
+      ];
+    }
+
+    if (
+      categoryLower.includes("accessory") ||
+      categoryLower.includes("accessories") ||
+      categoryLower.includes("audio")
+    ) {
+      return [
+        {
+          icon: "🎧",
+          text:
+            product.connectivity ||
+            "Wireless Bluetooth Connectivity",
+        },
+        {
+          icon: "🔋",
+          text:
+            product.battery ||
+            "Extended Playback Hours",
+        },
+        {
+          icon: "🛡️",
+          text:
+            product.build ||
+            "Ergonomic & Durable Design",
+        },
+      ];
+    }
+
+    return [
+      {
+        icon: "⚡",
+        text: `${prodRam || "4 GB RAM"} | ${
+          prodStorage || "64 GB ROM"
+        }`,
+      },
+      {
+        icon: "💻",
+        text:
+          product.processor ||
+          "Octa Core Processor",
+      },
+      {
+        icon: "📷",
+        text:
+          product.rearCamera ||
+          "50MP + 2MP Rear Camera",
+      },
+      {
+        icon: "📸",
+        text:
+          product.frontCamera ||
+          "8MP Front Camera",
+      },
+      {
+        icon: "📱",
+        text:
+          product.screenSize ||
+          "6.7 inch display",
+      },
+      {
+        icon: "🔋",
+        text:
+          product.battery ||
+          "5000 mAh Battery",
+      },
+    ];
   };
 
-  const dynamicHighlights = getHighlights();
+  const dynamicHighlights =
+    getHighlights();
 
   return (
     <main className="page pd">
+
+      {/* BACK */}
       <Link to="/" className="pd-back">
         ← Back to browse
       </Link>
 
       <div className="pd-grid">
-        {/* PRODUCT IMAGE */}
+
+        {/* =====================================
+            PRODUCT IMAGE GALLERY
+        ===================================== */}
+
         <section className="pd-gallery">
           <div className="pd-image">
             {gallery[activeImage] ? (
@@ -241,12 +421,18 @@ export default function ProductDetail() {
                       ? "pd-thumb-active"
                       : ""
                   }`}
-                  onClick={() => setActiveImage(index)}
-                  aria-label={`View product image ${index + 1}`}
+                  onClick={() =>
+                    setActiveImage(index)
+                  }
+                  aria-label={`View product image ${
+                    index + 1
+                  }`}
                 >
                   <img
                     src={image}
-                    alt={`${product.title} view ${index + 1}`}
+                    alt={`${product.title} view ${
+                      index + 1
+                    }`}
                   />
                 </button>
               ))}
@@ -254,9 +440,14 @@ export default function ProductDetail() {
           )}
         </section>
 
-        {/* PRODUCT DETAILS */}
+        {/* =====================================
+            PRODUCT DETAILS
+        ===================================== */}
+
         <section className="pd-info">
+
           <div className="pd-title-row">
+
             {product.verified && (
               <span className="badge badge-verified">
                 VERIFIED SUPPLIER
@@ -268,6 +459,7 @@ export default function ProductDetail() {
                 OUT OF STOCK
               </span>
             )}
+
           </div>
 
           {product.brand && (
@@ -282,6 +474,7 @@ export default function ProductDetail() {
 
           {product.rating && (
             <div className="pd-rating">
+
               <Star
                 size={17}
                 fill="currentColor"
@@ -296,11 +489,14 @@ export default function ProductDetail() {
                   ({product.reviewCount} reviews)
                 </span>
               )}
+
             </div>
           )}
 
           {/* PRICE */}
+
           <div className="pd-price-row">
+
             <span className="mono pd-price">
               ₹{price.toLocaleString("en-IN")}
             </span>
@@ -314,10 +510,13 @@ export default function ProductDetail() {
             <span className="pd-per">
               per unit, excl. GST
             </span>
+
           </div>
 
           {/* PRODUCT IDS */}
+
           <div className="pd-ids mono">
+
             {product.sku && (
               <>
                 SKU: {product.sku}
@@ -337,30 +536,40 @@ export default function ProductDetail() {
                 GST: {product.gstPercent}%
               </>
             )}
+
           </div>
 
           {/* OUT OF STOCK */}
+
           {outOfStock ? (
+
             <div className="pd-oos-banner">
+
               <strong>
                 Currently out of stock.
-              </strong>
+              </strong>{" "}
 
-              {" "}
-              This product is temporarily unavailable.
-              Please check again later.
+              This product is temporarily
+              unavailable. Please check again
+              later.
+
             </div>
+
           ) : (
+
             <>
+
               {/* STOCK */}
+
               <div className="pd-specs">
+
                 <div>
                   <span>In stock</span>
 
                   <b>
-                    {Number(product.stock || 0).toLocaleString(
-                      "en-IN"
-                    )}{" "}
+                    {Number(
+                      product.stock || 0
+                    ).toLocaleString("en-IN")}{" "}
                     units
                   </b>
                 </div>
@@ -372,18 +581,24 @@ export default function ProductDetail() {
                     within 24 hrs
                   </b>
                 </div>
+
               </div>
 
               {/* QUANTITY */}
+
               <div className="pd-qty">
+
                 <label>
                   Quantity
                 </label>
 
                 <div className="pd-qty-controls">
+
                   <button
                     type="button"
-                    onClick={decreaseQuantity}
+                    onClick={
+                      decreaseQuantity
+                    }
                     aria-label="Decrease quantity"
                   >
                     −
@@ -395,16 +610,22 @@ export default function ProductDetail() {
 
                   <button
                     type="button"
-                    onClick={increaseQuantity}
+                    onClick={
+                      increaseQuantity
+                    }
                     aria-label="Increase quantity"
                   >
                     +
                   </button>
+
                 </div>
+
               </div>
 
               {/* BUTTONS */}
+
               <div className="pd-cta-row">
+
                 <button
                   type="button"
                   className="btn btn-outline pd-cta"
@@ -422,15 +643,19 @@ export default function ProductDetail() {
                 >
                   Buy Now
                 </button>
+
               </div>
+
             </>
           )}
 
           {/* PINCODE */}
+
           <form
             className="pd-delivery"
             onSubmit={checkDelivery}
           >
+
             <MapPin size={17} />
 
             <input
@@ -440,6 +665,7 @@ export default function ProductDetail() {
               value={pincode}
               maxLength={6}
               onChange={(event) => {
+
                 const value =
                   event.target.value.replace(
                     /\D/g,
@@ -448,6 +674,7 @@ export default function ProductDetail() {
 
                 setPincode(value);
                 setDeliveryStatus(null);
+
               }}
             />
 
@@ -457,49 +684,96 @@ export default function ProductDetail() {
             >
               Check
             </button>
+
           </form>
 
           {deliveryStatus === "ok" && (
             <p className="pd-delivery-ok">
-              Deliverable to {pincode}. Dispatch
-              within 24 hours.
+              Deliverable to {pincode}.
+              Dispatch within 24 hours.
             </p>
           )}
 
           {deliveryStatus === "unavailable" && (
             <p className="pd-delivery-bad">
-              Enter a valid 6-digit Indian pincode.
+              Enter a valid 6-digit Indian
+              pincode.
             </p>
           )}
 
-          {/* HIGHLIGHTS BOX */}
+          {/* =====================================
+              WARRANTY / RETURNS / DISPATCH BOX
+          ===================================== */}
+
           <div className="pd-highlights-box">
+
             <div className="pd-highlight-item">
-              <span className="pd-highlight-icon">🛡️</span>
+
+              <span className="pd-highlight-icon">
+                🛡️
+              </span>
+
               <div>
-                <strong>1 Year Warranty</strong>
-                <p>Manufacturer assured</p>
+                <strong>
+                  1 Year Warranty
+                </strong>
+
+                <p>
+                  Manufacturer assured
+                </p>
               </div>
+
             </div>
+
             <div className="pd-highlight-item">
-              <span className="pd-highlight-icon">🔄</span>
+
+              <span className="pd-highlight-icon">
+                🔄
+              </span>
+
               <div>
-                <strong>Easy Returns</strong>
-                <p>7-day policy</p>
+                <strong>
+                  Easy Returns
+                </strong>
+
+                <p>
+                  7-day policy
+                </p>
               </div>
+
             </div>
+
             <div className="pd-highlight-item">
-              <span className="pd-highlight-icon">⚡</span>
+
+              <span className="pd-highlight-icon">
+                ⚡
+              </span>
+
               <div>
-                <strong>Fast Dispatch</strong>
-                <p>Ships in 24 hrs</p>
+                <strong>
+                  Fast Dispatch
+                </strong>
+
+                <p>
+                  Ships in 24 hrs
+                </p>
               </div>
+
             </div>
+
           </div>
 
-          {/* INTERACTIVE VARIANTS */}
-          {(variantStorage.length > 0 || variantColors.length > 0) && (
+          {/* =====================================
+              INTERACTIVE VARIANTS
+          ===================================== */}
+
+          {(
+            variantStorage.length > 0 ||
+            variantColors.length > 0
+          ) && (
+
             <div className="pd-variants">
+
               {variantStorage.length > 0 && (
                 <VariantGroup
                   label="Storage Capacity"
@@ -519,6 +793,7 @@ export default function ProductDetail() {
                   onSelect={selectVariant}
                 />
               )}
+
             </div>
           )}
 
@@ -527,96 +802,274 @@ export default function ProductDetail() {
             Orders are verified against your
             GST profile before dispatch.
           </p>
+
         </section>
       </div>
 
-      {/* DYNAMIC PRODUCT HIGHLIGHTS LIST */}
+      {/* =========================================
+          DYNAMIC PRODUCT HIGHLIGHTS
+      ========================================= */}
+
       <section className="pd-section">
-        <h2>Product highlights</h2>
+
+        <h2>
+          Product highlights
+        </h2>
+
         <div className="pd-highlights-list">
-          {dynamicHighlights.map((highlight, index) => (
-            <div key={index} className="pd-highlights-row">
-              <span className="pd-highlight-icon">{highlight.icon}</span>
-              <span>{highlight.text}</span>
-            </div>
-          ))}
+
+          {dynamicHighlights.map(
+            (highlight, index) => (
+
+              <div
+                key={index}
+                className="pd-highlights-row"
+              >
+
+                <span className="pd-highlight-icon">
+                  {highlight.icon}
+                </span>
+
+                <span>
+                  {highlight.text}
+                </span>
+
+              </div>
+
+            )
+          )}
+
         </div>
+
       </section>
 
-      {/* OVERVIEW / DESCRIPTION */}
+      {/* =========================================
+          OVERVIEW / DESCRIPTION
+      ========================================= */}
+
       <section className="pd-section">
+
         <h2>
           Overview / Description
         </h2>
 
         <p className="pd-overview">
-          {prodOverview || "Engineered for optimal reliability and peak performance, this premium model features durable building architecture and high fidelity output designed for everyday enterprise and consumer workflows."}
+          {prodOverview ||
+            "Engineered for optimal reliability and peak performance, this premium model features durable building architecture and high fidelity output designed for everyday enterprise and consumer workflows."}
         </p>
+
       </section>
 
-      {/* SPECIFICATIONS */}
+      {/* =========================================
+          SPECIFICATIONS
+      ========================================= */}
+
       <section className="pd-section">
-        <h2>Specifications</h2>
+
+        <h2>
+          Specifications
+        </h2>
+
         <div className="pd-spec-grid">
-          {product.title && <div className="pd-spec-item"><strong>Product Title:</strong> {product.title}</div>}
-          {product.brand && <div className="pd-spec-item"><strong>Brand:</strong> {product.brand}</div>}
-          {product.category && <div className="pd-spec-item"><strong>Category:</strong> {product.category}</div>}
-          {prodColour && <div className="pd-spec-item"><strong>Colour:</strong> {prodColour}</div>}
-          {prodStorage && <div className="pd-spec-item"><strong>Storage Capacity:</strong> {prodStorage}</div>}
-          {prodRam && <div className="pd-spec-item"><strong>RAM:</strong> {prodRam}</div>}
-          {product.screenSize && <div className="pd-spec-item"><strong>Screen Size:</strong> {product.screenSize}</div>}
-          {product.processor && <div className="pd-spec-item"><strong>Processor:</strong> {product.processor}</div>}
-          {product.battery && <div className="pd-spec-item"><strong>Battery:</strong> {product.battery}</div>}
-          {product.weight && <div className="pd-spec-item"><strong>Weight:</strong> {product.weight}</div>}
-          {price > 0 && <div className="pd-spec-item"><strong>Price:</strong> ₹{price.toLocaleString("en-IN")}</div>}
-          {mrp > 0 && <div className="pd-spec-item"><strong>MRP:</strong> ₹{mrp.toLocaleString("en-IN")}</div>}
-          {product.stock !== undefined && <div className="pd-spec-item"><strong>Stock:</strong> {product.stock}</div>}
-          {product.moq && <div className="pd-spec-item"><strong>MOQ:</strong> {product.moq}</div>}
+
+          {product.title && (
+            <div className="pd-spec-item">
+              <strong>
+                Product Title:
+              </strong>{" "}
+              {product.title}
+            </div>
+          )}
+
+          {product.brand && (
+            <div className="pd-spec-item">
+              <strong>
+                Brand:
+              </strong>{" "}
+              {product.brand}
+            </div>
+          )}
+
+          {product.category && (
+            <div className="pd-spec-item">
+              <strong>
+                Category:
+              </strong>{" "}
+              {product.category}
+            </div>
+          )}
+
+          {prodColour && (
+            <div className="pd-spec-item">
+              <strong>
+                Colour:
+              </strong>{" "}
+              {prodColour}
+            </div>
+          )}
+
+          {prodStorage && (
+            <div className="pd-spec-item">
+              <strong>
+                Storage Capacity:
+              </strong>{" "}
+              {prodStorage}
+            </div>
+          )}
+
+          {prodRam && (
+            <div className="pd-spec-item">
+              <strong>
+                RAM:
+              </strong>{" "}
+              {prodRam}
+            </div>
+          )}
+
+          {product.screenSize && (
+            <div className="pd-spec-item">
+              <strong>
+                Screen Size:
+              </strong>{" "}
+              {product.screenSize}
+            </div>
+          )}
+
+          {product.processor && (
+            <div className="pd-spec-item">
+              <strong>
+                Processor:
+              </strong>{" "}
+              {product.processor}
+            </div>
+          )}
+
+          {product.battery && (
+            <div className="pd-spec-item">
+              <strong>
+                Battery:
+              </strong>{" "}
+              {product.battery}
+            </div>
+          )}
+
+          {product.weight && (
+            <div className="pd-spec-item">
+              <strong>
+                Weight:
+              </strong>{" "}
+              {product.weight}
+            </div>
+          )}
+
+          {price > 0 && (
+            <div className="pd-spec-item">
+              <strong>
+                Price:
+              </strong>{" "}
+              ₹{price.toLocaleString("en-IN")}
+            </div>
+          )}
+
+          {mrp > 0 && (
+            <div className="pd-spec-item">
+              <strong>
+                MRP:
+              </strong>{" "}
+              ₹{mrp.toLocaleString("en-IN")}
+            </div>
+          )}
+
+          {product.stock !== undefined && (
+            <div className="pd-spec-item">
+              <strong>
+                Stock:
+              </strong>{" "}
+              {product.stock}
+            </div>
+          )}
+
+          {product.moq && (
+            <div className="pd-spec-item">
+              <strong>
+                MOQ:
+              </strong>{" "}
+              {product.moq}
+            </div>
+          )}
+
         </div>
+
       </section>
 
-      {/* WARRANTY AND SUPPORT */}
+      {/* =========================================
+          WARRANTY AND SUPPORT
+      ========================================= */}
+
       <section className="pd-section">
+
         <h2>
           Warranty and support
         </h2>
 
         <p className="pd-overview">
-          {product.warranty || "1 Year Manufacturer Warranty covering device hardware defects, functional malfunctions, and standard factory faults. Physical or liquid damages are excluded."}
+          {product.warranty ||
+            "1 Year Manufacturer Warranty covering device hardware defects, functional malfunctions, and standard factory faults. Physical or liquid damages are excluded."}
         </p>
 
         <p className="pd-overview">
-          For technical assistance or authorized service center routing, contact support at{" "}
+
+          For technical assistance or authorized
+          service center routing, contact support
+          at{" "}
+
           <a
             href="mailto:support@example.com"
             className="pd-link"
           >
             support@example.com
           </a>
+
           .
+
         </p>
+
       </section>
 
-      {/* RELATED PRODUCTS */}
+      {/* =========================================
+          RELATED PRODUCTS
+      ========================================= */}
+
       {related.length > 0 && (
+
         <section className="pd-section">
+
           <h2>
             Related products
           </h2>
 
           <div className="grid">
-            {related.map((relatedProduct) => (
-              <ProductCard
-                key={relatedProduct.id}
-                product={relatedProduct}
-              />
-            ))}
+
+            {related.map(
+              (relatedProduct) => (
+                <ProductCard
+                  key={relatedProduct.id}
+                  product={relatedProduct}
+                />
+              )
+            )}
+
           </div>
+
         </section>
       )}
 
-      {/* RATINGS */}
+      {/* =========================================
+          RATINGS
+      ========================================= */}
+
       <section className="pd-section">
+
         <h2>
           Customer ratings
         </h2>
@@ -625,11 +1078,17 @@ export default function ProductDetail() {
           No customer ratings for this
           product yet.
         </p>
+
       </section>
 
-      {/* QUESTIONS */}
+      {/* =========================================
+          QUESTIONS
+      ========================================= */}
+
       <section className="pd-section pd-qa">
+
         <div className="pd-qa-head">
+
           <h2>
             Questions &amp; answers
           </h2>
@@ -638,9 +1097,13 @@ export default function ProductDetail() {
             type="button"
             className="btn btn-primary btn-sm"
           >
+
             <HelpCircle size={16} />
+
             Ask a question
+
           </button>
+
         </div>
 
         <p className="pd-no-reviews">
@@ -648,10 +1111,17 @@ export default function ProductDetail() {
           Questions with answers will
           appear here.
         </p>
+
       </section>
+
     </main>
   );
 }
+
+
+/* =========================================
+   VARIANT GROUP
+========================================= */
 
 function VariantGroup({
   label,
@@ -662,12 +1132,15 @@ function VariantGroup({
 }) {
   return (
     <div className="pd-variant-group">
+
       <span className="pd-variant-label">
         {label}
       </span>
 
       <div className="pd-variant-options">
+
         {options.map((option) => (
+
           <button
             key={option}
             type="button"
@@ -682,8 +1155,11 @@ function VariantGroup({
           >
             {option}
           </button>
+
         ))}
+
       </div>
+
     </div>
   );
 }

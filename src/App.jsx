@@ -7,6 +7,8 @@ import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
 import StockTicker from "./components/StockTicker";
 import Footer from "./components/Footer";
+import LiveTour from "./components/LiveTour";
+import Chatbot from "./components/Chatbot";
 
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
@@ -32,98 +34,237 @@ import OrderReports from "./pages/OrderReports";
 import Admin from "./pages/Admin";
 import MerchantDashboard from "./pages/MerchantDashboard";
 
-// Hardened role-based protection wrapper
+// --------------------------------------------------
+// Protected Route
+// --------------------------------------------------
 function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useAuth();
-  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const currentUser = user || storedUser;
-  const token = localStorage.getItem('token');
 
+  const storedUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const currentUser = user || storedUser;
+  const token = localStorage.getItem("token");
+
+  // User must be logged in
   if (!token || !currentUser?.email) {
     return <Navigate to="/login" replace />;
   }
 
-  const userRole = currentUser.role ? currentUser.role.toLowerCase() : 'buyer';
-  const isStrictAdminOnly = allowedRoles.length === 1 && allowedRoles.includes('admin');
-  
-  if (isStrictAdminOnly && userRole !== 'admin') {
+  const userRole = currentUser.role
+    ? currentUser.role.toLowerCase()
+    : "buyer";
+
+  // Strict admin-only protection
+  const isStrictAdminOnly =
+    allowedRoles.length === 1 &&
+    allowedRoles.includes("admin");
+
+  if (isStrictAdminOnly && userRole !== "admin") {
     return <Navigate to="/" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
+  // General role protection
+  if (
+    allowedRoles &&
+    !allowedRoles
+      .map((role) => role.toLowerCase())
+      .includes(userRole)
+  ) {
     return <Navigate to="/" replace />;
   }
 
   return children;
 }
 
-// Layout wrapper for pages that need the main store navigation
+// --------------------------------------------------
+// Main Store Layout
+// --------------------------------------------------
 function MainStoreLayout() {
   return (
     <>
       <Navbar />
+
       <StockTicker />
+
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/sell" element={<Sell />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/orders/:id" element={<OrderDetail />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/account/notifications" element={<NotificationPreferences />} />
-        <Route path="/account/order-reports" element={<OrderReports />} />
-        <Route path="/account/info" element={<AccountInfo />} />
-        <Route path="/account/kyc" element={<KycDocuments />} />
-        <Route path="/account/address" element={<MyAddress />} />
-        <Route path="/account/policies" element={<Policies />} />
-        <Route 
-          path="/admin" 
+        {/* Home */}
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        {/* Products */}
+        <Route
+          path="/product/:id"
+          element={<ProductDetail />}
+        />
+
+        {/* Cart */}
+        <Route
+          path="/cart"
+          element={<Cart />}
+        />
+
+        {/* Checkout */}
+        <Route
+          path="/checkout"
+          element={<Checkout />}
+        />
+
+        {/* Sell */}
+        <Route
+          path="/sell"
+          element={<Sell />}
+        />
+
+        {/* Orders */}
+        <Route
+          path="/orders"
+          element={<Orders />}
+        />
+
+        <Route
+          path="/orders/:id"
+          element={<OrderDetail />}
+        />
+
+        {/* Register */}
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        {/* Support */}
+        <Route
+          path="/support"
+          element={<Support />}
+        />
+
+        {/* Account */}
+        <Route
+          path="/account"
+          element={<Account />}
+        />
+
+        <Route
+          path="/account/notifications"
+          element={<NotificationPreferences />}
+        />
+
+        <Route
+          path="/account/order-reports"
+          element={<OrderReports />}
+        />
+
+        <Route
+          path="/account/info"
+          element={<AccountInfo />}
+        />
+
+        <Route
+          path="/account/kyc"
+          element={<KycDocuments />}
+        />
+
+        <Route
+          path="/account/address"
+          element={<MyAddress />}
+        />
+
+        <Route
+          path="/account/policies"
+          element={<Policies />}
+        />
+
+        {/* Admin */}
+        <Route
+          path="/admin"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <Admin />
             </ProtectedRoute>
-          } 
+          }
         />
+
+        {/* Merchant */}
         <Route
           path="/merchant"
           element={
-            <ProtectedRoute allowedRoles={['merchant', 'admin', 'seller']}>
+            <ProtectedRoute
+              allowedRoles={[
+                "merchant",
+                "admin",
+                "seller",
+              ]}
+            >
               <MerchantDashboard />
             </ProtectedRoute>
           }
         />
+
+        {/* Merchant Dashboard - alternate URL */}
         <Route
           path="/merchant-Dashboard"
           element={
-            <ProtectedRoute allowedRoles={['merchant', 'admin', 'seller']}>
+            <ProtectedRoute
+              allowedRoles={[
+                "merchant",
+                "admin",
+                "seller",
+              ]}
+            >
               <MerchantDashboard />
             </ProtectedRoute>
           }
         />
-        <Route path="/account/:section" element={<AccountStub />} />
+
+        {/* Account sub-pages */}
+        <Route
+          path="/account/:section"
+          element={<AccountStub />}
+        />
       </Routes>
+
       <Footer />
     </>
   );
 }
 
+// --------------------------------------------------
+// Main App
+// --------------------------------------------------
 export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
-          <Routes>
-            {/* Standalone Login Page - completely hides Navbar, StockTicker, and JCS Global Header */}
-            <Route path="/login" element={<Login />} />
 
-            {/* All other store routes wrapped with the main header */}
-            <Route path="/*" element={<MainStoreLayout />} />
+          <Routes>
+
+            {/* Login Page */}
+            {/* Navbar and StockTicker are hidden on login */}
+            <Route
+              path="/login"
+              element={<Login />}
+            />
+
+            {/* All other store pages */}
+            <Route
+              path="/*"
+              element={<MainStoreLayout />}
+            />
+
           </Routes>
+
+          {/* Toast Notifications */}
           <Toaster position="top-right" />
+<LiveTour />
+<Chatbot />
+         
+
+
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>

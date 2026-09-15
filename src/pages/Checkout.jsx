@@ -1,74 +1,160 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Loader2,
-  ShieldAlert,
-  QrCode,
-  CheckCircle2,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Loader2, ShieldAlert, CheckCircle2, MapPin } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
 import "./Checkout.css";
 
+const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
+
 export default function Checkout() {
   const { items, subtotal, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [placing, setPlacing] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
-  const [showQrModal, setShowQrModal] = useState(false);
-  const [qrScanned, setQrScanned] = useState(false);
   const [error, setError] = useState(null);
-
-  const gst = Math.round(subtotal * 0.18);
-  const totalPrice = subtotal + gst;
-
+  const [successMessage, setSuccessMessage] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [savedAddressLabel, setSavedAddressLabel] = useState("");
   const [form, setForm] = useState({
     shippingName: "",
     shippingGstin: "",
     shippingAddress: "",
     shippingCity: "",
+    shippingState: "",
     shippingPincode: "",
     shippingPhone: "",
   });
-
-  const [paymentMethod, setPaymentMethod] =
-    useState("razorpay_sandbox");
-
+  const [paymentMethod, setPaymentMethod] = useState("razorpay_sandbox");
   const [pincodeStatus, setPincodeStatus] = useState("");
 
-  // =========================
-  // FORM UPDATE
-  // =========================
+  const gst = Math.round(Number(subtotal || 0) * 0.18);
+  const totalPrice = Number(subtotal || 0) + gst;
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const existingScript = document.querySelector(
+        `script[src="${RAZORPAY_SCRIPT}"]`
+      );
+      if (existingScript) {
+        existingScript.addEventListener("load", () => resolve(true));
+        existingScript.addEventListener("error", () => resolve(false));
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = RAZORPAY_SCRIPT;
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  useEffect(() => {
+    loadShippingDetails();
+  }, [user]);
+
+  const loadShippingDetails = () => {
+    try {
+      let userData = user || {};
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        userData = { ...storedUser, ...userData };
+      } catch (e) {
+        console.warn("Unable to read stored user");
+      }
+
+      const userId = userData?.id || userData?.userId || userData?._id;
+      const profileName =
+        userData?.businessName ||
+        userData?.merchantName ||
+        userData?.company ||
+        userData?.name ||
+        userData?.fullName ||
+        "";
+      const profileGstin =
+        userData?.gstin || userData?.gstNumber || userData?.GSTIN || "";
+      const profilePhone =
+        userData?.phone ||
+        userData?.mobile ||
+        userData?.mobileNumber ||
+        userData?.contactNumber ||
+        "";
+      const profileAddress = userData?.address || userData?.street || "";
+      const profileCity = userData?.city || "";
+      const profileState = userData?.state || "";
+      const profilePincode =
+        userData?.pincode || userData?.pin || userData?.zip || "";
+
+      let addresses = [];
+      if (userId) {
+        const storageKey = `jcs_addresses_${userId}`;
+        const savedAddresses = localStorage.getItem(storageKey);
+        if (savedAddresses) {
+          try {
+            const parsed = JSON.parse(savedAddresses);
+            if (Array.isArray(parsed)) {
+              addresses = parsed;
+            }
+          } catch (e) {
+            console.warn("Could not read saved addresses");
+          }
+        }
+      }
+
+      const defaultAddress =
+        addresses.find((address) => address?.isDefault === true) ||
+        addresses[0] ||
+        null;
+
+      const finalAddress = defaultAddress?.line || profileAddress || "";
+      const finalCity = defaultAddress?.city || profileCity || "";
+      const finalState = defaultAddress?.state || profileState || "";
+      const finalPincode = defaultAddress?.pincode || profilePincode || "";
+
+      setForm({
+        shippingName: profileName,
+        shippingGstin: profileGstin,
+        shippingAddress: finalAddress,
+        shippingCity: finalCity,
+        shippingState: finalState,
+        shippingPincode: String(finalPincode),
+        shippingPhone: String(profilePhone),
+      });
+
+      if (defaultAddress) {
+        setSavedAddressLabel(defaultAddress.label || "Default address");
+      }
+
+      if (/^[1-9][0-9]{5}$/.test(String(finalPincode))) {
+        setPincodeStatus("valid");
+      }
+      setProfileLoaded(true);
+    } catch (err) {
+      console.error("Failed to load shipping details:", err);
+      setProfileLoaded(true);
+    }
+  };
 
   const update = (key) => (e) => {
-    setForm((f) => ({
-      ...f,
-      [key]: e.target.value,
-    }));
+    setForm((f) => ({ ...f, [key]: e.target.value }));
   };
 
   const updatePhone = (e) => {
-    const digitsOnly = e.target.value
-      .replace(/\D/g, "")
-      .slice(0, 10);
-
-    setForm((f) => ({
-      ...f,
-      shippingPhone: digitsOnly,
-    }));
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setForm((f) => ({ ...f, shippingPhone: digitsOnly }));
   };
 
   const updatePincode = (e) => {
-    const digitsOnly = e.target.value
-      .replace(/\D/g, "")
-      .slice(0, 6);
-
-    setForm((f) => ({
-      ...f,
-      shippingPincode: digitsOnly,
-    }));
-
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setForm((f) => ({ ...f, shippingPincode: digitsOnly }));
     if (digitsOnly.length === 0) {
       setPincodeStatus("");
     } else if (/^[1-9][0-9]{5}$/.test(digitsOnly)) {
@@ -78,56 +164,38 @@ export default function Checkout() {
     }
   };
 
-  // =========================
-  // SUBMIT ORDER
-  // =========================
+  const getToken = () => {
+    let token =
+      localStorage.getItem("token") || localStorage.getItem("jcs_token");
+    if (!token) {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        token = storedUser?.token;
+      } catch (e) {
+        console.warn("Could not read user token");
+      }
+    }
+    return token;
+  };
 
-  const submitOrder = async () => {
-    setPlacing(true);
-    setError(null);
-
-    const isPaid =
-      paymentMethod === "razorpay_sandbox";
-
-    const statusText = isPaid
-      ? "PAID"
-      : "PENDING";
-
-    const paymentLabel =
-      isPaid
-        ? "Razorpay Sandbox QR"
-        : paymentMethod === "cod"
-        ? "Cash on Delivery"
-        : "Credit Terms";
-
-    // Generate customer-facing order ID
+  const createJCSOrder = async ({
+    paymentStatus,
+    paymentMethodLabel,
+    razorpayOrderId = null,
+    razorpayPaymentId = null,
+  }) => {
     const generatedOrderId =
       "JCS-" +
-      paymentMethod.toUpperCase() +
+      paymentMethodLabel.toUpperCase().replace(/\s+/g, "-") +
       "-" +
       Math.floor(10000 + Math.random() * 90000);
 
-    // =========================
-    // ORDER ITEMS
-    // =========================
-
     const orderItems = items.map(({ product, qty }) => ({
       product: product.id || product._id,
-
-      title:
-        product.title ||
-        product.name ||
-        "Product",
-
-      name:
-        product.title ||
-        product.name ||
-        "Product",
-
+      title: product.title || product.name || "Product",
+      name: product.title || product.name || "Product",
       qty: Number(qty),
-
       price: Number(product.price),
-
       image:
         product.image ||
         (product.images && product.images.length > 0
@@ -135,261 +203,328 @@ export default function Checkout() {
           : ""),
     }));
 
-    // =========================
-    // BACKEND PAYLOAD
-    // =========================
-
     const payload = {
-      // Order identifiers
       id: generatedOrderId,
       order_id: generatedOrderId,
-
-      // Products
       orderItems,
-
       items: items.map(({ product, qty }) => ({
-        title:
-          product.title ||
-          product.name ||
-          "Product",
-
+        title: product.title || product.name || "Product",
         qty: Number(qty),
-
         price: Number(product.price),
       })),
-
-      // Shipping
-      shippingName: form.shippingName,
-      shippingGstin: form.shippingGstin,
-      shippingAddress: form.shippingAddress,
-      shippingCity: form.shippingCity,
-      shippingPincode: form.shippingPincode,
-      shippingPhone: form.shippingPhone,
-
-      // Payment
-      paymentMethod: paymentLabel,
-
-      status: statusText,
-      paymentStatus: statusText,
-
-      // Amounts
+      shippingName: form.shippingName.trim(),
+      shippingGstin: form.shippingGstin.trim(),
+      shippingAddress: form.shippingAddress.trim(),
+      shippingCity: form.shippingCity.trim(),
+      shippingState: form.shippingState.trim(),
+      shippingPincode: form.shippingPincode.trim(),
+      shippingPhone: form.shippingPhone.trim(),
+      paymentMethod: paymentMethodLabel,
+      paymentStatus,
+      status: paymentStatus === "PAID" ? "PAID" : "PENDING",
+      razorpayOrderId,
+      razorpayPaymentId,
       totalAmount: Number(totalPrice),
       totalPrice: Number(totalPrice),
       itemsPrice: Number(subtotal),
       taxPrice: Number(gst),
       shippingPrice: 0,
-
       createdAt: new Date().toISOString(),
     };
 
+    const token = getToken();
+    if (!token) {
+      throw new Error("You are not logged in. Please login again.");
+    }
+
+    console.log("====================================");
+    console.log("CREATING JCS ORDER");
+    console.log("Order ID:", generatedOrderId);
+    console.log("Payment:", paymentMethodLabel);
+    console.log("Payment Status:", paymentStatus);
+    console.log("Razorpay Order:", razorpayOrderId);
+    console.log("Razorpay Payment:", razorpayPaymentId);
+    console.log("Order payload:", payload);
+
+    const response = await api.post("/orders", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log("ORDER SAVED:", response.data);
+
     try {
-      // =========================
-      // AUTH TOKEN
-      // =========================
+      const existingLocalOrders = JSON.parse(
+        localStorage.getItem("orders") || "[]"
+      );
+      const backendOrder = response.data || {};
+      const savedOrder = {
+        ...payload,
+        ...backendOrder,
+        order_id:
+          backendOrder.order_id || backendOrder.orderId || generatedOrderId,
+        id: backendOrder.id || generatedOrderId,
+      };
+      const updatedOrders = [
+        savedOrder,
+        ...existingLocalOrders.filter(
+          (order) =>
+            order.order_id !== generatedOrderId &&
+            order.id !== generatedOrderId
+        ),
+      ];
+      localStorage.setItem("orders", JSON.stringify(updatedOrders));
+      window.dispatchEvent(new Event("storage"));
+    } catch (localErr) {
+      console.warn("Local order cache error:", localErr);
+    }
 
-      let token = localStorage.getItem("token");
+    return response.data;
+  };
 
-      if (!token) {
-        try {
-          const user = JSON.parse(
-            localStorage.getItem("user") || "{}"
-          );
+  const startRazorpayPayment = async () => {
+    setError(null);
+    setSuccessMessage("");
+    setProcessingPayment(true);
 
-          token = user?.token;
-        } catch (e) {
-          console.warn("Could not read user from localStorage");
-        }
+    try {
+      if (!totalPrice || Number(totalPrice) <= 0) {
+        throw new Error("Invalid order amount.");
       }
 
-      if (!token) {
+      const razorpayLoaded = await loadRazorpayScript();
+      if (!razorpayLoaded) {
         throw new Error(
-          "You are not logged in. Please login again."
+          "Razorpay Checkout could not be loaded. Please check your internet connection."
+        );
+      }
+      if (!window.Razorpay) {
+        throw new Error("Razorpay Checkout is unavailable.");
+      }
+
+      console.log("Creating Razorpay Test Order...");
+      console.log("Amount:", totalPrice);
+
+      const createResponse = await api.post("/payment/create-order", {
+        amount: Number(totalPrice),
+        currency: "INR",
+        receipt: `JCS-${Date.now()}`,
+      });
+
+      console.log("Razorpay create-order response:", createResponse.data);
+
+      const razorpayData = createResponse.data;
+
+      if (!razorpayData?.success) {
+        throw new Error(
+          razorpayData?.message || "Unable to create Razorpay order."
+        );
+      }
+      if (!razorpayData?.order?.id) {
+        throw new Error(
+          "Razorpay order ID was not returned by the server."
+        );
+      }
+      if (!razorpayData?.keyId) {
+        throw new Error(
+          "Razorpay Test Key ID was not returned by the server."
         );
       }
 
-      console.log(
-        "===================================="
-      );
-      console.log("PLACING ORDER");
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "Order ID:",
-        generatedOrderId
-      );
-
-      console.log(
-        "Order payload:",
-        payload
-      );
-
-      // =========================
-      // SAVE TO BACKEND DATABASE
-      // =========================
-
-      const response = await api.post(
-        "/orders",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      const options = {
+        key: razorpayData.keyId,
+        amount: razorpayData.order.amount,
+        currency: razorpayData.order.currency || "INR",
+        name: "JCS Global",
+        description: "JCS Global Order",
+        order_id: razorpayData.order.id,
+        prefill: {
+          name: form.shippingName,
+          email: user?.email || "",
+          contact: form.shippingPhone,
+        },
+        notes: {
+          shippingName: form.shippingName,
+          shippingAddress: form.shippingAddress,
+          shippingCity: form.shippingCity,
+          shippingState: form.shippingState,
+          shippingPincode: form.shippingPincode,
+          gstin: form.shippingGstin || "",
+        },
+        theme: { color: "#111827" },
+        modal: {
+          ondismiss: () => {
+            console.log("Razorpay checkout closed.");
+            setProcessingPayment(false);
           },
-        }
-      );
+        },
+        handler: async function (razorpayResponse) {
+          console.log("====================================");
+          console.log("RAZORPAY PAYMENT SUCCESS");
+          console.log(razorpayResponse);
 
-      console.log(
-        "===================================="
-      );
+          try {
+            setSuccessMessage("Payment received. Verifying...");
 
-      console.log(
-        "ORDER SAVED TO BACKEND SUCCESSFULLY"
-      );
+            const verifyResponse = await api.post("/payment/verify", {
+              razorpay_order_id: razorpayResponse.razorpay_order_id,
+              razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+              razorpay_signature: razorpayResponse.razorpay_signature,
+            });
 
-      console.log(
-        "Backend response:",
-        response.data
-      );
+            console.log("Verification response:", verifyResponse.data);
 
-      console.log(
-        "===================================="
-      );
+            const verifyData = verifyResponse.data;
 
-      // =========================
-      // LOCAL STORAGE CACHE
-      // ONLY AFTER BACKEND SUCCESS
-      // =========================
+            if (!verifyData?.success || !verifyData?.verified) {
+              throw new Error(
+                verifyData?.message ||
+                  "Razorpay payment verification failed."
+              );
+            }
 
-      try {
-        const existingLocalOrders =
-          JSON.parse(
-            localStorage.getItem("orders") || "[]"
-          );
+            setSuccessMessage(
+              "Payment verified. Creating your order..."
+            );
 
-        const backendOrder =
-          response.data || {};
+            await createJCSOrder({
+              paymentStatus: "PAID",
+              paymentMethodLabel: "Razorpay Test",
+              razorpayOrderId:
+                razorpayResponse.razorpay_order_id,
+              razorpayPaymentId:
+                razorpayResponse.razorpay_payment_id,
+            });
 
-        const savedOrder = {
-          ...payload,
-          ...backendOrder,
+            clearCart();
+            setProcessingPayment(false);
+            setPlacing(false);
+            setSuccessMessage(
+              "Payment successful! Your order has been placed."
+            );
 
-          order_id:
-            backendOrder.order_id ||
-            backendOrder.orderId ||
-            generatedOrderId,
+            setTimeout(() => {
+              navigate("/orders", {
+                state: {
+                  justPlaced: true,
+                  paymentMethod: "Razorpay Test",
+                  paymentStatus: "PAID",
+                  razorpayOrderId:
+                    razorpayResponse.razorpay_order_id,
+                  razorpayPaymentId:
+                    razorpayResponse.razorpay_payment_id,
+                },
+              });
+            }, 1200);
+          } catch (verifyError) {
+            console.error(
+              "PAYMENT VERIFICATION FAILED:",
+              verifyError
+            );
+            console.error(
+              "Backend response:",
+              verifyError?.response?.data
+            );
+            setProcessingPayment(false);
+            setPlacing(false);
+            setError(
+              verifyError?.response?.data?.message ||
+                verifyError.message ||
+                "Payment verification failed."
+            );
+          }
+        },
+      };
 
-          id:
-            backendOrder.id ||
-            generatedOrderId,
-        };
+      const razorpay = new window.Razorpay(options);
 
-        const updatedOrders = [
-          savedOrder,
-
-          ...existingLocalOrders.filter(
-            (order) =>
-              order.order_id !==
-                generatedOrderId &&
-              order.id !== generatedOrderId
-          ),
-        ];
-
-        localStorage.setItem(
-          "orders",
-          JSON.stringify(updatedOrders)
+      razorpay.on("payment.failed", function (response) {
+        console.error("RAZORPAY PAYMENT FAILED:", response);
+        setProcessingPayment(false);
+        setPlacing(false);
+        setError(
+          response?.error?.description ||
+            "Razorpay payment failed."
         );
+      });
 
-        window.dispatchEvent(
-          new Event("storage")
-        );
-      } catch (localErr) {
-        console.warn(
-          "Local storage cache error:",
-          localErr
-        );
-      }
+      console.log("Opening Razorpay Test Checkout...");
+      razorpay.open();
+    } catch (err) {
+      console.error("====================================");
+      console.error("RAZORPAY CHECKOUT ERROR");
+      console.error("Status:", err?.response?.status);
+      console.error("Backend response:", err?.response?.data);
+      console.error("Message:", err.message);
+      console.error("====================================");
+      setProcessingPayment(false);
+      setPlacing(false);
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          "Unable to start Razorpay payment."
+      );
+    }
+  };
 
-      // =========================
-      // CLEAR CART
-      // =========================
+  const submitNonRazorpayOrder = async () => {
+    setPlacing(true);
+    setError(null);
+
+    try {
+      const paymentStatus =
+        paymentMethod === "cod" ? "PENDING" : "PENDING";
+      const paymentLabel =
+        paymentMethod === "cod"
+          ? "Cash on Delivery"
+          : "Credit Terms";
+
+      await createJCSOrder({
+        paymentStatus,
+        paymentMethodLabel: paymentLabel,
+      });
 
       clearCart();
-
       setPlacing(false);
-
-      // =========================
-      // GO TO ORDERS
-      // =========================
 
       navigate("/orders", {
         state: {
           justPlaced: true,
           paymentMethod: paymentLabel,
-          sandbox: isPaid,
+          paymentStatus,
         },
       });
     } catch (err) {
-      // =========================
-      // BACKEND ERROR
-      // =========================
-
-      console.error(
-        "===================================="
-      );
-
-      console.error(
-        "ORDER CREATION FAILED"
-      );
-
-      console.error(
-        "HTTP STATUS:",
-        err.response?.status
-      );
-
-      console.error(
-        "BACKEND RESPONSE:",
-        err.response?.data
-      );
-
-      console.error(
-        "ERROR MESSAGE:",
-        err.message
-      );
-
-      console.error(
-        "===================================="
-      );
-
+      console.error("ORDER CREATION FAILED:", err);
+      console.error("Backend response:", err?.response?.data);
       setPlacing(false);
-
-      const backendMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        "Unable to place order.";
-
       setError(
-        `Order was not saved to the server: ${backendMessage}`
+        err?.response?.data?.message ||
+          err.message ||
+          "Unable to place order."
       );
-
-      // IMPORTANT:
-      // Do NOT save the order to localStorage
-      // when backend creation fails.
-      return;
     }
   };
 
-  // =========================
-  // PLACE ORDER BUTTON
-  // =========================
-
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-
     setError(null);
+    setSuccessMessage("");
 
-    // Phone validation
+    if (!form.shippingName.trim()) {
+      setError("Please enter the shipping name.");
+      return;
+    }
+
+    if (!form.shippingAddress.trim()) {
+      setError("Please enter the shipping address.");
+      return;
+    }
+
+    if (!form.shippingCity.trim()) {
+      setError("Please enter the city.");
+      return;
+    }
+
     if (form.shippingPhone.length !== 10) {
       setError(
         "Please enter a valid 10-digit phone number."
@@ -397,55 +532,21 @@ export default function Checkout() {
       return;
     }
 
-    // PIN validation
-    if (
-      !/^[1-9][0-9]{5}$/.test(
-        form.shippingPincode
-      )
-    ) {
+    if (!/^[1-9][0-9]{5}$/.test(form.shippingPincode)) {
       setPincodeStatus("invalid");
-
-      setError(
-        "Please enter a valid 6-digit PIN code."
-      );
-
+      setError("Please enter a valid 6-digit PIN code.");
       return;
     }
 
-    // Razorpay sandbox
-    if (
-      paymentMethod === "razorpay_sandbox"
-    ) {
-      setQrScanned(false);
-      setShowQrModal(true);
+    if (paymentMethod === "razorpay_sandbox") {
+      await startRazorpayPayment();
       return;
     }
 
-    // COD / Credit
-    await submitOrder();
+    await submitNonRazorpayOrder();
   };
 
-  // =========================
-  // SIMULATE QR PAYMENT
-  // =========================
-
-  const simulateQrPaymentCompletion = () => {
-    setQrScanned(true);
-    setProcessingPayment(true);
-
-    setTimeout(() => {
-      setShowQrModal(false);
-      setProcessingPayment(false);
-
-      submitOrder();
-    }, 1500);
-  };
-
-  // =========================
-  // EMPTY CART
-  // =========================
-
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return (
       <div className="page container">
         <p>Your cart is empty.</p>
@@ -453,17 +554,9 @@ export default function Checkout() {
     );
   }
 
-  // =========================
-  // UI
-  // =========================
-
   return (
     <div className="page container checkout">
-
-      {/* SANDBOX BANNER */}
-
-      {paymentMethod ===
-        "razorpay_sandbox" && (
+      {paymentMethod === "razorpay_sandbox" && (
         <div
           className="sandbox-banner"
           style={{
@@ -480,14 +573,9 @@ export default function Checkout() {
           }}
         >
           <ShieldAlert size={18} />
-
           <span>
-            <strong>
-              Sandbox Razorpay QR Active:
-            </strong>{" "}
-            Test environment enabled. Scan the
-            simulated QR code to complete payment
-            and mark order as PAID.
+            <strong>Razorpay Test Mode:</strong> This is a sandbox
+            payment. No real money will be charged.
           </span>
         </div>
       )}
@@ -498,42 +586,85 @@ export default function Checkout() {
         className="checkout-grid"
         onSubmit={handlePlaceOrder}
       >
-
-        {/* =========================
-            SHIPPING FORM
-        ========================== */}
-
         <div className="checkout-form card">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "15px",
+              marginBottom: "18px",
+            }}
+          >
+            <div>
+              <h3>Shipping details</h3>
+              {savedAddressLabel && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    fontSize: "13px",
+                    color: "#6b7280",
+                    marginTop: "4px",
+                  }}
+                >
+                  <MapPin size={14} />
+                  <span>{savedAddressLabel}</span>
+                </div>
+              )}
+            </div>
+            <Link
+              to="/account/address"
+              className="btn"
+              style={{
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Manage Address
+            </Link>
+          </div>
 
-          <h3>Shipping details</h3>
-
-          {/* NAME */}
+          <div
+            style={{
+              background: "#eff6ff",
+              border: "1px solid #bfdbfe",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              marginBottom: "18px",
+              color: "#1e40af",
+              fontSize: "13px",
+            }}
+          >
+            <MapPin
+              size={15}
+              style={{
+                verticalAlign: "middle",
+                marginRight: "6px",
+              }}
+            />
+            Shipping details are automatically loaded from your
+            Profile / saved address.
+          </div>
 
           <div className="field">
             <label>
               Business / consignee name{" "}
-              <span className="required">
-                *
-              </span>
+              <span className="required">*</span>
             </label>
-
             <input
               required
               placeholder="ABC Retail Pvt Ltd"
               value={form.shippingName}
-              onChange={update(
-                "shippingName"
-              )}
+              onChange={update("shippingName")}
             />
           </div>
-
-          {/* GSTIN */}
 
           <div className="field">
             <label>
               GSTIN{" "}
               <span
-                className="optional"
                 style={{
                   fontWeight: "normal",
                   color: "#6b7280",
@@ -542,136 +673,119 @@ export default function Checkout() {
                 (Optional)
               </span>
             </label>
-
             <input
               placeholder="27ABCDE1234F1Z5"
               value={form.shippingGstin}
-              onChange={update(
-                "shippingGstin"
-              )}
+              onChange={update("shippingGstin")}
             />
           </div>
 
-          {/* ADDRESS */}
-
           <div className="field">
             <label>
-              Address line{" "}
-              <span className="required">
-                *
-              </span>
+              Address line <span className="required">*</span>
             </label>
-
             <input
               required
               placeholder="Shop no, street, area"
               value={form.shippingAddress}
-              onChange={update(
-                "shippingAddress"
-              )}
+              onChange={update("shippingAddress")}
             />
           </div>
 
-          {/* CITY + PIN */}
-
           <div className="row">
-
             <div className="field">
               <label>
-                City{" "}
-                <span className="required">
-                  *
-                </span>
+                City <span className="required">*</span>
               </label>
-
               <input
                 required
                 value={form.shippingCity}
-                onChange={update(
-                  "shippingCity"
-                )}
+                onChange={update("shippingCity")}
               />
             </div>
+            <div className="field">
+              <label>State</label>
+              <input
+                value={form.shippingState}
+                onChange={update("shippingState")}
+              />
+            </div>
+          </div>
 
+          <div className="row">
             <div className="field">
               <label>
-                PIN code{" "}
-                <span className="required">
-                  *
-                </span>
+                PIN code <span className="required">*</span>
               </label>
-
               <input
                 required
                 type="text"
                 inputMode="numeric"
                 placeholder="Enter 6-digit PIN"
                 maxLength={6}
-                value={
-                  form.shippingPincode
-                }
+                value={form.shippingPincode}
                 onChange={updatePincode}
               />
-
-              {pincodeStatus ===
-                "valid" && (
+              {pincodeStatus === "valid" && (
                 <span className="pincode-valid">
                   ✓ Valid PIN code
                 </span>
               )}
-
-              {pincodeStatus ===
-                "invalid" && (
+              {pincodeStatus === "invalid" && (
                 <span className="pincode-invalid">
-                  ✕ Enter a valid 6-digit PIN
-                  code
+                  ✕ Enter a valid 6-digit PIN code
                 </span>
               )}
             </div>
-
-          </div>
-
-          {/* PHONE */}
-
-          <div className="field">
-            <label>
-              Phone (for WhatsApp order
-              updates){" "}
-              <span className="required">
-                *
+            <div className="field">
+              <label>
+                Phone <span className="required">*</span>
+              </label>
+              <input
+                required
+                type="tel"
+                inputMode="numeric"
+                placeholder="10-digit mobile number"
+                maxLength={10}
+                value={form.shippingPhone}
+                onChange={updatePhone}
+              />
+              <span className="field-hint">
+                {form.shippingPhone.length}/10 digits
               </span>
-            </label>
-
-            <input
-              required
-              type="tel"
-              inputMode="numeric"
-              placeholder="10-digit mobile number"
-              maxLength={10}
-              value={
-                form.shippingPhone
-              }
-              onChange={updatePhone}
-            />
-
-            <span className="field-hint">
-              {form.shippingPhone.length}/10
-              digits
-            </span>
+            </div>
           </div>
 
-          {/* PAYMENT */}
+          {!form.shippingAddress && !savedAddressLabel && (
+            <div
+              style={{
+                background: "#fff7ed",
+                border: "1px solid #fed7aa",
+                borderRadius: "8px",
+                padding: "12px",
+                marginBottom: "15px",
+              }}
+            >
+              <strong>No saved address found.</strong>
+              <p style={{ margin: "5px 0 10px", fontSize: "13px" }}>
+                Add your shipping address in My Address first.
+              </p>
+              <Link
+                to="/account/address"
+                className="btn btn-primary"
+                style={{ textDecoration: "none" }}
+              >
+                Add Address
+              </Link>
+            </div>
+          )}
 
           <h3>Payment method</h3>
 
           <div className="pay-options">
-
-            {/* RAZORPAY */}
-
             <label
               className={`pay-option ${
-                paymentMethod ===
-                "razorpay_sandbox"
+                paymentMethod === "razorpay_sandbox"
                   ? "pay-option-active"
                   : ""
               }`}
@@ -679,32 +793,19 @@ export default function Checkout() {
               <input
                 type="radio"
                 name="pay"
-                checked={
-                  paymentMethod ===
-                  "razorpay_sandbox"
-                }
+                checked={paymentMethod === "razorpay_sandbox"}
                 onChange={() =>
-                  setPaymentMethod(
-                    "razorpay_sandbox"
-                  )
+                  setPaymentMethod("razorpay_sandbox")
                 }
               />
-
               <span>
-                <strong>
-                  Razorpay Test QR
-                  (Sandbox)
-                </strong>
-
+                <strong>Razorpay Test Payment</strong>
                 <small>
-                  Scan simulated UPI QR code
-                  to complete transaction
-                  instantly.
+                  UPI, Cards and other Razorpay test payment
+                  methods.
                 </small>
               </span>
             </label>
-
-            {/* COD */}
 
             <label
               className={`pay-option ${
@@ -716,27 +817,14 @@ export default function Checkout() {
               <input
                 type="radio"
                 name="pay"
-                checked={
-                  paymentMethod === "cod"
-                }
-                onChange={() =>
-                  setPaymentMethod("cod")
-                }
+                checked={paymentMethod === "cod"}
+                onChange={() => setPaymentMethod("cod")}
               />
-
               <span>
-                <strong>
-                  Cash on Delivery
-                </strong>
-
-                <small>
-                  Pay when your order is
-                  delivered.
-                </small>
+                <strong>Cash on Delivery</strong>
+                <small>Pay when your order is delivered.</small>
               </span>
             </label>
-
-            {/* CREDIT */}
 
             <label
               className={`pay-option ${
@@ -748,380 +836,121 @@ export default function Checkout() {
               <input
                 type="radio"
                 name="pay"
-                checked={
-                  paymentMethod === "credit"
-                }
-                onChange={() =>
-                  setPaymentMethod("credit")
-                }
+                checked={paymentMethod === "credit"}
+                onChange={() => setPaymentMethod("credit")}
               />
-
               <span>
-                <strong>
-                  Credit terms
-                </strong>
-
-                <small>
-                  Available for approved
-                  accounts.
-                </small>
+                <strong>Credit terms</strong>
+                <small>Available for approved accounts.</small>
               </span>
             </label>
-
           </div>
         </div>
 
-        {/* =========================
-            ORDER SUMMARY
-        ========================== */}
-
         <aside className="checkout-summary card">
-
           <h3>Order summary</h3>
 
-          {items.map(
-            ({ product, qty }) => (
-              <div
-                className="checkout-item"
-                key={
-                  product.id ||
-                  product._id
-                }
-              >
-                <span>
-                  {product.title ||
-                    product.name}{" "}
-                  × {qty}
-                </span>
-
-                <span className="mono">
-                  ₹
-                  {(
-                    Number(
-                      product.price
-                    ) * qty
-                  ).toLocaleString(
-                    "en-IN"
-                  )}
-                </span>
-              </div>
-            )
-          )}
+          {items.map(({ product, qty }) => (
+            <div
+              className="checkout-item"
+              key={product.id || product._id}
+            >
+              <span>
+                {product.title || product.name} × {qty}
+              </span>
+              <span className="mono">
+                ₹
+                {(
+                  Number(product.price) * Number(qty)
+                ).toLocaleString("en-IN")}
+              </span>
+            </div>
+          ))}
 
           <div className="summary-line">
             <span>Subtotal</span>
-
             <span className="mono">
-              ₹
-              {subtotal.toLocaleString(
-                "en-IN"
-              )}
+              ₹{Number(subtotal).toLocaleString("en-IN")}
             </span>
           </div>
 
           <div className="summary-line">
             <span>GST (18%)</span>
-
             <span className="mono">
-              ₹
-              {gst.toLocaleString(
-                "en-IN"
-              )}
+              ₹{gst.toLocaleString("en-IN")}
             </span>
           </div>
 
           <div className="summary-line summary-total">
             <span>Total</span>
-
             <span className="mono">
-              ₹
-              {totalPrice.toLocaleString(
-                "en-IN"
-              )}
+              ₹{totalPrice.toLocaleString("en-IN")}
             </span>
           </div>
 
-          {/* ERROR */}
-
-          {error && (
-            <p className="checkout-error">
-              {error}
-            </p>
+          {successMessage && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "#ecfdf5",
+                border: "1px solid #a7f3d0",
+                color: "#047857",
+                padding: "10px",
+                borderRadius: "8px",
+                marginTop: "12px",
+                fontSize: "13px",
+              }}
+            >
+              <CheckCircle2 size={18} />
+              {successMessage}
+            </div>
           )}
 
-          {/* PLACE ORDER */}
+          {error && <p className="checkout-error">{error}</p>}
 
           <button
             type="submit"
             className="btn btn-primary btn-block"
             disabled={
-              placing ||
-              processingPayment
+              placing || processingPayment || !profileLoaded
             }
           >
-
             {processingPayment ? (
               <>
-                <Loader2
-                  size={15}
-                  className="spin"
-                />
-                Verifying Payment…
+                <Loader2 size={15} className="spin" /> Processing
+                Payment…
               </>
             ) : placing ? (
               "Placing order…"
-            ) : paymentMethod ===
-              "cod" ? (
+            ) : paymentMethod === "cod" ? (
               "Place COD Order"
-            ) : paymentMethod ===
-              "credit" ? (
+            ) : paymentMethod === "credit" ? (
               "Place Order with Credit Terms"
             ) : (
               `Pay ₹${totalPrice.toLocaleString(
                 "en-IN"
-              )} via Razorpay QR`
+              )} via Razorpay`
             )}
-
           </button>
 
-        </aside>
-      </form>
-
-      {/* =========================
-          QR MODAL
-      ========================== */}
-
-      {showQrModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: "20px",
-          }}
-        >
-
-          <div
-            className="card"
-            style={{
-              background: "#fff",
-              maxWidth: "400px",
-              width: "100%",
-              padding: "24px",
-              textAlign: "center",
-              borderRadius: "12px",
-              boxShadow:
-                "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-
-            {/* HEADER */}
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  color: "#1f2937",
-                }}
-              >
-                Razorpay Sandbox QR
-              </span>
-
-              <span
-                style={{
-                  fontSize: "12px",
-                  background: "#e0e7ff",
-                  color: "#3730a3",
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                }}
-              >
-                PAID MODE TEST
-              </span>
-            </div>
-
-            {/* DESCRIPTION */}
-
+          {paymentMethod === "razorpay_sandbox" && (
             <p
               style={{
-                fontSize: "13px",
-                color: "#4b5563",
-                marginBottom: "16px",
+                textAlign: "center",
+                fontSize: "12px",
+                color: "#6b7280",
+                marginTop: "10px",
               }}
             >
-              Scan the QR code below
-              using any UPI app to simulate
-              a successful paid transaction.
+              🔒 Razorpay Test Mode
+              <br />
+              No real money will be charged.
             </p>
-
-            {/* QR */}
-
-            <div
-              style={{
-                background: "#f3f4f6",
-                padding: "20px",
-                borderRadius: "8px",
-                display:
-                  "inline-block",
-                marginBottom: "16px",
-                border:
-                  "1px dashed #d1d5db",
-              }}
-            >
-
-              {qrScanned ? (
-                <div
-                  style={{
-                    padding:
-                      "40px 20px",
-                    color: "#059669",
-                  }}
-                >
-                  <CheckCircle2
-                    size={48}
-                    style={{
-                      margin:
-                        "0 auto 8px",
-                    }}
-                  />
-
-                  <p
-                    style={{
-                      fontWeight:
-                        "bold",
-                    }}
-                  >
-                    Payment Successful!
-                  </p>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection:
-                      "column",
-                    alignItems:
-                      "center",
-                    gap: "8px",
-                  }}
-                >
-
-                  <QrCode
-                    size={140}
-                    color="#111827"
-                  />
-
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontFamily:
-                        "monospace",
-                      color: "#6b7280",
-                    }}
-                  >
-                    upi://pay?pa=razorpay.test@icici&am=
-                    {totalPrice}
-                  </span>
-
-                </div>
-              )}
-
-            </div>
-
-            {/* AMOUNT */}
-
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                marginBottom: "20px",
-                color: "#111827",
-              }}
-            >
-              Amount: ₹
-              {totalPrice.toLocaleString(
-                "en-IN"
-              )}
-            </div>
-
-            {/* BUTTONS */}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-              }}
-            >
-
-              <button
-                type="button"
-                className="btn"
-                style={{
-                  flex: 1,
-                  background: "#f3f4f6",
-                  color: "#374151",
-                }}
-                onClick={() => {
-                  setShowQrModal(false);
-                  setQrScanned(false);
-                }}
-                disabled={
-                  processingPayment
-                }
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{
-                  flex: 1,
-                  cursor: "pointer",
-                }}
-                onClick={
-                  simulateQrPaymentCompletion
-                }
-                disabled={
-                  processingPayment ||
-                  qrScanned
-                }
-              >
-                {processingPayment ? (
-                  <>
-                    <Loader2
-                      size={14}
-                      className="spin"
-                    />
-                    Confirming...
-                  </>
-                ) : (
-                  "Simulate Scan & Pay"
-                )}
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      )}
+          )}
+        </aside>
+      </form>
     </div>
   );
 }

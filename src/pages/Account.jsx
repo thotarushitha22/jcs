@@ -16,7 +16,10 @@ const sections = [
 
 export default function Account() {
   return (
-    <div className="page container account">
+    <div
+  className="page container account"
+  data-tour="account-page"
+>
       <span className="account-crumb">My Account</span>
       <h1>My Account</h1>
 

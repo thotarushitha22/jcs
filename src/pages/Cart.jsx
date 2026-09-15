@@ -18,7 +18,10 @@ export default function Cart() {
   }
 
   return (
-    <div className="page container cart">
+    <div
+  className="page container cart"
+  data-tour="cart-page"
+>
       <h1>Your cart</h1>
 
       <div className="cart-grid">

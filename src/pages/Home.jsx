@@ -88,8 +88,11 @@ export default function Home() {
       <HeroCarousel />
 
       <section className="catalog">
-        <aside className="filters">
-          <h4>Category</h4>
+        <aside
+  className="filters"
+  data-tour="categories"
+>
+  <h4>Category</h4>
           <button
             className={`filter-item ${activeCategory === "all" ? "active" : ""}`}
             onClick={() => setActiveCategory("all")}
