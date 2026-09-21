@@ -1,3 +1,18 @@
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.checkout,
+.checkout-page,
+.checkout-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
 .checkout h1 { margin-bottom: 20px; }
 
 .checkout-grid {
@@ -5,15 +20,17 @@
   grid-template-columns: 1fr 320px;
   gap: 28px;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.checkout-form { padding: 24px; }
+.checkout-form { padding: 24px; box-sizing: border-box; }
 .checkout-form h3 { margin: 4px 0 16px; font-size: 16px; }
 .checkout-form h3:not(:first-child) { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--paper-line); }
 
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; box-sizing: border-box; }
 
-.checkout-summary { padding: 20px; position: sticky; top: 84px; }
+.checkout-summary { padding: 20px; position: sticky; top: 84px; box-sizing: border-box; }
 .checkout-summary h3 { margin-bottom: 14px; font-size: 16px; }
 
 .checkout-item {
