@@ -1,0 +1,132 @@
+.customer-reviews-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid var(--paper-line, #e5e7eb);
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reviews-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink, #111827);
+  margin: 0;
+}
+
+.write-review-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.write-review-toggle-btn:hover {
+  background: #1f2937;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.review-form input:focus,
+.review-form select:focus,
+.review-form textarea:focus {
+  border-color: #111827;
+}
+
+.submit-review-btn {
+  padding: 10px;
+  background: #15803d;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-card {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.review-top-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.review-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.review-stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.review-text {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.verified-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: #15803d;
+  background: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.no-reviews {
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
+}

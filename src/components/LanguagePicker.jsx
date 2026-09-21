@@ -26,6 +26,9 @@ export default function LanguagePicker() {
     setLang(code);
     localStorage.setItem("jcs_lang", code);
     setOpen(false);
+
+    // Dispatch a custom event so components know the language changed
+    window.dispatchEvent(new CustomEvent("jcs_lang_change", { detail: code }));
   };
 
   const current = LANGUAGES.find((l) => l.code === lang) || LANGUAGES[0];

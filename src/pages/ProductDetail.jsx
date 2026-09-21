@@ -4,6 +4,7 @@ import { Star, MapPin, HelpCircle } from "lucide-react";
 import { fetchProduct, fetchRelatedProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
+import CustomerReviews from "../components/CustomerReviews"; // Imported Customer Reviews component
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
@@ -1065,20 +1066,11 @@ export default function ProductDetail() {
       )}
 
       {/* =========================================
-          RATINGS
+          CUSTOMER REVIEWS / COMMENTS
       ========================================= */}
 
       <section className="pd-section">
-
-        <h2>
-          Customer ratings
-        </h2>
-
-        <p className="pd-no-reviews">
-          No customer ratings for this
-          product yet.
-        </p>
-
+        <CustomerReviews productId={id} />
       </section>
 
       {/* =========================================
