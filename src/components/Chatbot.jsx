@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X, Send, Bot } from "lucide-react";
 import "./Chatbot.css";
 
@@ -57,6 +57,25 @@ export default function Chatbot() {
   ]);
 
   const [input, setInput] = useState("");
+
+  // Listen for the custom event fired from ProductDetail Q&A button
+  useEffect(() => {
+    const handleOpenChat = (e) => {
+      setOpen(true);
+      if (e.detail?.question) {
+        const userQ = e.detail.question;
+        const botReply = getBotReply(userQ);
+        setMessages((previous) => [
+          ...previous,
+          { role: "user", content: userQ },
+          { role: "assistant", content: botReply },
+        ]);
+      }
+    };
+
+    window.addEventListener("open_chatbot", handleOpenChat);
+    return () => window.removeEventListener("open_chatbot", handleOpenChat);
+  }, []);
 
   const sendMessage = () => {
     const text = input.trim();

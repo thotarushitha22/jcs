@@ -1,22 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import "./CustomerReviews.css";
 
 export default function CustomerReviews({ productId }) {
-  // Initial list of reviews
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      author: "Rahul Sharma",
-      rating: 5,
-      date: "May 12, 2026",
-      comment: "Amazing build quality and fast delivery! Highly recommended.",
-      verified: true,
-    },
-  ]);
+  const storageKey = `jcs_reviews_${productId}`;
+
+  // Load initial reviews from localStorage or default list
+  const [reviews, setReviews] = useState(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback if parsing fails
+      }
+    }
+    return [
+      {
+        id: 1,
+        author: "Rahul Sharma",
+        rating: 5,
+        date: "May 12, 2026",
+        comment: "Amazing build quality and fast delivery! Highly recommended.",
+        verified: true,
+      },
+    ];
+  });
 
   const [newReview, setNewReview] = useState({ author: "", comment: "", rating: 5 });
   const [showForm, setShowForm] = useState(false);
+
+  // Save to localStorage whenever reviews change
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(reviews));
+  }, [reviews, storageKey]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,10 +48,9 @@ export default function CustomerReviews({ productId }) {
       verified: true,
     };
 
-    // This updates the state immediately so the new review appears on screen!
-    setReviews([reviewToAdd, ...reviews]);
+    const updatedReviews = [reviewToAdd, ...reviews];
+    setReviews(updatedReviews);
     
-    // Reset form fields and hide form
     setNewReview({ author: "", comment: "", rating: 5 });
     setShowForm(false);
   };
@@ -49,7 +65,6 @@ export default function CustomerReviews({ productId }) {
         </button>
       </div>
 
-      {/* Review Submission Form */}
       {showForm && (
         <form className="review-form" onSubmit={handleSubmit}>
           <input
@@ -80,7 +95,6 @@ export default function CustomerReviews({ productId }) {
         </form>
       )}
 
-      {/* Reviews List - Newly submitted reviews will instantly appear at the top here */}
       <div className="reviews-list">
         {reviews.length === 0 ? (
           <p className="no-reviews">No reviews yet. Be the first to review!</p>

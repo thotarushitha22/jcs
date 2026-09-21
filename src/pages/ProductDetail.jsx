@@ -4,7 +4,7 @@ import { Star, MapPin, HelpCircle } from "lucide-react";
 import { fetchProduct, fetchRelatedProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
-import CustomerReviews from "../components/CustomerReviews"; // Imported Customer Reviews component
+import CustomerReviews from "../components/CustomerReviews";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
@@ -1088,6 +1088,13 @@ export default function ProductDetail() {
           <button
             type="button"
             className="btn btn-primary btn-sm"
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent("open_chatbot", {
+                  detail: { question: `I have a question about product: ${product.title}` }
+                })
+              );
+            }}
           >
 
             <HelpCircle size={16} />
