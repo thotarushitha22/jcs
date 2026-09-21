@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import "./CustomerReviews.css";
 
-export default function CustomerReviews() {
+export default function CustomerReviews({ productId }) {
+  // Initial list of reviews
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -10,14 +11,6 @@ export default function CustomerReviews() {
       rating: 5,
       date: "May 12, 2026",
       comment: "Amazing build quality and fast delivery! Highly recommended.",
-      verified: true,
-    },
-    {
-      id: 2,
-      author: "Priya Patel",
-      rating: 4,
-      date: "May 10, 2026",
-      comment: "Very good product, works as expected. Packaging could be slightly better.",
       verified: true,
     },
   ]);
@@ -38,7 +31,10 @@ export default function CustomerReviews() {
       verified: true,
     };
 
+    // This updates the state immediately so the new review appears on screen!
     setReviews([reviewToAdd, ...reviews]);
+    
+    // Reset form fields and hide form
     setNewReview({ author: "", comment: "", rating: 5 });
     setShowForm(false);
   };
@@ -84,7 +80,7 @@ export default function CustomerReviews() {
         </form>
       )}
 
-      {/* Reviews List */}
+      {/* Reviews List - Newly submitted reviews will instantly appear at the top here */}
       <div className="reviews-list">
         {reviews.length === 0 ? (
           <p className="no-reviews">No reviews yet. Be the first to review!</p>
