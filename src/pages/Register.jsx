@@ -4,33 +4,22 @@ import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const GSTIN_RE =
-  /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z][Z][0-9A-Z]$/;
-
-const PASSWORD_RE =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z][Z][0-9A-Z]$/;
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
 export default function Register() {
   const { register, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const defaultRole =
-    location.state?.accountType ||
-    location.state?.defaultRole ||
-    "buyer";
+  const defaultRole = location.state?.accountType || location.state?.defaultRole || "buyer";
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role:
-      defaultRole === "merchant" ||
-      defaultRole === "seller"
-        ? "merchant"
-        : "buyer",
+    role: defaultRole === "merchant" || defaultRole === "seller" ? "merchant" : "buyer",
     gstNumber: "",
   });
 
@@ -38,148 +27,74 @@ export default function Register() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (
-      location.state?.accountType ||
-      location.state?.defaultRole
-    ) {
-      const incomingRole =
-        location.state.accountType ||
-        location.state.defaultRole;
-
+    if (location.state?.accountType || location.state?.defaultRole) {
+      const incomingRole = location.state.accountType || location.state.defaultRole;
       setForm((f) => ({
         ...f,
-        role:
-          incomingRole === "merchant" ||
-          incomingRole === "seller"
-            ? "merchant"
-            : "buyer",
+        role: incomingRole === "merchant" || incomingRole === "seller" ? "merchant" : "buyer",
       }));
     }
   }, [location.state]);
 
   const update = (key) => (e) => {
     let value = e.target.value;
-
-    if (key === "gstNumber") {
-      value = value.toUpperCase();
-    }
-
-    setForm((f) => ({
-      ...f,
-      [key]: value,
-    }));
-
-    if (error) {
-      setError(null);
-    }
+    if (key === "gstNumber") value = value.toUpperCase();
+    setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError(null);
   };
 
   const setRoleTab = (selectedRole) => {
     setForm((f) => ({
       ...f,
       role: selectedRole,
-      gstNumber:
-        selectedRole === "buyer"
-          ? ""
-          : f.gstNumber,
+      gstNumber: selectedRole === "buyer" ? "" : f.gstNumber,
     }));
-
     setError(null);
   };
 
   const validate = () => {
     if (!form.name.trim()) {
-      return form.role === "merchant"
-        ? "Please enter the merchant/business name."
-        : "Please enter your name.";
+      return form.role === "merchant" ? "Please enter the merchant/business name." : "Please enter your name.";
     }
-
-    if (!form.email.trim()) {
-      return "Please enter your email.";
-    }
-
-    if (!EMAIL_RE.test(form.email.trim())) {
-      return "That doesn't look like a valid email address.";
-    }
-
-    if (!form.password) {
-      return "Please choose a password.";
-    }
-
+    if (!form.email.trim()) return "Please enter your email.";
+    if (!EMAIL_RE.test(form.email.trim())) return "That doesn't look like a valid email address.";
+    if (!form.password) return "Please choose a password.";
     if (!PASSWORD_RE.test(form.password)) {
       return "Password must be at least 8 characters and include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.";
     }
-
-    if (!form.confirmPassword) {
-      return "Please confirm your password.";
-    }
-
-    if (form.password !== form.confirmPassword) {
-      return "Passwords don't match.";
-    }
-
-    if (
-      form.role === "merchant" &&
-      !form.gstNumber.trim()
-    ) {
-      return "GSTIN is required for a merchant account.";
-    }
-
-    if (
-      form.gstNumber.trim() &&
-      !GSTIN_RE.test(
-        form.gstNumber.trim().toUpperCase()
-      )
-    ) {
+    if (!form.confirmPassword) return "Please confirm your password.";
+    if (form.password !== form.confirmPassword) return "Passwords don't match.";
+    if (form.role === "merchant" && !form.gstNumber.trim()) return "GSTIN is required for a merchant account.";
+    if (form.gstNumber.trim() && !GSTIN_RE.test(form.gstNumber.trim().toUpperCase())) {
       return "That GSTIN doesn't look valid. Example: 27ABCDE1234F1Z5";
     }
-
     return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError(null);
-
     const validationError = validate();
-
     if (validationError) {
       setError(validationError);
       return;
     }
 
     setLoading(true);
-
     try {
-      const {
-        confirmPassword,
-        ...payload
-      } = form;
-
+      const { confirmPassword, ...payload } = form;
       await register({
         ...payload,
         name: payload.name.trim(),
         email: payload.email.trim(),
-        gstNumber: payload.gstNumber
-          .trim()
-          .toUpperCase(),
+        gstNumber: payload.gstNumber.trim().toUpperCase(),
       });
-
       logout();
-
       navigate("/login", {
-        state: {
-          justRegistered: true,
-          accountType: form.role,
-        },
+        state: { justRegistered: true, accountType: form.role },
       });
     } catch (err) {
-      console.error(
-        "Registration error:",
-        err
-      );
-
+      console.error("Registration error:", err);
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
@@ -194,183 +109,78 @@ export default function Register() {
   const isMerchant = form.role === "merchant";
 
   return (
-    <div className="login-split-container">
+    <div className="auth-split-container">
+      {/* LEFT SIDE: Vibrant Blue Branding Panel */}
+      <div className="auth-left-pane">
+        <div className="brand-header-area">
+          <span className="brand-logo-icon">▲</span>
+          <span className="brand-logo-text">JCS GLOBAL</span>
+        </div>
 
-      {/* LEFT SIDE - SAME AS LOGIN */}
-      <div className="login-left-pane">
-        <div className="login-brand-overlay">
-          <h2>JCS Global</h2>
-
-          <p>
-            Your trusted partner for global
-            wholesale trade, electronics, and
-            bulk distribution.
+        <div className="brand-center-area">
+          <span className="brand-eyebrow">Join Our Network</span>
+          <h1 className="brand-title">Create Account.<br />Expand Globally.</h1>
+          <div className="brand-divider"></div>
+          <p className="brand-desc">
+            Your trusted partner for global wholesale trade, electronics, and bulk distribution.
           </p>
+        </div>
+
+        <div className="floating-arrow-bubble">
+          <span>→</span>
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
-      <div className="login-right-pane">
-        <div className="login-card-wrapper">
-
-          {/* TOP NAV */}
-          <div className="login-top-nav">
-            <span className="login-brand-tag">
-              Secure Portal
-            </span>
-
-            <Link
-              to="/"
-              className="back-home-link"
-            >
-              ← Back to store
-            </Link>
+      {/* RIGHT SIDE: Modern Clean Form Panel */}
+      <div className="auth-right-pane">
+        <div className="auth-card-wrapper">
+          <div className="auth-top-nav">
+            <span className="portal-tag">SECURE PORTAL</span>
+            <Link to="/" className="back-home-link">← Back to store</Link>
           </div>
 
-          {/* REGISTER FORM */}
-          <form
-            className="auth-card"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-
-            {/* ROLE SWITCHER */}
-            <div
-              style={{
-                textAlign: "center",
-                marginBottom: "20px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "14px",
-                  color: "#666",
-                  display: "block",
-                  marginBottom: "8px",
-                }}
-              >
-                Register as
-              </span>
-
-              <div
-                style={{
-                  display: "inline-flex",
-                  background: "#f1f3f5",
-                  padding: "4px",
-                  borderRadius: "8px",
-                  gap: "4px",
-                }}
-              >
-
-                {/* CUSTOMER */}
+          <form className="auth-card-form" onSubmit={handleSubmit} noValidate>
+            <div className="role-switcher-container">
+              <span className="role-label-text">Register as</span>
+              <div className="role-buttons-group">
                 <button
                   type="button"
-                  onClick={() =>
-                    setRoleTab("buyer")
-                  }
-                  style={{
-                    padding: "6px 16px",
-                    border: "none",
-                    background:
-                      form.role === "buyer"
-                        ? "#fff"
-                        : "transparent",
-                    boxShadow:
-                      form.role === "buyer"
-                        ? "0 2px 4px rgba(0,0,0,0.1)"
-                        : "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight:
-                      form.role === "buyer"
-                        ? "600"
-                        : "400",
-                    fontSize: "13px",
-                  }}
+                  onClick={() => setRoleTab("buyer")}
+                  className={`role-btn ${form.role === "buyer" ? "active" : ""}`}
                 >
                   👤 Customer
                 </button>
-
-                {/* MERCHANT */}
                 <button
                   type="button"
-                  onClick={() =>
-                    setRoleTab("merchant")
-                  }
-                  style={{
-                    padding: "6px 16px",
-                    border: "none",
-                    background:
-                      form.role === "merchant"
-                        ? "#fff"
-                        : "transparent",
-                    boxShadow:
-                      form.role === "merchant"
-                        ? "0 2px 4px rgba(0,0,0,0.1)"
-                        : "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight:
-                      form.role === "merchant"
-                        ? "600"
-                        : "400",
-                    fontSize: "13px",
-                  }}
+                  onClick={() => setRoleTab("merchant")}
+                  className={`role-btn ${form.role === "merchant" ? "active" : ""}`}
                 >
                   🏪 Merchant
                 </button>
-
               </div>
             </div>
 
-            {/* TITLE */}
-            <h1>Create your account</h1>
-
-            <p className="auth-sub">
-              Create a buyer or merchant
-              account to use JCSGlobal.
+            <h2 className="form-main-heading">Create Account</h2>
+            <p className="form-sub-heading">
+              Create a buyer or merchant account to use JCSGlobal.
             </p>
 
-            {/* ERROR */}
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
+            {error && <p className="auth-error-alert">{error}</p>}
 
-            {/* MERCHANT / CUSTOMER NAME */}
-            <div className="field">
+            <div className="field-block">
               <label>
-                {isMerchant
-                  ? "Merchant Name"
-                  : "Customer / User Name"}
-
-                <span className="required">
-                  {" "}*
-                </span>
+                {isMerchant ? "Merchant Name" : "Customer / User Name"} *
               </label>
-
               <input
                 value={form.name}
                 onChange={update("name")}
-                placeholder={
-                  isMerchant
-                    ? "Enter merchant/business name"
-                    : "ABC Retail Pvt Ltd"
-                }
+                placeholder={isMerchant ? "Enter merchant/business name" : "ABC Retail Pvt Ltd"}
                 autoComplete="name"
               />
             </div>
 
-            {/* EMAIL */}
-            <div className="field">
-              <label>
-                Email
-                <span className="required">
-                  {" "}*
-                </span>
-              </label>
-
+            <div className="field-block">
+              <label>Email Address *</label>
               <input
                 type="email"
                 value={form.email}
@@ -380,15 +190,8 @@ export default function Register() {
               />
             </div>
 
-            {/* PASSWORD */}
-            <div className="field">
-              <label>
-                Password
-                <span className="required">
-                  {" "}*
-                </span>
-              </label>
-
+            <div className="field-block">
+              <label>Password *</label>
               <input
                 type="password"
                 value={form.password}
@@ -396,75 +199,36 @@ export default function Register() {
                 placeholder="Enter a strong password"
                 autoComplete="new-password"
               />
-
-              <small
-                style={{
-                  display: "block",
-                  marginTop: "6px",
-                  color: "#666",
-                  lineHeight: "1.4",
-                  fontSize: "12px",
-                }}
-              >
-                Minimum 8 characters:
-                1 uppercase, 1 lowercase,
-                1 number and 1 special
-                character.
+              <small className="helper-hint">
+                Minimum 8 characters: 1 uppercase, 1 lowercase, 1 number, and 1 special character.
               </small>
             </div>
 
-            {/* CONFIRM PASSWORD */}
-            <div className="field">
-              <label>
-                Confirm Password
-                <span className="required">
-                  {" "}*
-                </span>
-              </label>
-
+            <div className="field-block">
+              <label>Confirm Password *</label>
               <input
                 type="password"
                 value={form.confirmPassword}
-                onChange={update(
-                  "confirmPassword"
-                )}
+                onChange={update("confirmPassword")}
                 placeholder="Re-enter your password"
                 autoComplete="new-password"
               />
             </div>
 
-            {/* GSTIN FOR MERCHANT */}
             {isMerchant && (
-              <div className="field">
-                <label>
-                  GSTIN
-                  <span className="required">
-                    {" "}*
-                  </span>
-                </label>
-
+              <div className="field-block">
+                <label>GSTIN *</label>
                 <input
                   value={form.gstNumber}
-                  onChange={update(
-                    "gstNumber"
-                  )}
+                  onChange={update("gstNumber")}
                   placeholder="Enter your business GSTIN"
                   maxLength={15}
                 />
-
-                <small>
-                  GSTIN is required for merchant
-                  accounts.
-                </small>
+                <small className="helper-hint">GSTIN is required for merchant accounts.</small>
               </div>
             )}
 
-            {/* SUBMIT */}
-            <button
-              type="submit"
-              className="btn btn-primary btn-block"
-              disabled={loading}
-            >
+            <button type="submit" className="btn-primary-action" disabled={loading}>
               {loading
                 ? "Creating account..."
                 : isMerchant
@@ -472,15 +236,9 @@ export default function Register() {
                 : "Create Customer Account"}
             </button>
 
-            {/* LOGIN LINK */}
-            <p className="auth-switch">
-              Already registered?{" "}
-
-              <Link to="/login">
-                Sign in
-              </Link>
+            <p className="auth-switch-prompt">
+              Already registered? <Link to="/login">Sign in</Link>
             </p>
-
           </form>
         </div>
       </div>
