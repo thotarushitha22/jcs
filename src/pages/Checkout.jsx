@@ -799,7 +799,7 @@ export default function Checkout() {
                 }
               />
               <span>
-                <strong>Razorpay Test Payment</strong>
+                <strong>💳 Razorpay Test Payment</strong>
                 <small>
                   UPI, Cards and other Razorpay test payment
                   methods.
@@ -821,7 +821,7 @@ export default function Checkout() {
                 onChange={() => setPaymentMethod("cod")}
               />
               <span>
-                <strong>Cash on Delivery</strong>
+                <strong>💵 Cash on Delivery</strong>
                 <small>Pay when your order is delivered.</small>
               </span>
             </label>
@@ -840,7 +840,7 @@ export default function Checkout() {
                 onChange={() => setPaymentMethod("credit")}
               />
               <span>
-                <strong>Credit terms</strong>
+                <strong>📄 Credit terms</strong>
                 <small>Available for approved accounts.</small>
               </span>
             </label>

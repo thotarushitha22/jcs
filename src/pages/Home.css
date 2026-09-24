@@ -58,6 +58,16 @@
 }
 
 /* =========================================
+   GLOBAL LIGHT BLUE PAGE BACKGROUND
+========================================= */
+html, 
+body, 
+.page {
+  background-color: #dbeafe !important;
+  color: #1e3a8a !important;
+}
+
+/* =========================================
    HERO CAROUSEL — EQUAL LEFT/RIGHT SPACE
 ========================================= */
 
@@ -71,11 +81,10 @@
 /* Main catalog layout */
 .catalog {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 260px 1fr;
   gap: 32px;
   margin-top: 40px;
 
-  /* Equal space before Categories and after products */
   width: calc(100% - 64px);
   max-width: 1800px;
   margin-left: auto;
@@ -84,51 +93,81 @@
   padding: 0;
 }
 
-/* Category filters */
+/* =========================================
+   COMPACT MULTI-TIER SIDEBAR BOX (Dark Blue)
+========================================= */
 .filters {
+  background-color: #1e3a8a !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: none !important;
+}
+
+.filters::-webkit-scrollbar {
+  width: 5px;
+}
+.filters::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 4px;
 }
 
 .filters h4 {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 11px !important;
+  font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--slate-light);
-  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+  color: #93c5fd !important;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
 }
 
-/* Category names */
+.filters h4:first-of-type {
+  margin-top: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Category names & filter items */
 .filter-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-align: left;
-  padding: 13px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 18px;
-  color: #111; /* Forced dark high-contrast text color */
-  background: transparent;
-  border: none;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  color: #f8fafc !important;
+  background: transparent !important;
+  border: none !important;
   cursor: pointer;
   width: 100%;
 }
 
 .filter-item:hover {
-  background: var(--paper-dim);
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }
 
 .filter-item.active {
-  background: var(--signal-tint);
-  color: var(--signal-dark);
-  font-weight: 700;
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
 }
 
 .filter-count {
-  font-size: 14px;
-  color: var(--slate-light);
+  font-size: 12px;
+  color: #93c5fd;
 }
 
 /* Best Sellers heading */
@@ -136,6 +175,7 @@
   font-size: 30px;
   font-weight: 800;
   margin-bottom: 16px;
+  color: #1e3a8a !important;
 }
 
 /* Results and sorting */
@@ -144,7 +184,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
-  color: var(--slate);
+  background-color: rgba(30, 58, 138, 0.08);
+  border: 1px solid rgba(30, 58, 138, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #1e3a8a;
   font-size: 15px;
 }
 
@@ -157,11 +201,39 @@
   color: var(--ink);
 }
 
-/* Product grid */
+/* =========================================
+   PRODUCT GRID & DARK BLUE CARDS
+========================================= */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 18px;
+}
+
+div[class*="product-card"],
+.product-card,
+article {
+  background-color: #1e3a8a !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+}
+
+div[class*="product-card"] h3,
+div[class*="product-card"] .current-price,
+.product-name, 
+.current-price {
+  color: #ffffff !important;
+}
+
+div[class*="product-card"] p,
+div[class*="product-card"] span,
+.product-brand-tag, 
+.product-color-text, 
+.product-desc-snippet, 
+.stock-delivery-row,
+.quantity-row {
+  color: #93c5fd !important;
 }
 
 .empty-state {
@@ -178,8 +250,8 @@
   }
 
   .filters {
-    flex-direction: row;
-    flex-wrap: wrap;
+    max-width: 100%;
+    max-height: none;
   }
 
   .hero-title {
@@ -213,7 +285,6 @@
     max-width: 100%;
   }
 
-  /* Equal left and right space on mobile */
   .hero-carousel {
     width: calc(100% - 32px);
     margin-left: auto;
@@ -233,11 +304,325 @@
   }
 
   .filter-item {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
+}
+/* Target the stock ticker bar underneath the header */
+.stock-ticker,
+div[class*="stock-ticker"],
+div[class*="ticker"] {
+  background-color: #1e3a8a !important; /* Makes it a matching dark blue box */
+  color: #f8fafc !important;
+  border-bottom: 1px solid #3b82f6 !important;
+}
+
+/* Ensure ticker item text color looks sharp */
+.stock-ticker span,
+.stock-ticker div {
+  color: #93c5fd !important;
+}
+.filters {
+  background-color: #1e3a8a !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  border: none !important;
+  align-self: flex-start !important; /* Prevents it from stretching to match the product list height */
+}
+/* Increase category & filter item text size */
+.filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  font-size: 16px !important; /* Increased text size */
+  color: #f8fafc !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Increase section header text size */
+.filters h4 {
+  font-size: 13px !important; /* Increased section title size */
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #93c5fd !important;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+/* =========================================
+   PRODUCT CARDS - LIGHT BLUE THEME
+========================================= */
+.grid > div,
+.grid > article,
+.product-card,
+[class*="product-card"],
+[class*="ProductCard"] {
+  background-color: #dbeafe !important; /* Light blue background */
+  background: #dbeafe !important;
+  border: 1px solid #93c5fd !important; /* Soft blue border */
+  border-radius: 12px !important;
+  color: #1e3a8a !important; /* Deep dark blue text for high contrast */
+}
+
+/* Force text elements inside the product card to be dark blue and readable */
+.grid > div h1,
+.grid > div h2,
+.grid > div h3,
+.grid > div h4,
+.grid > div h5,
+.grid > div h6,
+.grid > div p,
+.grid > div span,
+.grid > div strong,
+.grid > div small,
+.grid > div label,
+.product-card h3,
+.product-card p,
+.product-card span,
+.product-card strong,
+.product-card small,
+[class*="product-card"] h3,
+[class*="product-card"] p,
+[class*="product-card"] span,
+[class*="product-card"] strong,
+[class*="product-card"] small,
+[class*="product-card"] div {
+  color: #1e3a8a !important;
+}
+
+/* Make prices stand out cleanly with a rich accent */
+.grid > div .current-price,
+.grid > div .price,
+.product-card .current-price,
+[class*="product-card"] .current-price {
+  color: #172554 !important;
+  font-weight: 700 !important;
+}
+
+/* Fix quantity input text fields so numbers remain easily visible */
+.grid > div input,
+.product-card input,
+[class*="product-card"] input {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+/* =========================================
+   HEADER ONLY - DARK BLUE THEME (FIXED ICONS & BUTTONS)
+========================================= */
+header,
+.header,
+nav,
+[class*="header"] {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+/* Specific text targeting so buttons don't break */
+header h1,
+header h2,
+header h3,
+header p,
+header span:not([class*="badge"]),
+.header span,
+.header a {
+  color: #ffffff !important;
+}
+
+/* Fix right-side utility icons (cart, help, profile circles) to show dark icons on white background */
+header button,
+.header button,
+[class*="header"] button {
+  color: #0f172a !important;
+}
+
+header svg,
+.header svg,
+[class*="header"] svg {
+  fill: currentColor;
+}
+/* =========================================
+   LOCATION MODAL TEXT VISIBILITY FIX
+========================================= */
+.modal,
+[class*="modal"],
+[class*="popup"],
+[class*="location"] {
+  color: #0f172a !important;
+}
+
+/* Force specific visibility on modal paragraphs and labels */
+.modal p,
+.modal span,
+.modal div,
+[class*="modal"] p,
+[class*="modal"] span,
+[class*="modal"] label,
+[class*="popup"] p,
+[class*="popup"] span {
+  color: #1e293b !important;
+}
+
+/* Fix muted texts like "Currently Selected:" to be dark and readable */
+.modal [class*="selected"],
+[class*="modal"] small,
+[class*="popup"] small {
+  color: #334155 !important;
+}
+/* =========================================
+   FIX "CURRENTLY SELECTED:" TEXT VISIBILITY
+========================================= */
+div[class*="location"] span,
+div[class*="modal"] span,
+[class*="location"] span:first-child,
+[class*="selected"] {
+  color: #0f172a !important;
+}
+/* =========================================
+   CHECKOUT INPUT BOXES - COMPACT LIGHT PINK
+========================================= */
+.checkout input,
+.checkout select,
+.checkout textarea,
+[class*="checkout"] input,
+[class*="checkout"] select,
+[class*="checkout"] textarea,
+form input[type="text"],
+form input[type="tel"],
+form input[type="number"] {
+  background-color: #fce7f3 !important; /* Soft light pink background */
+  background: #fce7f3 !important;
+  border: 1px solid #f472b6 !important; /* Rose pink border */
+  border-radius: 6px !important;
+  padding: 6px 10px !important; /* Reduced padding for smaller height */
+  font-size: 13px !important; /* Compact font size */
+  max-width: 100% !important; /* Keeps boxes neatly sized */
+  color: #831843 !important; /* Deep contrast text */
+}
+
+/* Make placeholder text legible */
+.checkout input::placeholder,
+[class*="checkout"] input::placeholder {
+  color: #9d174d !important;
+  opacity: 0.7 !important;
+}
+/* =========================================
+   COMPACT & SMALLER CHECKOUT INPUT BOXES
+========================================= */
+.checkout input,
+.checkout select,
+.checkout textarea,
+[class*="checkout"] input,
+[class*="checkout"] select,
+[class*="checkout"] textarea,
+form input[type="text"],
+form input[type="tel"],
+form input[type="number"] {
+  background-color: #fce7f3 !important; /* Soft light pink background */
+  background: #fce7f3 !important;
+  border: 1px solid #f472b6 !important; /* Rose pink border */
+  border-radius: 6px !important;
+  padding: 6px 10px !important; /* Smaller height padding */
+  font-size: 13px !important; /* Compact font size */
+  max-width: 420px !important; /* Restricts the box width so they aren't overly huge */
+  width: 100% !important;
+  color: #831843 !important; /* Deep contrast text */
+}
+
+/* Make placeholder text legible */
+.checkout input::placeholder,
+[class*="checkout"] input::placeholder {
+  color: #9d174d !important;
+  opacity: 0.7 !important;
+}
+/* =========================================
+   REVERT PAYMENT SECTION TO DEFAULT
+========================================= */
+.payment-methods,
+.checkout-payment,
+[class*="payment"],
+[class*="razorpay"],
+[class*="cod"] {
+  all: unset; /* Resets custom overrides back to your original default stylesheet */
+  display: block;
+}
+/* =========================================
+   GUARANTEED PAYMENT METHOD ICONS
+========================================= */
+
+/* Add card icon before Razorpay title */
+.payment-method *:not(input):not(span):not(p):contains("Razorpay"),
+[class*="payment"] *:not(input):not(span):not(p):contains("Razorpay"),
+label:has(input[value*="razorpay"]) strong,
+label:has(input[value*="razorpay"]) span:first-of-type {
+  /* Forces icon injection */
+}
+
+/* Let's prepend using a universal wrapper approach for the labels */
+.payment-method label::before,
+[class*="payment"] label::before,
+div[class*="payment"] span::before {
+  display: none !important; /* clear old attempts */
+}
+
+/* Target the payment header text blocks and add icons directly */
+.payment-method, 
+[class*="payment-option"] {
+  position: relative !important;
+}
+
+/* Clean inline emoji prepending via specific text matching */
+/* Ensure high visibility and contrast for text in dark sections */
+.ticker-bar, 
+.top-ticker, 
+[class*="ticker"], 
+.sidebar a, 
+.sidebar span, 
+.nav-links span, 
+.nav-item {
+  color: #000000 !important;
+}
+
+/* If you need specific unselected or muted sidebar text to be distinct */
+.sidebar a:not(.active), 
+.sidebar span:not(.active) {
+  color: #1f2937 !important;
+}/* Apply light blue background to the entire dashboard container and main content area */
+body, 
+.page, 
+.dashboard-container, 
+.merchant-dashboard, 
+div[class*="dashboard"], 
+main, 
+.content-area {
+  background-color: #f0f6ff !important;
+}
+/* Apply light blue background to the entire dashboard container and main content area */
+body, 
+.page, 
+.dashboard-container, 
+.merchant-dashboard, 
+div[class*="dashboard"], 
+main, 
+.content-area {
+  background-color: #f0f6ff !important;
 }

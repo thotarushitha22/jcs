@@ -15,6 +15,8 @@ const myCategories = [
   { id: "accessories", name: "Accessories", slug: "accessories" },
 ];
 
+const availableBrands = ["Samsung", "Apple", "OnePlus", "Nokia", "Motorola", "Redmi", "realme", "vivo"];
+
 export default function Home() {
   const [searchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get("search") || "";
@@ -24,7 +26,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Filter States
   const [activeCategory, setActiveCategory] = useState("all");
+  const [activeBrand, setActiveBrand] = useState("all");
+  const [activePriceRange, setActivePriceRange] = useState("all");
+  const [activeDiscount, setActiveDiscount] = useState("all");
   const [sort, setSort] = useState("relevance");
 
   const normalizeCategory = (value) => {
@@ -97,6 +103,7 @@ export default function Home() {
   const filteredProducts = useMemo(() => {
     let resultList = [...products];
 
+    // 1. Category Filter
     if (activeCategory !== "all") {
       const selectedCategory = normalizeCategory(activeCategory);
 
@@ -104,17 +111,9 @@ export default function Home() {
         const productCategory = getProductCategory(product);
         if (!productCategory) return false;
 
-        if (productCategory === selectedCategory) return true;
-
-        const selectedSingular = selectedCategory.endsWith("s")
-          ? selectedCategory.slice(0, -1)
-          : selectedCategory;
-
-        const productSingular = productCategory.endsWith("s")
-          ? productCategory.slice(0, -1)
-          : productCategory;
-
-        if (productSingular === selectedSingular) return true;
+        if (productCategory.includes(selectedCategory) || selectedCategory.includes(productCategory)) {
+          return true;
+        }
 
         const categoryAliases = {
           smartphones: ["smartphone", "smart phones", "smart phone", "mobile", "mobiles", "mobile phones", "cell phones"],
@@ -123,11 +122,43 @@ export default function Home() {
           accessories: ["accessory", "accessories", "audio", "mobile accessories", "computer accessories", "electronics accessories"],
         };
 
-        const aliases = categoryAliases[selectedCategory] || [];
-        return aliases.some((alias) => normalizeCategory(alias) === productCategory);
+        const aliases = categoryAliases[activeCategory] || [];
+        return aliases.some((alias) => productCategory.includes(normalizeCategory(alias)));
       });
     }
 
+    // 2. Brand Filter
+    if (activeBrand !== "all") {
+      resultList = resultList.filter((product) => {
+        const productBrand = normalizeCategory(
+          product.brand || product.manufacturer || product.title || product.name || ""
+        );
+        return productBrand.includes(normalizeCategory(activeBrand));
+      });
+    }
+
+    // 3. Price Range Filter
+    if (activePriceRange !== "all") {
+      resultList = resultList.filter((product) => {
+        const price = Number(product.price || product.cost || 0);
+        if (activePriceRange === "under-1000") return price < 1000;
+        if (activePriceRange === "1000-5000") return price >= 1000 && price <= 5000;
+        if (activePriceRange === "5000-10000") return price > 5000 && price <= 10000;
+        if (activePriceRange === "10000-20000") return price > 10000 && price <= 20000;
+        if (activePriceRange === "over-20000") return price > 20000;
+        return true;
+      });
+    }
+
+    // 4. Discount Filter
+    if (activeDiscount !== "all") {
+      resultList = resultList.filter((product) => {
+        const discount = Number(product.discount || product.discountPercentage || product.off || 0);
+        return discount >= Number(activeDiscount);
+      });
+    }
+
+    // 5. Search Query Filter
     if (urlSearchQuery.trim()) {
       const q = normalizeCategory(urlSearchQuery);
 
@@ -148,6 +179,7 @@ export default function Home() {
       });
     }
 
+    // Sorting
     if (sort === "price-asc") {
       resultList.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
     }
@@ -157,30 +189,126 @@ export default function Home() {
     }
 
     return resultList;
-  }, [products, activeCategory, urlSearchQuery, sort]);
+  }, [products, activeCategory, activeBrand, activePriceRange, activeDiscount, urlSearchQuery, sort]);
 
   return (
     <div className="page">
       <HeroCarousel />
 
       <section className="catalog">
+        {/* Multi-tier Sidebar Filter Box */}
         <aside className="filters" data-tour="categories">
           <h4>Category</h4>
-          <button
-            className={`filter-item ${activeCategory === "all" ? "active" : ""}`}
-            onClick={() => setActiveCategory("all")}
-          >
-            All categories
-          </button>
-          {categories.map((category) => (
+          <div className="filter-group">
             <button
-              key={category.id}
-              className={`filter-item ${activeCategory === category.slug ? "active" : ""}`}
-              onClick={() => setActiveCategory(category.slug)}
+              className={`filter-item ${activeCategory === "all" ? "active" : ""}`}
+              onClick={() => setActiveCategory("all")}
             >
-              {category.name}
+              All categories
             </button>
-          ))}
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                className={`filter-item ${activeCategory === category.slug ? "active" : ""}`}
+                onClick={() => setActiveCategory(category.slug)}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+
+          <h4>Brands</h4>
+          <div className="filter-group">
+            <button
+              className={`filter-item ${activeBrand === "all" ? "active" : ""}`}
+              onClick={() => setActiveBrand("all")}
+            >
+              All Brands
+            </button>
+            {availableBrands.map((brand) => (
+              <button
+                key={brand}
+                className={`filter-item ${activeBrand === brand ? "active" : ""}`}
+                onClick={() => setActiveBrand(brand)}
+              >
+                {brand}
+              </button>
+            ))}
+          </div>
+
+          <h4>Price</h4>
+          <div className="filter-group">
+            <button
+              className={`filter-item ${activePriceRange === "all" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("all")}
+            >
+              Any Price
+            </button>
+            <button
+              className={`filter-item ${activePriceRange === "under-1000" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("under-1000")}
+            >
+              Under ₹1,000
+            </button>
+            <button
+              className={`filter-item ${activePriceRange === "1000-5000" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("1000-5000")}
+            >
+              ₹1,000 - ₹5,000
+            </button>
+            <button
+              className={`filter-item ${activePriceRange === "5000-10000" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("5000-10000")}
+            >
+              ₹5,000 - ₹10,000
+            </button>
+            <button
+              className={`filter-item ${activePriceRange === "10000-20000" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("10000-20000")}
+            >
+              ₹10,000 - ₹20,000
+            </button>
+            <button
+              className={`filter-item ${activePriceRange === "over-20000" ? "active" : ""}`}
+              onClick={() => setActivePriceRange("over-20000")}
+            >
+              Over ₹20,000
+            </button>
+          </div>
+
+          <h4>Discount</h4>
+          <div className="filter-group">
+            <button
+              className={`filter-item ${activeDiscount === "all" ? "active" : ""}`}
+              onClick={() => setActiveDiscount("all")}
+            >
+              All Discounts
+            </button>
+            <button
+              className={`filter-item ${activeDiscount === "10" ? "active" : ""}`}
+              onClick={() => setActiveDiscount("10")}
+            >
+              10% Off or more
+            </button>
+            <button
+              className={`filter-item ${activeDiscount === "25" ? "active" : ""}`}
+              onClick={() => setActiveDiscount("25")}
+            >
+              25% Off or more
+            </button>
+            <button
+              className={`filter-item ${activeDiscount === "35" ? "active" : ""}`}
+              onClick={() => setActiveDiscount("35")}
+            >
+              35% Off or more
+            </button>
+            <button
+              className={`filter-item ${activeDiscount === "50" ? "active" : ""}`}
+              onClick={() => setActiveDiscount("50")}
+            >
+              50% Off or more
+            </button>
+          </div>
         </aside>
 
         <div className="catalog-main">
@@ -209,7 +337,7 @@ export default function Home() {
 
           {!error && !loading && filteredProducts.length === 0 ? (
             <p className="empty-state">
-              No listings match your search or category. Try clearing filters.
+              No listings match your selected filters. Try resetting filters.
             </p>
           ) : (
             <div className="grid">
