@@ -313,3 +313,28 @@
     flex: 1;
   }
 }
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: -5px;
+  margin-bottom: 4px;
+}
+
+.forgot-password-row a {
+  color: #5274c4;
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.forgot-password-row a:hover {
+  text-decoration: underline;
+}

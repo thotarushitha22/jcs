@@ -1,8 +1,20 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import { Toaster } from "react-hot-toast";
 
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
+import {
+  AuthProvider,
+  useAuth,
+} from "./context/AuthContext";
+
+import {
+  CartProvider,
+} from "./context/CartContext";
 
 import Navbar from "./components/Navbar";
 import StockTicker from "./components/StockTicker";
@@ -19,6 +31,7 @@ import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Register from "./pages/Register";
 import Support from "./pages/Support";
 
@@ -34,54 +47,110 @@ import OrderReports from "./pages/OrderReports";
 import Admin from "./pages/Admin";
 import MerchantDashboard from "./pages/MerchantDashboard";
 
+
 // --------------------------------------------------
 // Protected Route
 // --------------------------------------------------
-function ProtectedRoute({ children, allowedRoles }) {
-  const { user } = useAuth();
 
-  const storedUser = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+function ProtectedRoute({
+  children,
+  allowedRoles,
+}) {
 
-  const currentUser = user || storedUser;
-  const token = localStorage.getItem("token");
+  const { user } =
+    useAuth();
+
+
+  const storedUser =
+    JSON.parse(
+      localStorage.getItem(
+        "user"
+      ) || "{}"
+    );
+
+
+  const currentUser =
+    user || storedUser;
+
+
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
 
   // User must be logged in
-  if (!token || !currentUser?.email) {
-    return <Navigate to="/login" replace />;
+
+  if (
+    !token ||
+    !currentUser?.email
+  ) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
   }
 
-  const userRole = currentUser.role
-    ? currentUser.role.toLowerCase()
-    : "buyer";
+
+  const userRole =
+    currentUser.role
+      ? currentUser.role.toLowerCase()
+      : "buyer";
+
 
   // Strict admin-only protection
+
   const isStrictAdminOnly =
     allowedRoles.length === 1 &&
-    allowedRoles.includes("admin");
+    allowedRoles.includes(
+      "admin"
+    );
 
-  if (isStrictAdminOnly && userRole !== "admin") {
-    return <Navigate to="/" replace />;
+
+  if (
+    isStrictAdminOnly &&
+    userRole !== "admin"
+  ) {
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
 
+
   // General role protection
+
   if (
     allowedRoles &&
     !allowedRoles
-      .map((role) => role.toLowerCase())
+      .map((role) =>
+        role.toLowerCase()
+      )
       .includes(userRole)
   ) {
-    return <Navigate to="/" replace />;
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
+
 
   return children;
 }
 
+
 // --------------------------------------------------
 // Main Store Layout
 // --------------------------------------------------
+
 function MainStoreLayout() {
+
   return (
     <>
       <Navbar />
@@ -89,106 +158,171 @@ function MainStoreLayout() {
       <StockTicker />
 
       <Routes>
+
         {/* Home */}
+
         <Route
           path="/"
-          element={<Home />}
+          element={
+            <Home />
+          }
         />
+
 
         {/* Products */}
+
         <Route
           path="/product/:id"
-          element={<ProductDetail />}
+          element={
+            <ProductDetail />
+          }
         />
+
 
         {/* Cart */}
+
         <Route
           path="/cart"
-          element={<Cart />}
+          element={
+            <Cart />
+          }
         />
+
 
         {/* Checkout */}
+
         <Route
           path="/checkout"
-          element={<Checkout />}
+          element={
+            <Checkout />
+          }
         />
+
 
         {/* Sell */}
+
         <Route
           path="/sell"
-          element={<Sell />}
+          element={
+            <Sell />
+          }
         />
 
+
         {/* Orders */}
+
         <Route
           path="/orders"
-          element={<Orders />}
+          element={
+            <Orders />
+          }
         />
+
 
         <Route
           path="/orders/:id"
-          element={<OrderDetail />}
+          element={
+            <OrderDetail />
+          }
         />
+
 
         {/* Register */}
+
         <Route
           path="/register"
-          element={<Register />}
+          element={
+            <Register />
+          }
         />
+
 
         {/* Support */}
+
         <Route
           path="/support"
-          element={<Support />}
+          element={
+            <Support />
+          }
         />
 
+
         {/* Account */}
+
         <Route
           path="/account"
-          element={<Account />}
+          element={
+            <Account />
+          }
         />
+
 
         <Route
           path="/account/notifications"
-          element={<NotificationPreferences />}
+          element={
+            <NotificationPreferences />
+          }
         />
+
 
         <Route
           path="/account/order-reports"
-          element={<OrderReports />}
+          element={
+            <OrderReports />
+          }
         />
+
 
         <Route
           path="/account/info"
-          element={<AccountInfo />}
+          element={
+            <AccountInfo />
+          }
         />
+
 
         <Route
           path="/account/kyc"
-          element={<KycDocuments />}
+          element={
+            <KycDocuments />
+          }
         />
+
 
         <Route
           path="/account/address"
-          element={<MyAddress />}
+          element={
+            <MyAddress />
+          }
         />
+
 
         <Route
           path="/account/policies"
-          element={<Policies />}
+          element={
+            <Policies />
+          }
         />
 
+
         {/* Admin */}
+
         <Route
           path="/admin"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "admin",
+              ]}
+            >
               <Admin />
             </ProtectedRoute>
           }
         />
 
+
         {/* Merchant */}
+
         <Route
           path="/merchant"
           element={
@@ -204,7 +338,9 @@ function MainStoreLayout() {
           }
         />
 
+
         {/* Merchant Dashboard - alternate URL */}
+
         <Route
           path="/merchant-Dashboard"
           element={
@@ -220,53 +356,89 @@ function MainStoreLayout() {
           }
         />
 
+
         {/* Account sub-pages */}
+
         <Route
           path="/account/:section"
-          element={<AccountStub />}
+          element={
+            <AccountStub />
+          }
         />
+
       </Routes>
+
 
       <Footer />
     </>
   );
 }
 
+
 // --------------------------------------------------
 // Main App
 // --------------------------------------------------
+
 export default function App() {
+
   return (
     <AuthProvider>
+
       <CartProvider>
+
         <BrowserRouter>
 
           <Routes>
 
             {/* Login Page */}
+
             {/* Navbar and StockTicker are hidden on login */}
+
             <Route
               path="/login"
-              element={<Login />}
+              element={
+                <Login />
+              }
             />
 
+
+            {/* Forgot Password */}
+
+            <Route
+              path="/forgot-password"
+              element={
+                <ForgotPassword />
+              }
+            />
+
+
             {/* All other store pages */}
+
             <Route
               path="/*"
-              element={<MainStoreLayout />}
+              element={
+                <MainStoreLayout />
+              }
             />
 
           </Routes>
 
-          {/* Toast Notifications */}
-          <Toaster position="top-right" />
-<LiveTour />
-<Chatbot />
-         
 
+          {/* Toast Notifications */}
+
+          <Toaster
+            position="top-right"
+          />
+
+
+          <LiveTour />
+
+          <Chatbot />
 
         </BrowserRouter>
+
       </CartProvider>
+
     </AuthProvider>
   );
 }

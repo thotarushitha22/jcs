@@ -114,7 +114,7 @@ export default function ProductDetail() {
       0
   );
 
-  const gallery = (() => {
+  const rawGallery = (() => {
     if (
       Array.isArray(product.images) &&
       product.images.length > 0
@@ -129,6 +129,9 @@ export default function ProductDetail() {
 
     return singleImage ? [singleImage] : [];
   })();
+
+  // Normalize gallery items to strings if they are objects, and keep track of mapping
+  const gallery = rawGallery.map((img) => (typeof img === "object" && img !== null ? img.url : img));
 
   const outOfStock =
     Number(product.stock || 0) <= 0;
@@ -185,11 +188,23 @@ export default function ProductDetail() {
     }
   };
 
+  // Updated variant selector that also switches the active image view for colors
   const selectVariant = (group, value) => {
     setSelected((previous) => ({
       ...previous,
       [group]: value,
     }));
+
+    if (group === "colors") {
+      // Find if any image explicitly matches this color variant
+      const matchingIndex = rawGallery.findIndex(
+        (img) => typeof img === "object" && img !== null && img.color?.toLowerCase() === value.toLowerCase()
+      );
+
+      if (matchingIndex !== -1) {
+        setActiveImage(matchingIndex);
+      }
+    }
   };
 
   const prodOverview =

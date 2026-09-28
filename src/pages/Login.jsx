@@ -14,7 +14,9 @@ export default function Login() {
   const initialRole = location.state?.accountType || "customer";
 
   const [selectedRole, setSelectedRole] = useState(
-    initialRole === "merchant" || initialRole === "seller" ? "merchant" : "customer"
+    initialRole === "merchant" || initialRole === "seller"
+      ? "merchant"
+      : "customer"
   );
 
   const [email, setEmail] = useState("");
@@ -25,13 +27,16 @@ export default function Login() {
   const roleConfig = {
     customer: {
       title: "Welcome Back!",
-      subtitle: "Access wholesale pricing as a verified retailer.",
+      subtitle:
+        "Access wholesale pricing as a verified retailer.",
       placeholder: "you@business.com",
       buttonText: "Login as Customer",
     },
+
     merchant: {
       title: "Merchant Portal",
-      subtitle: "Login to manage your JCSGlobal store",
+      subtitle:
+        "Login to manage your JCSGlobal store",
       placeholder: "merchant@jcsglobal.com",
       buttonText: "Login as Merchant",
     },
@@ -40,9 +45,18 @@ export default function Login() {
   const currentConfig = roleConfig[selectedRole];
 
   const validate = () => {
-    if (!email.trim()) return "Please enter your email address.";
-    if (!EMAIL_RE.test(email.trim())) return "That doesn't look like a valid email address.";
-    if (!password) return "Please enter your password.";
+    if (!email.trim()) {
+      return "Please enter your email address.";
+    }
+
+    if (!EMAIL_RE.test(email.trim())) {
+      return "That doesn't look like a valid email address.";
+    }
+
+    if (!password) {
+      return "Please enter your password.";
+    }
+
     return null;
   };
 
@@ -56,6 +70,7 @@ export default function Login() {
     setError(null);
 
     const validationError = validate();
+
     if (validationError) {
       setError(validationError);
       return;
@@ -64,40 +79,81 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await login({ email: email.trim(), password });
+      const res = await login({
+        email: email.trim(),
+        password,
+      });
+
       const loggedInUser =
         res?.user ||
         res?.data?.user ||
         res ||
-        JSON.parse(localStorage.getItem("user") || "{}");
+        JSON.parse(
+          localStorage.getItem("user") || "{}"
+        );
 
-      const userRole = String(loggedInUser?.role || "").toLowerCase();
-      const userEmail = String(loggedInUser?.email || email).toLowerCase();
+      const userRole = String(
+        loggedInUser?.role || ""
+      ).toLowerCase();
 
-      const isMerchant = ["merchant", "seller", "vendor", "business", "store"].includes(userRole);
-      const isAdmin = userEmail === "thotarushitha22@gmail.com" || userRole === "admin";
+      const userEmail = String(
+        loggedInUser?.email || email
+      ).toLowerCase();
+
+      const isMerchant = [
+        "merchant",
+        "seller",
+        "vendor",
+        "business",
+        "store",
+      ].includes(userRole);
+
+      const isAdmin =
+        userEmail ===
+          "thotarushitha22@gmail.com" ||
+        userRole === "admin";
+
+      /* CUSTOMER LOGIN VALIDATION */
 
       if (selectedRole === "customer") {
         if (isAdmin) {
           logout();
-          throw new Error("Admin accounts cannot log in through the customer portal.");
+
+          throw new Error(
+            "Admin accounts cannot log in through the customer portal."
+          );
         }
+
         if (isMerchant) {
           logout();
-          throw new Error("You have a Merchant account. Please use the Merchant tab to log in.");
+
+          throw new Error(
+            "You have a Merchant account. Please use the Merchant tab to log in."
+          );
         }
       }
+
+      /* MERCHANT LOGIN VALIDATION */
 
       if (selectedRole === "merchant") {
         if (isAdmin) {
           logout();
-          throw new Error("Admin accounts cannot log in through the merchant portal.");
+
+          throw new Error(
+            "Admin accounts cannot log in through the merchant portal."
+          );
         }
+
         if (!isMerchant) {
           logout();
-          throw new Error("This account is not registered as a merchant. Please use the Customer tab.");
+
+          throw new Error(
+            "This account is not registered as a merchant. Please use the Customer tab."
+          );
         }
       }
+
+      /* REDIRECT */
 
       if (selectedRole === "merchant") {
         navigate("/merchant");
@@ -105,8 +161,13 @@ export default function Login() {
         navigate("/");
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error(
+        "Login error:",
+        err
+      );
+
       logout();
+
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
@@ -120,101 +181,277 @@ export default function Login() {
 
   return (
     <div className="auth-split-container">
-      {/* LEFT SIDE: Vibrant Blue Branding Panel */}
+
+      {/* =================================================
+          LEFT SIDE
+      ================================================= */}
+
       <div className="auth-left-pane">
+
         <div className="brand-header-area">
-          <span className="brand-logo-icon">▲</span>
-          <span className="brand-logo-text">JCS GLOBAL</span>
+
+          <span className="brand-logo-icon">
+            ▲
+          </span>
+
+          <span className="brand-logo-text">
+            JCS GLOBAL
+          </span>
+
         </div>
 
         <div className="brand-center-area">
-          <span className="brand-eyebrow">Access Made Effortless</span>
-          <h1 className="brand-title">Secure Access.<br />Smarter Control.</h1>
+
+          <span className="brand-eyebrow">
+            Access Made Effortless
+          </span>
+
+          <h1 className="brand-title">
+            Secure Access.
+            <br />
+            Smarter Control.
+          </h1>
+
           <div className="brand-divider"></div>
+
           <p className="brand-desc">
-            Your trusted partner for global wholesale trade, electronics, and bulk distribution.
+            Your trusted partner for global wholesale
+            trade, electronics, and bulk distribution.
           </p>
+
         </div>
 
         <div className="floating-arrow-bubble">
           <span>→</span>
         </div>
+
       </div>
 
-      {/* RIGHT SIDE: Modern Clean Form Panel */}
+
+      {/* =================================================
+          RIGHT SIDE
+      ================================================= */}
+
       <div className="auth-right-pane">
+
         <div className="auth-card-wrapper">
+
           <div className="auth-top-nav">
-            <span className="portal-tag">SECURE PORTAL</span>
-            <Link to="/" className="back-home-link">← Back to store</Link>
+
+            <span className="portal-tag">
+              SECURE PORTAL
+            </span>
+
+            <Link
+              to="/"
+              className="back-home-link"
+            >
+              ← Back to store
+            </Link>
+
           </div>
 
-          <form className="auth-card-form" onSubmit={handleSubmit} noValidate>
+
+          <form
+            className="auth-card-form"
+            onSubmit={handleSubmit}
+            noValidate
+          >
+
+            {/* ROLE SWITCHER */}
+
             <div className="role-switcher-container">
-              <span className="role-label-text">Login as</span>
+
+              <span className="role-label-text">
+                Login as
+              </span>
+
               <div className="role-buttons-group">
+
                 <button
                   type="button"
-                  onClick={() => switchRole("customer")}
-                  className={`role-btn ${selectedRole === "customer" ? "active" : ""}`}
+                  onClick={() =>
+                    switchRole("customer")
+                  }
+                  className={`role-btn ${
+                    selectedRole ===
+                    "customer"
+                      ? "active"
+                      : ""
+                  }`}
                 >
                   👤 Customer
                 </button>
+
                 <button
                   type="button"
-                  onClick={() => switchRole("merchant")}
-                  className={`role-btn ${selectedRole === "merchant" ? "active" : ""}`}
+                  onClick={() =>
+                    switchRole("merchant")
+                  }
+                  className={`role-btn ${
+                    selectedRole ===
+                    "merchant"
+                      ? "active"
+                      : ""
+                  }`}
                 >
                   🏪 Merchant
                 </button>
+
               </div>
+
             </div>
 
-            <h2 className="form-main-heading">{currentConfig.title}</h2>
-            <p className="form-sub-heading">{currentConfig.subtitle}</p>
 
-            {justRegistered && !error && (
-              <p className="auth-success-alert">Account created successfully! Please sign in.</p>
+            {/* TITLE */}
+
+            <h2 className="form-main-heading">
+              {currentConfig.title}
+            </h2>
+
+            <p className="form-sub-heading">
+              {currentConfig.subtitle}
+            </p>
+
+
+            {/* REGISTER SUCCESS */}
+
+            {justRegistered &&
+              !error && (
+                <p className="auth-success-alert">
+                  Account created successfully!
+                  Please sign in.
+                </p>
+              )}
+
+
+            {/* ERROR */}
+
+            {error && (
+              <p className="auth-error-alert">
+                {error}
+              </p>
             )}
 
-            {error && <p className="auth-error-alert">{error}</p>}
+
+            {/* EMAIL */}
 
             <div className="field-block">
-              <label>Email Address</label>
+
+              <label>
+                Email Address
+              </label>
+
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={currentConfig.placeholder}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+                placeholder={
+                  currentConfig.placeholder
+                }
                 autoComplete="email"
               />
+
             </div>
 
+
+            {/* PASSWORD */}
+
             <div className="field-block">
-              <label>Password</label>
+
+              <label>
+                Password
+              </label>
+
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
                 placeholder="Enter your password"
                 autoComplete="current-password"
               />
+
             </div>
 
-            <button type="submit" className="btn-primary-action" disabled={loading}>
-              {loading ? "Signing in…" : currentConfig.buttonText}
+
+            {/* FORGOT PASSWORD */}
+
+            <div className="forgot-password-row">
+
+              <Link
+                to="/forgot-password"
+              >
+                Forgot Password?
+              </Link>
+
+            </div>
+
+
+            {/* LOGIN */}
+
+            <button
+              type="submit"
+              className="btn-primary-action"
+              disabled={loading}
+            >
+              {loading
+                ? "Signing in…"
+                : currentConfig.buttonText}
             </button>
 
+
+            {/* REGISTER */}
+
             <p className="auth-switch-prompt">
-              {selectedRole === "merchant" ? (
-                <>Don't have a merchant account? <Link to="/register" state={{ defaultRole: "merchant" }}>Register as Merchant</Link></>
+
+              {selectedRole ===
+              "merchant" ? (
+                <>
+                  Don't have a merchant
+                  account?{" "}
+
+                  <Link
+                    to="/register"
+                    state={{
+                      defaultRole:
+                        "merchant",
+                    }}
+                  >
+                    Register as Merchant
+                  </Link>
+                </>
               ) : (
-                <>New to JCSGlobal? <Link to="/register" state={{ defaultRole: "buyer" }}>Create an account</Link></>
+                <>
+                  New to JCSGlobal?{" "}
+
+                  <Link
+                    to="/register"
+                    state={{
+                      defaultRole:
+                        "buyer",
+                    }}
+                  >
+                    Create an account
+                  </Link>
+                </>
               )}
+
             </p>
+
           </form>
+
         </div>
+
       </div>
+
     </div>
   );
 }
