@@ -29,6 +29,7 @@ import Checkout from "./pages/Checkout";
 import Sell from "./pages/Sell";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
+import Wishlist from "./pages/Wishlist"; // <-- Wishlist page imported
 
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -223,6 +224,25 @@ function MainStoreLayout() {
           path="/orders/:id"
           element={
             <OrderDetail />
+          }
+        />
+
+
+        {/* Wishlist */}
+
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "buyer",
+                "merchant",
+                "admin",
+                "seller",
+              ]}
+            >
+              <Wishlist />
+            </ProtectedRoute>
           }
         />
 

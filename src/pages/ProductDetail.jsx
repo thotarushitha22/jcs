@@ -5,6 +5,7 @@ import { fetchProduct, fetchRelatedProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
 import CustomerReviews from "../components/CustomerReviews";
+import WishlistButton from "../components/WishlistButton"; // <-- Import Wishlist Button
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
@@ -638,13 +639,13 @@ export default function ProductDetail() {
 
               </div>
 
-              {/* BUTTONS */}
+              {/* BUTTONS WITH WISHLIST */}
 
-              <div className="pd-cta-row">
+              <div className="pd-cta-row flex items-center gap-3">
 
                 <button
                   type="button"
-                  className="btn btn-outline pd-cta"
+                  className="btn btn-outline pd-cta flex-1"
                   onClick={handleAdd}
                 >
                   {added
@@ -654,11 +655,14 @@ export default function ProductDetail() {
 
                 <button
                   type="button"
-                  className="btn btn-primary pd-cta"
+                  className="btn btn-primary pd-cta flex-1"
                   onClick={handleBuyNow}
                 >
                   Buy Now
                 </button>
+
+                {/* Added Wishlist Button here */}
+                <WishlistButton productId={id} />
 
               </div>
 

@@ -10,6 +10,7 @@ import {
   PackagePlus,
   ShieldCheck,
   Store,
+  Heart,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -194,6 +195,16 @@ export default function Navbar() {
             aria-label="Help and support"
           >
             <Headphones size={22} />
+          </Link>
+
+          {/* WISHLIST */}
+          <Link
+            to="/wishlist"
+            className="icon-btn"
+            aria-label="Wishlist"
+            title="Wishlist"
+          >
+            <Heart size={22} />
           </Link>
 
           {/* CART */}
