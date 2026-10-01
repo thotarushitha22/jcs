@@ -44,20 +44,82 @@ export default function Home() {
 
   const getProductCategory = (product) => {
     if (!product) return "";
-    if (typeof product.category === "string") {
-      return normalizeCategory(product.category);
+    
+    // 1. Check explicit category fields first[cite: 11]
+    const possibleValues = [
+      product.category,
+      product.categoryName,
+      product.categorySlug,
+      product.type,
+      product.department
+    ];
+
+    for (const val of possibleValues) {
+      if (!val) continue;
+      if (typeof val === "string") {
+        const normalized = normalizeCategory(val);
+        if (normalized && normalized !== "uncategorized" && normalized !== "general" && normalized !== "none") {
+          return normalized;
+        }
+      }
+      if (typeof val === "object") {
+        const nested = val.name || val.title || val.slug || val.category || val.label;
+        if (nested && typeof nested === "string") {
+          const normalized = normalizeCategory(nested);
+          if (normalized && normalized !== "uncategorized" && normalized !== "general" && normalized !== "none") {
+            return normalized;
+          }
+        }
+      }
     }
-    if (product.category && typeof product.category === "object") {
-      return normalizeCategory(
-        product.category.name ||
-          product.category.title ||
-          product.category.slug ||
-          product.category.category
-      );
+
+    // 2. Comprehensive Fallback: Check Laptops FIRST so they don't get misclassified as phones
+    const textToCheck = normalizeCategory(
+      `${product.title || product.name || ""} ${product.brand || ""} ${product.model || ""} ${product.description || ""}`
+    );
+
+    if (
+      textToCheck.includes("laptop") || 
+      textToCheck.includes("notebook") || 
+      textToCheck.includes("macbook") || 
+      textToCheck.includes("ebook") ||
+      textToCheck.includes("chromebook")
+    ) {
+      return "laptops";
     }
-    if (product.categoryName) return normalizeCategory(product.categoryName);
-    if (product.categorySlug) return normalizeCategory(product.categorySlug);
-    return "";
+
+    if (textToCheck.includes("tv") || textToCheck.includes("television") || textToCheck.includes("led")) {
+      return "tvs";
+    }
+
+    if (textToCheck.includes("accessory") || textToCheck.includes("headphones") || textToCheck.includes("charger") || textToCheck.includes("case")) {
+      return "accessories";
+    }
+
+    // Now check Smartphones safely
+    if (
+      textToCheck.includes("phone") || 
+      textToCheck.includes("mobile") || 
+      textToCheck.includes("smartphone") || 
+      textToCheck.includes("cell") || 
+      textToCheck.includes("5g") || 
+      textToCheck.includes("4g") ||
+      textToCheck.includes("moto") || 
+      textToCheck.includes("galaxy") || 
+      textToCheck.includes("poco") || 
+      textToCheck.includes("iphone") || 
+      textToCheck.includes("redmi") || 
+      textToCheck.includes("vivo") || 
+      textToCheck.includes("oppo") ||
+      textToCheck.includes("oneplus") ||
+      textToCheck.includes("realme") ||
+      textToCheck.includes("nokia") ||
+      textToCheck.includes("samsung")
+    ) {
+      return "smartphones";
+    }
+
+    return normalizeCategory(product.category || "uncategorized");
   };
 
   useEffect(() => {
@@ -107,23 +169,22 @@ export default function Home() {
     if (activeCategory !== "all") {
       const selectedCategory = normalizeCategory(activeCategory);
 
+      const categoryAliases = {
+        smartphones: ["smartphone", "smart phones", "smart phone", "mobile", "mobiles", "mobile phones", "cell phones", "phone", "phones", "moto", "galaxy", "poco", "iphone", "redmi", "vivo", "oppo", "oneplus", "realme", "nokia", "5g", "4g"],
+        laptops: ["laptop", "laptops", "notebook", "notebooks", "notebook computer", "computer", "computers", "macbook", "ebook", "chromebook"],
+        tvs: ["tv", "tvs", "television", "televisions", "smart tv", "smart televisions", "led tv"],
+        accessories: ["accessory", "accessories", "audio", "mobile accessories", "computer accessories", "electronics accessories"],
+      };
+
+      const activeAliases = categoryAliases[activeCategory] || [selectedCategory];
+
       resultList = resultList.filter((product) => {
         const productCategory = getProductCategory(product);
-        if (!productCategory) return false;
-
-        if (productCategory.includes(selectedCategory) || selectedCategory.includes(productCategory)) {
-          return true;
-        }
-
-        const categoryAliases = {
-          smartphones: ["smartphone", "smart phones", "smart phone", "mobile", "mobiles", "mobile phones", "cell phones"],
-          laptops: ["laptop", "notebook", "notebooks", "notebook computer"],
-          tvs: ["tv", "television", "televisions", "smart tv", "smart televisions"],
-          accessories: ["accessory", "accessories", "audio", "mobile accessories", "computer accessories", "electronics accessories"],
-        };
-
-        const aliases = categoryAliases[activeCategory] || [];
-        return aliases.some((alias) => productCategory.includes(normalizeCategory(alias)));
+        const productTitle = normalizeCategory(product.title || product.name || "");
+        
+        return activeAliases.some(
+          (alias) => productCategory.includes(alias) || productTitle.includes(alias)
+        ) || productCategory.includes(selectedCategory);
       });
     }
 
