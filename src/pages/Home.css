@@ -746,3 +746,23 @@ body,
 [class*="location"] [class*="header"] p {
   color: #d5eadf !important;
 }
+/* =========================================================
+   FIX: CITY & STATE ROW LAYOUT
+========================================================= */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.row .field {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.row .field input {
+  width: 100%;
+  box-sizing: border-box;
+}

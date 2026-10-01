@@ -6,10 +6,25 @@ import "./MyAddress.css";
 
 export default function MyAddress() {
   const { user } = useAuth();
-  const storageKey = `jcs_addresses_${user?.id ?? "guest"}`;
+  
+  // Create a reliable storage key supporting both user-specific and fallback storage
+  const userId = user?.id || user?.userId || user?._id;
+  const storageKey = userId ? `jcs_addresses_${userId}` : "jcs_addresses_guest";
 
   const [addresses, setAddresses] = useState(() => {
-    const saved = localStorage.getItem(storageKey);
+    // Check primary user/guest key first
+    let saved = localStorage.getItem(storageKey);
+    
+    // If empty, check general fallback keys so addresses never get lost on refresh
+    if (!saved || JSON.parse(saved || "[]").length === 0) {
+      for (const key of [storageKey, "jcs_addresses", "addresses", "saved_addresses"]) {
+        const data = localStorage.getItem(key);
+        if (data && JSON.parse(data).length > 0) {
+          saved = data;
+          break;
+        }
+      }
+    }
     return saved ? JSON.parse(saved) : [];
   });
   
@@ -25,7 +40,11 @@ export default function MyAddress() {
   });
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(addresses));
+    if (addresses.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(addresses));
+      // Also update general fallback keys for cross-page compatibility with checkout
+      localStorage.setItem("addresses", JSON.stringify(addresses));
+    }
   }, [addresses, storageKey]);
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -58,7 +77,14 @@ export default function MyAddress() {
     setForm({ name: "", type: "Home", line: "", city: "", state: "", pincode: "", lat: 16.5062, lng: 80.6480 });
   };
 
-  const removeAddress = (id) => setAddresses((prev) => prev.filter((a) => a.id !== id));
+  const removeAddress = (id) => {
+    const updated = addresses.filter((a) => a.id !== id);
+    setAddresses(updated);
+    if (updated.length === 0) {
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem("addresses");
+    }
+  };
 
   const setDefault = (id) =>
     setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));

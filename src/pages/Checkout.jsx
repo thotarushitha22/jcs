@@ -74,17 +74,32 @@ export default function Checkout() {
       const userId = userData?.id || userData?.userId || userData?._id;
       
       let addresses = [];
+      
+      // 1. Try user-specific or guest storage keys first
       if (userId) {
         const storageKey = `jcs_addresses_${userId}`;
         const savedAddresses = localStorage.getItem(storageKey);
         if (savedAddresses) {
           try {
             const parsed = JSON.parse(savedAddresses);
-            if (Array.isArray(parsed)) {
-              addresses = parsed;
-            }
-          } catch (e) {
-            console.warn("Could not read saved addresses");
+            if (Array.isArray(parsed)) addresses = parsed;
+          } catch (e) {}
+        }
+      }
+
+      // 2. Fallback: check general address storage keys if user-specific key is empty
+      if (addresses.length === 0) {
+        const generalKeys = ["jcs_addresses_guest", "addresses", "saved_addresses", "jcs_addresses", "user_addresses"];
+        for (const key of generalKeys) {
+          const generalData = localStorage.getItem(key);
+          if (generalData) {
+            try {
+              const parsed = JSON.parse(generalData);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                addresses = parsed;
+                break;
+              }
+            } catch (e) {}
           }
         }
       }
@@ -111,10 +126,10 @@ export default function Checkout() {
         userData?.contactNumber ||
         "";
 
-      const finalAddress = defaultAddress?.line || userData?.address || "";
+      const finalAddress = defaultAddress?.line || defaultAddress?.address || defaultAddress?.street || userData?.address || "";
       const finalCity = defaultAddress?.city || userData?.city || "";
       const finalState = defaultAddress?.state || userData?.state || "";
-      const finalPincode = defaultAddress?.pincode || userData?.pincode || "";
+      const finalPincode = defaultAddress?.pincode || defaultAddress?.postalCode || userData?.pincode || "";
 
       setForm({
         shippingName: finalName,
@@ -127,7 +142,7 @@ export default function Checkout() {
       });
 
       if (defaultAddress) {
-        setSavedAddressLabel(defaultAddress.type || "Default address");
+        setSavedAddressLabel(defaultAddress.type || defaultAddress.label || "Default address");
       }
 
       if (/^[1-9][0-9]{5}$/.test(String(finalPincode))) {
