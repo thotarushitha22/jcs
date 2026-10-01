@@ -11,6 +11,17 @@
   align-items: start;
 }
 
+.myaddr-grid-empty {
+  grid-template-columns: 1fr !important;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.myaddr-grid-empty .myaddr-empty {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 .myaddr-list { display: flex; flex-direction: column; gap: 12px; }
 .myaddr-empty { color: var(--slate-light); font-size: 14px; }
 

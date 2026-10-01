@@ -277,3 +277,75 @@ html, body {
     font-size: 12px;
   }
 }
+/* =========================================================
+   FIX: REMOVE PINK INPUT BACKGROUND
+========================================================= */
+.checkout-form input,
+.checkout-form select,
+.checkout-form textarea,
+.checkout input,
+.checkout select,
+.checkout textarea {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+/* Ensure background stays white when focused or autofilled */
+.checkout-form input:focus,
+.checkout-form select:focus,
+.checkout-form textarea:focus,
+.checkout input:focus,
+.checkout select:focus,
+.checkout textarea:focus {
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+/* Force white background on all checkout inputs and override browser autofill styles */
+.checkout input,
+.checkout select,
+.checkout textarea,
+.checkout-form input,
+.checkout-form select,
+.checkout-form textarea {
+  background-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* Specifically target PIN code and Phone elements to strip background tints */
+input[value="520011"],
+input[placeholder*="10-digit"],
+input[placeholder*="PIN"] {
+  background-color: #ffffff !important;
+}
+/* =========================================================
+   AGGRESSIVE FIX: REMOVE PINK BACKGROUND & AUTOFILL TINTS
+========================================================= */
+.checkout input,
+.checkout select,
+.checkout textarea,
+.checkout-form input,
+.checkout-form select,
+.checkout-form textarea {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.checkout input:focus,
+.checkout select:focus,
+.checkout textarea:focus,
+.checkout-form input:focus,
+.checkout-form select:focus,
+.checkout-form textarea:focus {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}

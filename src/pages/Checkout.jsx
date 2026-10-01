@@ -72,27 +72,7 @@ export default function Checkout() {
       }
 
       const userId = userData?.id || userData?.userId || userData?._id;
-      const profileName =
-        userData?.businessName ||
-        userData?.merchantName ||
-        userData?.company ||
-        userData?.name ||
-        userData?.fullName ||
-        "";
-      const profileGstin =
-        userData?.gstin || userData?.gstNumber || userData?.GSTIN || "";
-      const profilePhone =
-        userData?.phone ||
-        userData?.mobile ||
-        userData?.mobileNumber ||
-        userData?.contactNumber ||
-        "";
-      const profileAddress = userData?.address || userData?.street || "";
-      const profileCity = userData?.city || "";
-      const profileState = userData?.state || "";
-      const profilePincode =
-        userData?.pincode || userData?.pin || userData?.zip || "";
-
+      
       let addresses = [];
       if (userId) {
         const storageKey = `jcs_addresses_${userId}`;
@@ -114,13 +94,30 @@ export default function Checkout() {
         addresses[0] ||
         null;
 
-      const finalAddress = defaultAddress?.line || profileAddress || "";
-      const finalCity = defaultAddress?.city || profileCity || "";
-      const finalState = defaultAddress?.state || profileState || "";
-      const finalPincode = defaultAddress?.pincode || profilePincode || "";
+      // Pull customer/user name from saved address first, fallback to user profile name
+      const finalName =
+        defaultAddress?.name ||
+        userData?.name ||
+        userData?.fullName ||
+        userData?.businessName ||
+        "";
+
+      const profileGstin =
+        userData?.gstin || userData?.gstNumber || userData?.GSTIN || "";
+      const profilePhone =
+        userData?.phone ||
+        userData?.mobile ||
+        userData?.mobileNumber ||
+        userData?.contactNumber ||
+        "";
+
+      const finalAddress = defaultAddress?.line || userData?.address || "";
+      const finalCity = defaultAddress?.city || userData?.city || "";
+      const finalState = defaultAddress?.state || userData?.state || "";
+      const finalPincode = defaultAddress?.pincode || userData?.pincode || "";
 
       setForm({
-        shippingName: profileName,
+        shippingName: finalName,
         shippingGstin: profileGstin,
         shippingAddress: finalAddress,
         shippingCity: finalCity,
@@ -130,7 +127,7 @@ export default function Checkout() {
       });
 
       if (defaultAddress) {
-        setSavedAddressLabel(defaultAddress.label || "Default address");
+        setSavedAddressLabel(defaultAddress.type || "Default address");
       }
 
       if (/^[1-9][0-9]{5}$/.test(String(finalPincode))) {
@@ -237,20 +234,9 @@ export default function Checkout() {
       throw new Error("You are not logged in. Please login again.");
     }
 
-    console.log("====================================");
-    console.log("CREATING JCS ORDER");
-    console.log("Order ID:", generatedOrderId);
-    console.log("Payment:", paymentMethodLabel);
-    console.log("Payment Status:", paymentStatus);
-    console.log("Razorpay Order:", razorpayOrderId);
-    console.log("Razorpay Payment:", razorpayPaymentId);
-    console.log("Order payload:", payload);
-
     const response = await api.post("/orders", payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    console.log("ORDER SAVED:", response.data);
 
     try {
       const existingLocalOrders = JSON.parse(
@@ -301,16 +287,11 @@ export default function Checkout() {
         throw new Error("Razorpay Checkout is unavailable.");
       }
 
-      console.log("Creating Razorpay Test Order...");
-      console.log("Amount:", totalPrice);
-
       const createResponse = await api.post("/payment/create-order", {
         amount: Number(totalPrice),
         currency: "INR",
         receipt: `JCS-${Date.now()}`,
       });
-
-      console.log("Razorpay create-order response:", createResponse.data);
 
       const razorpayData = createResponse.data;
 
@@ -353,15 +334,10 @@ export default function Checkout() {
         theme: { color: "#111827" },
         modal: {
           ondismiss: () => {
-            console.log("Razorpay checkout closed.");
             setProcessingPayment(false);
           },
         },
         handler: async function (razorpayResponse) {
-          console.log("====================================");
-          console.log("RAZORPAY PAYMENT SUCCESS");
-          console.log(razorpayResponse);
-
           try {
             setSuccessMessage("Payment received. Verifying...");
 
@@ -370,8 +346,6 @@ export default function Checkout() {
               razorpay_payment_id: razorpayResponse.razorpay_payment_id,
               razorpay_signature: razorpayResponse.razorpay_signature,
             });
-
-            console.log("Verification response:", verifyResponse.data);
 
             const verifyData = verifyResponse.data;
 
@@ -416,14 +390,6 @@ export default function Checkout() {
               });
             }, 1200);
           } catch (verifyError) {
-            console.error(
-              "PAYMENT VERIFICATION FAILED:",
-              verifyError
-            );
-            console.error(
-              "Backend response:",
-              verifyError?.response?.data
-            );
             setProcessingPayment(false);
             setPlacing(false);
             setError(
@@ -438,7 +404,6 @@ export default function Checkout() {
       const razorpay = new window.Razorpay(options);
 
       razorpay.on("payment.failed", function (response) {
-        console.error("RAZORPAY PAYMENT FAILED:", response);
         setProcessingPayment(false);
         setPlacing(false);
         setError(
@@ -447,15 +412,8 @@ export default function Checkout() {
         );
       });
 
-      console.log("Opening Razorpay Test Checkout...");
       razorpay.open();
     } catch (err) {
-      console.error("====================================");
-      console.error("RAZORPAY CHECKOUT ERROR");
-      console.error("Status:", err?.response?.status);
-      console.error("Backend response:", err?.response?.data);
-      console.error("Message:", err.message);
-      console.error("====================================");
       setProcessingPayment(false);
       setPlacing(false);
       setError(
@@ -471,8 +429,7 @@ export default function Checkout() {
     setError(null);
 
     try {
-      const paymentStatus =
-        paymentMethod === "cod" ? "PENDING" : "PENDING";
+      const paymentStatus = "PENDING";
       const paymentLabel =
         paymentMethod === "cod"
           ? "Cash on Delivery"
@@ -494,8 +451,6 @@ export default function Checkout() {
         },
       });
     } catch (err) {
-      console.error("ORDER CREATION FAILED:", err);
-      console.error("Backend response:", err?.response?.data);
       setPlacing(false);
       setError(
         err?.response?.data?.message ||
@@ -511,7 +466,7 @@ export default function Checkout() {
     setSuccessMessage("");
 
     if (!form.shippingName.trim()) {
-      setError("Please enter the shipping name.");
+      setError("Please enter the user/customer name.");
       return;
     }
 
@@ -644,18 +599,17 @@ export default function Checkout() {
                 marginRight: "6px",
               }}
             />
-            Shipping details are automatically loaded from your
-            Profile / saved address.
+            Shipping details are automatically loaded from your saved address.
           </div>
 
           <div className="field">
             <label>
-              Business / consignee name{" "}
+              User / Customer Name{" "}
               <span className="required">*</span>
             </label>
             <input
               required
-              placeholder="ABC Retail Pvt Ltd"
+              placeholder="Enter customer name"
               value={form.shippingName}
               onChange={update("shippingName")}
             />
@@ -934,21 +888,6 @@ export default function Checkout() {
               )} via Razorpay`
             )}
           </button>
-
-          {paymentMethod === "razorpay_sandbox" && (
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: "12px",
-                color: "#6b7280",
-                marginTop: "10px",
-              }}
-            >
-              🔒 Razorpay Test Mode
-              <br />
-              No real money will be charged.
-            </p>
-          )}
         </aside>
       </form>
     </div>
