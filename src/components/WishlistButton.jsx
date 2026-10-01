@@ -3,6 +3,7 @@ import { Heart } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import "./WishlistButton.css";
 
 const API_BASE = "https://jcs-server-1.onrender.com/api";
 
@@ -129,11 +130,8 @@ export default function WishlistButton({ product, productId: propProductId }) {
       type="button"
       onClick={handleToggleWishlist}
       disabled={loading}
-      className={`p-2 rounded-full transition flex items-center justify-center border ${
-        isWishlisted 
-          ? "bg-red-50 text-red-500 border-red-200" 
-          : "bg-white text-gray-500 border-gray-200 hover:text-red-500 hover:border-red-200"
-      }`}
+      className={`wl-btn ${isWishlisted ? "wl-btn-active" : ""}`}
+      aria-pressed={isWishlisted}
       title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
     >
       <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />

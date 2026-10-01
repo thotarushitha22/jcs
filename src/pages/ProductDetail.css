@@ -44,7 +44,7 @@
   grid-template-columns:
     minmax(500px, 720px)
     minmax(520px, 1fr);
-  gap: 35px;
+  gap: 64px;
   align-items: start;
 }
 
@@ -759,4 +759,312 @@
 .reviews-header button:hover,
 .write-review-btn:hover {
   background-color: #1d4ed8 !important;
+}
+
+/* ===================================
+   PINCODE BOX - space between input and Check button
+   (overrides the pink "form input" rule in Home.css)
+=================================== */
+
+.pd-delivery {
+  gap: 10px;
+  padding: 3px 5px 3px 12px;
+}
+
+.pd-delivery svg {
+  flex-shrink: 0;
+}
+
+.pd-delivery input.pd-pin-input,
+.pd-delivery input[type="text"] {
+  flex: 1;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0;
+  height: 100%;
+  padding: 0 6px !important;
+  margin: 0 6px 0 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-size: 13px !important;
+}
+
+.pd-delivery input.pd-pin-input::placeholder {
+  color: var(--slate-light) !important;
+  opacity: 1 !important;
+}
+
+.pd-delivery .btn {
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+@media (max-width: 1250px) {
+  .pd-grid {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .pd-grid {
+    gap: 24px;
+  }
+}
+
+
+/* ===================================
+   LARGER CONTROLS - FILL THE DETAILS COLUMN
+=================================== */
+
+.pd-brand { font-size: 14px; }
+
+.pd-title {
+  font-size: 38px;
+  margin: 2px 0 6px;
+}
+
+.pd-price { font-size: 40px; }
+.pd-mrp   { font-size: 17px; }
+.pd-per   { font-size: 14px; }
+.pd-ids   { font-size: 13px; margin-bottom: 10px; }
+
+.pd-specs {
+  padding: 10px 16px;
+  margin-bottom: 12px;
+}
+
+.pd-specs > div { font-size: 13px; }
+.pd-specs b     { font-size: 15px; }
+
+.pd-qty label { font-size: 14px; margin-bottom: 6px; }
+
+.pd-qty-controls { height: 44px; }
+.pd-qty-controls button { width: 46px; font-size: 18px; }
+.pd-qty-controls span   { width: 54px; font-size: 15px; }
+
+.pd-cta-row {
+  max-width: 760px;
+  gap: 14px;
+  margin: 8px 0 14px;
+}
+
+.pd-cta {
+  height: 48px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+
+.pd-delivery {
+  max-width: 760px;
+  height: 48px;
+}
+
+.pd-delivery input { font-size: 15px; }
+.pd-delivery .btn  { height: 36px; min-width: 76px; font-size: 14px; }
+
+.pd-highlights-box {
+  max-width: 760px;
+  padding: 14px 18px;
+  margin: 10px 0 14px;
+}
+
+.pd-highlight-item strong { font-size: 14px; }
+.pd-highlight-item p      { font-size: 12px; }
+.pd-highlight-icon        { font-size: 18px; }
+
+.pd-variant-label { font-size: 15px; }
+
+.pd-variant-chip {
+  min-height: 38px;
+  padding: 6px 16px;
+  font-size: 14px;
+}
+
+.pd-note {
+  max-width: 760px;
+  font-size: 12px;
+}
+
+/* ===================================
+   QUICK INFO PANEL
+=================================== */
+
+.pd-quick {
+  width: 100%;
+  max-width: 760px;
+  margin: 14px 0 8px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid var(--paper-line);
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.pd-quick h3 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pd-quick h3 + .pd-quick-text,
+.pd-quick h3 + .pd-quick-grid {
+  margin-top: 0;
+}
+
+.pd-quick-text {
+  margin: 0 0 16px;
+  color: var(--slate);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.pd-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.pd-quick-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  background: var(--paper-dim);
+  border-radius: 8px;
+}
+
+.pd-quick-item span {
+  color: var(--slate-light);
+  font-size: 12px;
+}
+
+.pd-quick-item b {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+@media (max-width: 650px) {
+  .pd-title { font-size: 28px; }
+  .pd-price { font-size: 32px; }
+}
+
+
+/* ===================================
+   BIGGER IMAGE + ASSURANCE CARD UNDER IT
+=================================== */
+
+.pd-image {
+  height: 680px;
+}
+
+.pd-image img {
+  width: 85%;
+  height: 85%;
+}
+
+.pd-trust {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid var(--paper-line);
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.pd-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--paper-dim);
+  border-radius: 8px;
+}
+
+.pd-trust-item > span {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pd-trust-item strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.pd-trust-item p {
+  margin: 2px 0 0;
+  color: var(--slate-light);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.pd-trust-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1250px) {
+  .pd-image { height: 560px; }
+}
+
+@media (max-width: 650px) {
+  .pd-image { height: 380px; }
+  .pd-trust { grid-template-columns: 1fr; }
+}
+
+/* ===================================
+   SELECTED VARIANT CHIP - keep text visible while hovering
+   (the :hover colour was turning the text green on a green chip)
+=================================== */
+
+.pd-variant-chip.pd-variant-chip-active,
+.pd-variant-chip.pd-variant-chip-active:hover,
+.pd-variant-chip.pd-variant-chip-active:focus {
+  color: #ffffff !important;
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+
+/* ===================================
+   WISHLIST HEART ON THE IMAGE (top-right)
+=================================== */
+
+.pd-image {
+  position: relative;
+}
+
+.pd-wishlist-overlay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+}
+
+.pd-wishlist-overlay .wl-btn {
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.18);
+}
+
+@media (max-width: 650px) {
+  .pd-wishlist-overlay {
+    top: 10px;
+    right: 10px;
+  }
+
+  .pd-wishlist-overlay .wl-btn {
+    width: 40px;
+    height: 40px;
+  }
 }

@@ -1,0 +1,50 @@
+/* ===================================
+   WISHLIST HEART BUTTON
+=================================== */
+
+.wl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid var(--paper-line);
+  border-radius: 50%;
+  color: var(--slate);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease,
+    border-color 0.15s ease, transform 0.15s ease;
+}
+
+.wl-btn:hover:not(:disabled) {
+  color: #e53e3e;
+  border-color: #f5b5b5;
+  transform: scale(1.08);
+}
+
+.wl-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.wl-btn-active,
+.wl-btn-active:hover:not(:disabled) {
+  color: #e53e3e;
+  background: #fff1f1;
+  border-color: #f5b5b5;
+}
+
+/* smaller version on product cards */
+.p-wishlist-overlay .wl-btn {
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 3px rgba(11, 18, 32, 0.15);
+}
+
+.p-wishlist-overlay .wl-btn svg {
+  width: 18px;
+  height: 18px;
+}

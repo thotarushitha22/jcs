@@ -1,27 +1,41 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, ShoppingCart, Heart, Image as ImageIcon } from "lucide-react";
+import { Trash2, ShoppingCart, Heart, Image as ImageIcon, PackageCheck } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import "./Wishlist.css";
 
 const API_BASE = "https://jcs-server-1.onrender.com/api";
 
-const PRODUCT_IMAGES = {
-  "neopticon": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60",
-  "ebook": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60",
-  "laptop": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60",
-  "motorola": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&auto=format&fit=crop&q=60",
-  "moto": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&auto=format&fit=crop&q=60",
-  "poco": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60",
-  "samsung": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60"
+const readList = (key) => {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+};
+
+const getId = (item) => Number(item?.productId || item?.id || item?._id);
+
+// Same image logic as the product cards on the home page
+const getImage = (product) => {
+  const first = Array.isArray(product.images) ? product.images[0] : null;
+  const raw =
+    (typeof first === "string" ? first : first?.url || first?.image) ||
+    product.image ||
+    product.imageUrl ||
+    product.productImage ||
+    "";
+  return typeof raw === "string" && !raw.includes("undefined") ? raw.trim() : "";
 };
 
 export default function Wishlist() {
   const { user } = useAuth();
   const { addToCart } = useCart();
-  
+
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUser = user || storedUser;
   const userId = currentUser?.id || currentUser?.userId;
@@ -34,27 +48,36 @@ export default function Wishlist() {
     const fetchData = async () => {
       try {
         setLoading(true);
+
         const [wishlistRes, productsRes] = await Promise.all([
           axios.get(`${API_BASE}/wishlist/${userId}`).catch(() => ({ data: { data: [] } })),
-          axios.get(`${API_BASE}/products`).catch(() => ({ data: [] }))
+          axios.get(`${API_BASE}/products`).catch(() => ({ data: [] })),
         ]);
 
-        let items = wishlistRes.data.data || wishlistRes.data || [];
-        
-        const localDeleted = JSON.parse(localStorage.getItem(`deleted_wishlist_${userId}`) || "[]");
-        items = items.filter(i => {
-          const prodId = Number(i.productId || i.id || i._id);
-          return !localDeleted.includes(prodId);
+        let items = wishlistRes.data?.data || wishlistRes.data || [];
+        if (!Array.isArray(items)) items = [];
+
+        const prodData = productsRes.data?.data || productsRes.data;
+        const products = Array.isArray(prodData) ? prodData : [];
+        setAllProducts(products);
+
+        // hearts added on this device but not (yet) saved on the server
+        const localAdded = readList(`added_wishlist_${userId}`);
+        const serverIds = items.map(getId);
+        localAdded.forEach((id) => {
+          if (!serverIds.includes(id)) {
+            const found = products.find((p) => getId(p) === id);
+            if (found) items.push({ productId: id });
+          }
         });
 
+        // hearts removed on this device
+        const localDeleted = readList(`deleted_wishlist_${userId}`);
+        items = items.filter((i) => !localDeleted.includes(getId(i)));
+
         setWishlistItems(items);
-        
-        const prodData = productsRes.data.data || productsRes.data;
-        if (Array.isArray(prodData)) {
-          setAllProducts(prodData);
-        }
       } catch (error) {
-        // Suppress
+        // ignore - empty state is shown
       } finally {
         setLoading(false);
       }
@@ -67,166 +90,172 @@ export default function Wishlist() {
     }
   }, [userId]);
 
-  const handleRemove = (item) => {
-    const prodId = Number(item.productId || item.id || item._id);
+  const removeFromList = (item, silent = false) => {
+    const prodId = getId(item);
 
-    setWishlistItems((prev) => 
-      prev.filter((i) => Number(i.productId || i.id || i._id) !== prodId)
-    );
+    setWishlistItems((prev) => prev.filter((i) => getId(i) !== prodId));
 
-    const localDeleted = JSON.parse(localStorage.getItem(`deleted_wishlist_${userId}`) || "[]");
-    if (!localDeleted.includes(prodId)) {
-      localDeleted.push(prodId);
-      localStorage.setItem(`deleted_wishlist_${userId}`, JSON.stringify(localDeleted));
-    }
+    const localDeleted = readList(`deleted_wishlist_${userId}`);
+    if (!localDeleted.includes(prodId)) localDeleted.push(prodId);
+    localStorage.setItem(`deleted_wishlist_${userId}`, JSON.stringify(localDeleted));
 
-    toast.success("Removed from wishlist");
+    // keep the heart buttons in sync
+    const localAdded = readList(`added_wishlist_${userId}`).filter((id) => id !== prodId);
+    localStorage.setItem(`added_wishlist_${userId}`, JSON.stringify(localAdded));
+
+    if (!silent) toast.success("Removed from wishlist");
   };
 
-  const handleAddToCart = (productToUse) => {
-    addToCart(productToUse, 1);
-    toast.success("Moved item to cart!");
+  const handleMoveToCart = (item, product) => {
+    addToCart(product, 1);
+    removeFromList(item, true);
+    toast.success("Moved to cart");
   };
 
+  // live product data first, saved wishlist data fills any gaps
   const getProductDetails = (item) => {
-    const prodId = Number(item.productId || item.id || item._id);
-    const title = item.title || item.name || "Product";
-    const lowerTitle = title.toLowerCase();
-
-    const matchedProduct = allProducts.find(p => {
-      const pId = Number(p.id || p._id || p.productId);
-      const pTitle = (p.title || p.name || "").toLowerCase().trim();
-      return pId === prodId || (lowerTitle && pTitle && (pTitle.includes(lowerTitle) || lowerTitle.includes(pTitle)));
-    }) || {};
-
-    const price = Number(item.price || matchedProduct.price || 0);
-    const brand = item.brand || matchedProduct.brand;
-
-    let imageUrl = "";
-    for (const [keyword, url] of Object.entries(PRODUCT_IMAGES)) {
-      if (lowerTitle.includes(keyword)) {
-        imageUrl = url;
-        break;
-      }
-    }
-
-    // Absolute fail-safe guarantee for the Neopticon laptop item
-    if (!imageUrl && (lowerTitle.includes("neopticon") || lowerTitle.includes("ebook"))) {
-      imageUrl = "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60";
-    }
-
-    if (!imageUrl) {
-      imageUrl = 
-        matchedProduct.image || 
-        matchedProduct.imageUrl || 
-        matchedProduct.productImage ||
-        item.image || 
-        item.imageUrl || 
-        item.productImage || 
-        "";
-    }
+    const prodId = getId(item);
+    const matched = allProducts.find((p) => getId(p) === prodId) || {};
+    const merged = { ...item, ...matched };
 
     return {
-      id: prodId || matchedProduct.id || matchedProduct._id,
-      title,
-      price,
-      brand,
-      image: typeof imageUrl === 'string' ? imageUrl.trim() : "",
-      ...matchedProduct,
-      ...item
+      ...merged,
+      id: prodId || matched.id || matched._id,
+      title: merged.title || merged.name || "Product",
+      price: Number(merged.price || 0),
+      mrp: Number(merged.mrp || 0),
+      stock: merged.stock === undefined ? null : Number(merged.stock),
+      image: getImage(merged),
     };
   };
 
+  /* ---------------- states ---------------- */
+
   if (!userId) {
     return (
-      <div className="page container text-center py-16">
-        <Heart size={48} className="mx-auto text-gray-300 mb-4" />
-        <h2 className="text-xl font-bold mb-2">Sign in to view your Wishlist</h2>
-        <p className="text-gray-500 mb-6">Keep track of items you want to buy later.</p>
-        <Link to="/login" className="btn btn-primary">Sign In</Link>
+      <div className="page wl-page">
+        <div className="wl-empty">
+          <Heart size={44} />
+          <h2>Sign in to view your wishlist</h2>
+          <p>Keep track of the items you want to buy later.</p>
+          <Link to="/login" className="btn btn-primary">Sign in</Link>
+        </div>
       </div>
     );
   }
 
   if (loading) {
-    return <div className="page container py-16 text-center">Loading your wishlist...</div>;
-  }
-
-  if (wishlistItems.length === 0) {
     return (
-      <div className="page container text-center py-16">
-        <Heart size={48} className="mx-auto text-gray-300 mb-4" />
-        <h2 className="text-xl font-bold mb-2">Your Wishlist is Empty</h2>
-        <p className="text-gray-500 mb-6">Explore our products and save your favorites here!</p>
-        <Link to="/" className="btn btn-primary">Start Shopping</Link>
+      <div className="page wl-page">
+        <div className="wl-empty">
+          <p>Loading your wishlist…</p>
+        </div>
       </div>
     );
   }
 
-  return (
-    <main className="page container py-8">
-      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <Heart className="text-red-500" fill="currentColor" size={24} /> My Wishlist ({wishlistItems.length})
-      </h1>
+  if (wishlistItems.length === 0) {
+    return (
+      <div className="page wl-page">
+        <div className="wl-empty">
+          <Heart size={44} />
+          <h2>Your wishlist is empty</h2>
+          <p>Tap the heart on any product to save it here.</p>
+          <Link to="/" className="btn btn-primary">Start shopping</Link>
+        </div>
+      </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  /* ---------------- list ---------------- */
+
+  return (
+    <div className="page wl-page">
+      <div className="wl-head">
+        <h1 className="wl-title">
+          <Heart size={26} fill="currentColor" />
+          My wishlist
+        </h1>
+        <span className="wl-count mono">
+          {wishlistItems.length} {wishlistItems.length === 1 ? "item" : "items"}
+        </span>
+      </div>
+
+      <div className="wl-grid">
         {wishlistItems.map((item) => {
           const product = getProductDetails(item);
+          const outOfStock = product.stock !== null && product.stock <= 0;
+          const discount =
+            product.mrp > product.price && product.mrp > 0
+              ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+              : 0;
 
           return (
-            <div key={product.id || item._id} className="border rounded-lg p-4 bg-white shadow-sm flex flex-col justify-between">
-              <div>
-                <Link to={`/product/${product.id}`}>
-                  <div className="h-48 w-full overflow-hidden rounded-md mb-4 bg-gray-100 flex items-center justify-center relative">
-                    {product.image && !product.image.includes("undefined") ? (
-                      <img 
-                        src={product.image} 
-                        alt={product.title} 
-                        className="object-contain h-full w-full p-2 hover:scale-105 transition-transform" 
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-gray-400">
-                        <ImageIcon size={36} className="mb-1" />
-                        <span className="text-xs">No Image Available</span>
-                      </div>
-                    )}
-                  </div>
+            <div key={product.id || item._id} className="wl-card">
+              <Link to={`/product/${product.id}`} className="wl-image">
+                {product.image ? (
+                  <img src={product.image} alt={product.title} loading="lazy" />
+                ) : (
+                  <span className="wl-no-image">
+                    <ImageIcon size={34} />
+                    No image
+                  </span>
+                )}
+                {outOfStock && <span className="wl-oos">Out of stock</span>}
+              </Link>
+
+              <div className="wl-body">
+                {product.brand && <span className="wl-brand">{product.brand}</span>}
+
+                <Link to={`/product/${product.id}`} className="wl-name">
+                  {product.title}
                 </Link>
 
-                {product.brand && <span className="text-xs text-gray-500 uppercase font-semibold">{product.brand}</span>}
-                <Link to={`/product/${product.id}`}>
-                  <h3 className="font-medium text-gray-800 hover:text-blue-600 line-clamp-2 mt-1 mb-2">
-                    {product.title}
-                  </h3>
-                </Link>
-
-                <div className="text-lg font-bold text-gray-900 mb-4">
-                  ₹{Number(product.price).toLocaleString("en-IN")}
+                <div className="wl-price-row">
+                  <span className="wl-price mono">
+                    ₹{product.price.toLocaleString("en-IN")}
+                  </span>
+                  {product.mrp > product.price && (
+                    <span className="wl-mrp mono">
+                      ₹{product.mrp.toLocaleString("en-IN")}
+                    </span>
+                  )}
+                  {discount > 0 && <span className="wl-off">{discount}% off</span>}
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t">
-                <button
-                  type="button"
-                  onClick={() => handleAddToCart(product)}
-                  className="btn btn-primary flex-1 flex items-center justify-center gap-2 text-sm"
-                >
-                  <ShoppingCart size={16} /> Add to Cart
-                </button>
+                {product.stock !== null && !outOfStock && (
+                  <span className="wl-stock">
+                    <PackageCheck size={13} />
+                    {product.stock.toLocaleString("en-IN")} in stock
+                  </span>
+                )}
 
-                <button
-                  type="button"
-                  onClick={() => handleRemove(item)}
-                  className="p-2 border rounded-md text-gray-500 hover:text-red-600 hover:border-red-200 transition"
-                  title="Remove from Wishlist"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="wl-actions">
+                  <button
+                    type="button"
+                    className="btn btn-primary wl-cart"
+                    onClick={() => handleMoveToCart(item, product)}
+                    disabled={outOfStock}
+                  >
+                    <ShoppingCart size={16} />
+                    {outOfStock ? "Unavailable" : "Move to cart"}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="wl-remove"
+                    onClick={() => removeFromList(item)}
+                    title="Remove from wishlist"
+                    aria-label="Remove from wishlist"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
-    </main>
+    </div>
   );
 }

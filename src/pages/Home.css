@@ -523,63 +523,6 @@ div[class*="modal"] span,
   color: #0f172a !important;
 }
 /* =========================================
-   CHECKOUT INPUT BOXES - COMPACT LIGHT PINK
-========================================= */
-.checkout input,
-.checkout select,
-.checkout textarea,
-[class*="checkout"] input,
-[class*="checkout"] select,
-[class*="checkout"] textarea,
-form input[type="text"],
-form input[type="tel"],
-form input[type="number"] {
-  background-color: #fce7f3 !important; /* Soft light pink background */
-  background: #fce7f3 !important;
-  border: 1px solid #f472b6 !important; /* Rose pink border */
-  border-radius: 6px !important;
-  padding: 6px 10px !important; /* Reduced padding for smaller height */
-  font-size: 13px !important; /* Compact font size */
-  max-width: 100% !important; /* Keeps boxes neatly sized */
-  color: #831843 !important; /* Deep contrast text */
-}
-
-/* Make placeholder text legible */
-.checkout input::placeholder,
-[class*="checkout"] input::placeholder {
-  color: #9d174d !important;
-  opacity: 0.7 !important;
-}
-/* =========================================
-   COMPACT & SMALLER CHECKOUT INPUT BOXES
-========================================= */
-.checkout input,
-.checkout select,
-.checkout textarea,
-[class*="checkout"] input,
-[class*="checkout"] select,
-[class*="checkout"] textarea,
-form input[type="text"],
-form input[type="tel"],
-form input[type="number"] {
-  background-color: #fce7f3 !important; /* Soft light pink background */
-  background: #fce7f3 !important;
-  border: 1px solid #f472b6 !important; /* Rose pink border */
-  border-radius: 6px !important;
-  padding: 6px 10px !important; /* Smaller height padding */
-  font-size: 13px !important; /* Compact font size */
-  max-width: 420px !important; /* Restricts the box width so they aren't overly huge */
-  width: 100% !important;
-  color: #831843 !important; /* Deep contrast text */
-}
-
-/* Make placeholder text legible */
-.checkout input::placeholder,
-[class*="checkout"] input::placeholder {
-  color: #9d174d !important;
-  opacity: 0.7 !important;
-}
-/* =========================================
    REVERT PAYMENT SECTION TO DEFAULT
 ========================================= */
 .payment-methods,
@@ -745,24 +688,4 @@ body,
 [class*="modal"] [class*="header"] p,
 [class*="location"] [class*="header"] p {
   color: #d5eadf !important;
-}
-/* =========================================================
-   FIX: CITY & STATE ROW LAYOUT
-========================================================= */
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.row .field {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.row .field input {
-  width: 100%;
-  box-sizing: border-box;
 }

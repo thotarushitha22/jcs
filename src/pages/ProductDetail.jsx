@@ -180,7 +180,7 @@ export default function ProductDetail() {
   };
 
   const checkDelivery = (event) => {
-    event.preventDefault();
+    event?.preventDefault?.();
 
     if (/^[1-6][0-9]{5}$/.test(pincode)) {
       setDeliveryStatus("ok");
@@ -425,6 +425,11 @@ export default function ProductDetail() {
                 Product image unavailable
               </div>
             )}
+
+            {/* Wishlist heart on the image */}
+            <div className="pd-wishlist-overlay">
+              <WishlistButton product={product} productId={id} />
+            </div>
           </div>
 
           {gallery.length > 1 && (
@@ -455,6 +460,49 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+
+          {/* Buying assurance (fills the space under the image) */}
+          <div className="pd-trust">
+            <div className="pd-trust-item">
+              <span>🛡️</span>
+              <div>
+                <strong>1 Year Warranty</strong>
+                <p>Manufacturer assured</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>🔄</span>
+              <div>
+                <strong>Easy Returns</strong>
+                <p>7-day policy</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>⚡</span>
+              <div>
+                <strong>Fast Dispatch</strong>
+                <p>Ships within 24 hrs</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>🔒</span>
+              <div>
+                <strong>Secure Payment</strong>
+                <p>Protected at checkout</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item pd-trust-wide">
+              <span>✅</span>
+              <div>
+                <strong>GST-verified orders</strong>
+                <p>Orders are verified against your GST profile before dispatch</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* =====================================
@@ -661,9 +709,6 @@ export default function ProductDetail() {
                   Buy Now
                 </button>
 
-                {/* Added Wishlist Button here */}
-                <WishlistButton productId={id} />
-
               </div>
 
             </>
@@ -671,15 +716,20 @@ export default function ProductDetail() {
 
           {/* PINCODE */}
 
-          <form
+          {/* div instead of form: global "form input" styles (pink boxes)
+              can no longer reach this input */}
+          <div
             className="pd-delivery"
-            onSubmit={checkDelivery}
+            style={{ gap: 12 }}
           >
 
             <MapPin size={17} />
 
             <input
-              type="text"
+              className="pd-pin-input"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") checkDelivery(event);
+              }}
               inputMode="numeric"
               placeholder="Enter delivery pincode"
               value={pincode}
@@ -699,13 +749,15 @@ export default function ProductDetail() {
             />
 
             <button
-              type="submit"
+              type="button"
               className="btn btn-outline"
+              style={{ marginLeft: 8 }}
+              onClick={checkDelivery}
             >
               Check
             </button>
 
-          </form>
+          </div>
 
           {deliveryStatus === "ok" && (
             <p className="pd-delivery-ok">
@@ -720,68 +772,6 @@ export default function ProductDetail() {
               pincode.
             </p>
           )}
-
-          {/* =====================================
-              WARRANTY / RETURNS / DISPATCH BOX
-          ===================================== */}
-
-          <div className="pd-highlights-box">
-
-            <div className="pd-highlight-item">
-
-              <span className="pd-highlight-icon">
-                🛡️
-              </span>
-
-              <div>
-                <strong>
-                  1 Year Warranty
-                </strong>
-
-                <p>
-                  Manufacturer assured
-                </p>
-              </div>
-
-            </div>
-
-            <div className="pd-highlight-item">
-
-              <span className="pd-highlight-icon">
-                🔄
-              </span>
-
-              <div>
-                <strong>
-                  Easy Returns
-                </strong>
-
-                <p>
-                  7-day policy
-                </p>
-              </div>
-
-            </div>
-
-            <div className="pd-highlight-item">
-
-              <span className="pd-highlight-icon">
-                ⚡
-              </span>
-
-              <div>
-                <strong>
-                  Fast Dispatch
-                </strong>
-
-                <p>
-                  Ships in 24 hrs
-                </p>
-              </div>
-
-            </div>
-
-          </div>
 
           {/* =====================================
               INTERACTIVE VARIANTS
@@ -816,6 +806,60 @@ export default function ProductDetail() {
 
             </div>
           )}
+
+          {/* =====================================
+              QUICK INFO (fills the right column)
+          ===================================== */}
+
+          {(() => {
+            const categoryName =
+              typeof product.category === "object"
+                ? product.category?.name
+                : product.category;
+
+            const quickSpecs = [
+              ["Brand", product.brand],
+              ["Model", product.model],
+              ["Category", categoryName],
+              ["Storage", prodStorage],
+              ["RAM", prodRam],
+              ["Colour", prodColour],
+              ["Min. order", product.moq],
+            ].filter(([, value]) => value);
+
+            const summary = prodOverview
+              ? String(prodOverview).length > 260
+                ? `${String(prodOverview).slice(0, 260).trim()}…`
+                : String(prodOverview)
+              : "";
+
+            if (!summary && quickSpecs.length === 0) return null;
+
+            return (
+              <div className="pd-quick">
+                {summary && (
+                  <>
+                    <h3>About this product</h3>
+                    <p className="pd-quick-text">{summary}</p>
+                  </>
+                )}
+
+                {quickSpecs.length > 0 && (
+                  <>
+                    <h3>Quick specs</h3>
+                    <div className="pd-quick-grid">
+                      {quickSpecs.map(([label, value]) => (
+                        <div className="pd-quick-item" key={label}>
+                          <span>{label}</span>
+                          <b>{String(value)}</b>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           <p className="pd-note">
             Payment is secured at checkout.
