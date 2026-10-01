@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/products";
 import ProductCard from "../components/ProductCard";
-import HeroCarousel from "../components/HeroCarousel";
+import BannerRail from "../components/BannerRail";
 import HowItWorks from "../components/HowItWorks";
 import WhyChooseUs from "../components/WhyChooseUs";
 import CtaBanner from "../components/CtaBanner";
@@ -193,7 +193,7 @@ export default function Home() {
 
   return (
     <div className="page">
-      <HeroCarousel />
+      <BannerRail />
 
       <section className="catalog">
         {/* Multi-tier Sidebar Filter Box */}

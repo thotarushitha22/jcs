@@ -91,3 +91,32 @@
   .hc-title { font-size: 30px; }
   .hc-arrow { display: none; }
 }
+
+/* ---- Festival campaigns ---- */
+.hc-tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--hc-from), var(--hc-to));
+  opacity: 0.55;
+}
+.hc-festive .hc-overlay {
+  background: linear-gradient(90deg, rgba(11,18,32,0.78) 0%, rgba(11,18,32,0.5) 45%, rgba(11,18,32,0.1) 100%);
+}
+.hc-festive .eyebrow { color: var(--hc-accent); }
+
+.hc-art {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(40%, 480px);
+  height: 90%;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .hc-art { right: -14%; width: 80%; opacity: 0.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hc-slide { transition: none; }
+}

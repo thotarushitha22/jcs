@@ -1,3 +1,15 @@
+/* =========================================
+   THEME TOKENS - deep green + sage
+========================================= */
+:root {
+  --ink: #14342b !important;
+  --ink-soft: #1b4a3d !important;
+  --ink-line: rgba(255, 255, 255, 0.14) !important;
+  --signal: #1f8a63 !important;
+  --paper-dim: #e4ece1 !important;
+  --paper-line: #d3dfd0 !important;
+}
+
 .hero {
   background: var(--ink);
   color: #fff;
@@ -63,8 +75,8 @@
 html, 
 body, 
 .page {
-  background-color: #dbeafe !important;
-  color: #1e3a8a !important;
+  background-color: #eef3ec !important;
+  color: #14342b !important;
 }
 
 /* =========================================
@@ -97,7 +109,7 @@ body,
    COMPACT MULTI-TIER SIDEBAR BOX (Dark Blue)
 ========================================= */
 .filters {
-  background-color: #1e3a8a !important;
+  background-color: #14342b !important;
   padding: 16px !important;
   border-radius: 12px !important;
   display: flex;
@@ -112,7 +124,7 @@ body,
   width: 5px;
 }
 .filters::-webkit-scrollbar-thumb {
-  background-color: #3b82f6;
+  background-color: #1f8a63;
   border-radius: 4px;
 }
 
@@ -121,7 +133,7 @@ body,
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #93c5fd !important;
+  color: #b7d9c6 !important;
   margin-top: 14px;
   margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -155,19 +167,19 @@ body,
 }
 
 .filter-item:hover {
-  background-color: #1d4ed8 !important;
+  background-color: #1b5e46 !important;
   color: #ffffff !important;
 }
 
 .filter-item.active {
-  background-color: #3b82f6 !important;
+  background-color: #1f8a63 !important;
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
 .filter-count {
   font-size: 12px;
-  color: #93c5fd;
+  color: #b7d9c6;
 }
 
 /* Best Sellers heading */
@@ -175,7 +187,7 @@ body,
   font-size: 30px;
   font-weight: 800;
   margin-bottom: 16px;
-  color: #1e3a8a !important;
+  color: #14342b !important;
 }
 
 /* Results and sorting */
@@ -184,11 +196,11 @@ body,
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
-  background-color: rgba(30, 58, 138, 0.08);
-  border: 1px solid rgba(30, 58, 138, 0.2);
+  background-color: rgba(20, 52, 43, 0.06);
+  border: 1px solid rgba(20, 52, 43, 0.15);
   border-radius: 8px;
   padding: 12px 16px;
-  color: #1e3a8a;
+  color: #14342b;
   font-size: 15px;
 }
 
@@ -213,8 +225,8 @@ body,
 div[class*="product-card"],
 .product-card,
 article {
-  background-color: #1e3a8a !important;
-  border: 1px solid #3b82f6 !important;
+  background-color: #14342b !important;
+  border: 1px solid #1f8a63 !important;
   border-radius: 12px !important;
   color: #f8fafc !important;
 }
@@ -233,7 +245,7 @@ div[class*="product-card"] span,
 .product-desc-snippet, 
 .stock-delivery-row,
 .quantity-row {
-  color: #93c5fd !important;
+  color: #b7d9c6 !important;
 }
 
 .empty-state {
@@ -316,28 +328,41 @@ div[class*="product-card"] span,
 .stock-ticker,
 div[class*="stock-ticker"],
 div[class*="ticker"] {
-  background-color: #1e3a8a !important; /* Makes it a matching dark blue box */
+  background-color: #14342b !important; /* Makes it a matching dark blue box */
   color: #f8fafc !important;
-  border-bottom: 1px solid #3b82f6 !important;
+  border-bottom: 1px solid #1f8a63 !important;
 }
 
 /* Ensure ticker item text color looks sharp */
 .stock-ticker span,
 .stock-ticker div {
-  color: #93c5fd !important;
+  color: #b7d9c6 !important;
 }
 .filters {
-  background-color: #1e3a8a !important;
+  background-color: #14342b !important;
   padding: 16px !important;
   border-radius: 12px !important;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  height: auto !important;
-  max-height: none !important;
-  overflow-y: visible !important;
   border: none !important;
   align-self: flex-start !important; /* Prevents it from stretching to match the product list height */
+
+  /* Keep the sidebar fixed while only the Best Sellers section scrolls */
+  position: sticky !important;
+  top: 96px !important;                      /* just below the navbar (76px + gap) */
+  height: auto !important;
+  max-height: calc(100vh - 116px) !important;
+  overflow-y: auto !important;               /* sidebar scrolls on its own if taller than screen */
+}
+
+/* On tablet/mobile the sidebar stacks above the products, so no sticky */
+@media (max-width: 860px) {
+  .filters {
+    position: static !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
 }
 /* Increase category & filter item text size */
 .filter-item {
@@ -361,7 +386,7 @@ div[class*="ticker"] {
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #93c5fd !important;
+  color: #b7d9c6 !important;
   margin-top: 14px;
   margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -375,11 +400,11 @@ div[class*="ticker"] {
 .product-card,
 [class*="product-card"],
 [class*="ProductCard"] {
-  background-color: #dbeafe !important; /* Light blue background */
-  background: #dbeafe !important;
-  border: 1px solid #93c5fd !important; /* Soft blue border */
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #d3dfd0 !important;
   border-radius: 12px !important;
-  color: #1e3a8a !important; /* Deep dark blue text for high contrast */
+  color: #14342b !important; /* Deep dark blue text for high contrast */
 }
 
 /* Force text elements inside the product card to be dark blue and readable */
@@ -405,7 +430,7 @@ div[class*="ticker"] {
 [class*="product-card"] strong,
 [class*="product-card"] small,
 [class*="product-card"] div {
-  color: #1e3a8a !important;
+  color: #14342b !important;
 }
 
 /* Make prices stand out cleanly with a rich accent */
@@ -413,7 +438,7 @@ div[class*="ticker"] {
 .grid > div .price,
 .product-card .current-price,
 [class*="product-card"] .current-price {
-  color: #172554 !important;
+  color: #0d2620 !important;
   font-weight: 700 !important;
 }
 
@@ -432,8 +457,8 @@ header,
 .header,
 nav,
 [class*="header"] {
-  background-color: #1e3a8a !important;
-  background: #1e3a8a !important;
+  background-color: #14342b !important;
+  background: #14342b !important;
   color: #ffffff !important;
 }
 
@@ -614,7 +639,7 @@ body,
 div[class*="dashboard"], 
 main, 
 .content-area {
-  background-color: #f0f6ff !important;
+  background-color: #eef3ec !important;
 }
 /* Apply light blue background to the entire dashboard container and main content area */
 body, 
@@ -624,5 +649,100 @@ body,
 div[class*="dashboard"], 
 main, 
 .content-area {
-  background-color: #f0f6ff !important;
+  background-color: #eef3ec !important;
+}
+/* =========================================
+   FULL PAGE SCROLL + FIXED SIDEBAR
+   The whole page scrolls normally (products, then How It Works
+   and the sections below). Only the category sidebar stays in place.
+   (keep this block near the end of the file)
+========================================= */
+
+/* sticky only works if no parent is a scroll container */
+html,
+body,
+#root,
+.page {
+  overflow-y: visible !important;
+  overflow-x: clip !important;
+}
+
+.catalog {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  align-items: start !important;
+  margin-bottom: 48px !important;
+}
+
+.catalog-main {
+  height: auto !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+.filters {
+  position: sticky !important;
+  top: 96px !important;
+  align-self: start !important;
+  height: auto !important;
+  max-height: calc(100vh - 112px) !important;
+  overflow-y: auto !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filters .filter-item {
+  font-size: 14px !important;
+  padding: 5px 10px !important;
+}
+
+.filters h4 {
+  margin-top: 10px !important;
+  margin-bottom: 4px !important;
+  font-size: 12px !important;
+}
+
+/* Tablet / mobile: sidebar sits above the products */
+@media (max-width: 860px) {
+  .filters {
+    position: static !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* =========================================
+   LOCATION POPUP HEADER - white text on dark green
+   (beats the [class*="modal"] / [class*="location"] dark-text rules above)
+========================================= */
+[class*="modal"] [class*="header"] h1,
+[class*="modal"] [class*="header"] h2,
+[class*="modal"] [class*="header"] h3,
+[class*="modal"] [class*="header"] h4,
+[class*="modal"] [class*="header"] p,
+[class*="modal"] [class*="header"] span,
+[class*="modal"] [class*="header"] div,
+[class*="modal"] [class*="header"] button,
+[class*="modal"] [class*="header"] svg,
+[class*="location"] [class*="header"] h1,
+[class*="location"] [class*="header"] h2,
+[class*="location"] [class*="header"] h3,
+[class*="location"] [class*="header"] h4,
+[class*="location"] [class*="header"] p,
+[class*="location"] [class*="header"] span,
+[class*="location"] [class*="header"] div,
+[class*="location"] [class*="header"] button,
+[class*="location"] [class*="header"] svg {
+  color: #ffffff !important;
+}
+
+/* subtitle slightly softer than the title */
+[class*="modal"] [class*="header"] p,
+[class*="location"] [class*="header"] p {
+  color: #d5eadf !important;
 }

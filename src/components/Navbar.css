@@ -4,7 +4,7 @@
 
 .nav {
   background: #fff;
-  border-bottom: 1px solid var(--paper-line);
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -217,7 +217,7 @@
   gap: 24px;
   height: 58px;
 
-  border-top: 1px solid var(--paper-line);
+  border-top: none;
 
   padding: 0 24px;
 }
@@ -512,4 +512,25 @@
     width: 20px;
     height: 20px;
   }
+}
+/* =========================
+   DELIVER TO - readable on the dark green navbar
+   (beats the [class*="location"] rule in Home.css)
+========================= */
+
+.nav .nav-location > svg,
+.nav .nav-location > .lucide {
+  color: #b7d9c6 !important;
+}
+
+.nav .nav-location > span > small {
+  color: #b7d9c6 !important;
+}
+
+.nav .nav-location > span > strong {
+  color: #ffffff !important;
+}
+
+.nav .nav-location:hover {
+  background: rgba(255, 255, 255, 0.1);
 }

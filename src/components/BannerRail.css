@@ -1,0 +1,82 @@
+.br { position: relative; max-width: 1440px; margin: 0 auto; padding: 24px 0 10px; }
+
+.br-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 0 24px;
+  scroll-padding: 0 24px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.br-track::-webkit-scrollbar { display: none; }
+
+.br-card {
+  position: relative;
+  flex: 0 0 38%;
+  min-width: 300px;
+  aspect-ratio: 2.05 / 1;
+  border-radius: 18px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  text-decoration: none;
+  display: block;
+}
+.br-dark  { color: #fff; }
+.br-light { color: #0f172a; }
+
+.br-media {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 58%;
+  background-size: cover; background-position: center;
+  opacity: 0.9;
+  background-blend-mode: multiply;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+}
+.br-card .hc-art {
+  position: absolute; right: 2%; top: 50%; transform: translateY(-50%);
+  width: 52%; height: 94%; pointer-events: none;
+}
+
+.br-chip {
+  position: absolute; top: 14px; right: 14px; z-index: 3;
+  background: var(--chip, #f59e0b); color: #1b1300;
+  font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 6px;
+}
+
+.br-copy {
+  position: relative; z-index: 2; height: 100%; width: 54%;
+  padding: 26px 0 26px 26px;
+  display: flex; flex-direction: column; justify-content: center; gap: 8px;
+}
+.br-title { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 700; }
+.br-offer { margin: 0; font-size: 16px; font-weight: 600; }
+.br-sub   { margin: 0; font-size: 13px; opacity: 0.8; }
+
+.br-arrow {
+  position: absolute; top: 46%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #fff; color: #0f172a; border: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s ease; cursor: pointer;
+}
+.br:hover .br-arrow, .br-arrow:focus-visible { opacity: 1; }
+.br-prev { left: 10px; } .br-next { right: 10px; }
+
+.br-dots { display: flex; justify-content: center; gap: 7px; margin-top: 14px; }
+.br-dot {
+  width: 7px; height: 7px; border-radius: 4px; border: 0; padding: 0;
+  background: #c4c9cf; cursor: pointer; transition: width 0.25s ease, background 0.25s ease;
+}
+.br-dot-on { width: 20px; background: #2b8a5e; }
+
+.br-card:focus-visible, .br-dot:focus-visible { outline: 3px solid #0a84c6; outline-offset: 3px; }
+
+@media (max-width: 720px) {
+  .br-track { padding: 0 14px; scroll-padding: 0 14px; gap: 12px; }
+  .br-card { flex-basis: 84%; }
+  .br-title { font-size: 19px; }
+  .br-offer { font-size: 14px; }
+  .br-arrow { display: none; }
+}

@@ -17,7 +17,6 @@ import {
 } from "./context/CartContext";
 
 import Navbar from "./components/Navbar";
-import StockTicker from "./components/StockTicker";
 import Footer from "./components/Footer";
 import LiveTour from "./components/LiveTour";
 import Chatbot from "./components/Chatbot";
@@ -155,8 +154,6 @@ function MainStoreLayout() {
   return (
     <>
       <Navbar />
-
-      <StockTicker />
 
       <Routes>
 
@@ -412,7 +409,7 @@ export default function App() {
 
             {/* Login Page */}
 
-            {/* Navbar and StockTicker are hidden on login */}
+            {/* Navbar is hidden on login */}
 
             <Route
               path="/login"

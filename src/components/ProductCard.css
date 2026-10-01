@@ -1,13 +1,22 @@
-.p-card {
+/* ===================================
+   PRODUCT CARD
+   image, wishlist, name, price, stock + delivery
+=================================== */
+
+.p-card,
+.p-card.card {
+  margin: 0 !important;      /* MerchantDashboard.css adds margin-bottom to every .card */
+  padding: 0 !important;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  height: auto;             /* Hugs content naturally without stretching */
-  align-self: start;        /* Prevents the card from stretching to match the row's tallest card */
+  height: auto;
+  align-self: start;
   overflow: hidden;
-  border-radius: 6px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid var(--paper-line, #e5e7eb);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .p-card:hover {
@@ -17,12 +26,12 @@
     0 10px 20px -10px rgba(11, 18, 32, 0.15);
 }
 
-/* Product image */
+/* Image */
 .p-image-wrap {
   position: relative;
   display: block;
   width: 100%;
-  height: 110px;
+  height: 190px;
   flex-shrink: 0;
   overflow: hidden;
   background: var(--paper-dim, #f9fafb);
@@ -33,219 +42,169 @@
   height: 100%;
   display: block;
   object-fit: contain;
-  padding: 4px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-/* Verified supplier label */
-.p-badge {
+/* Wishlist (top-right of image) */
+.p-wishlist-overlay {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(11, 18, 32, 0.15);
-  font-size: 9px;
-  padding: 2px 5px;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
 }
 
-/* Product details wrapper */
+.p-wishlist-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.p-wishlist-btn:hover {
+  background: #fff;
+  transform: scale(1.1);
+}
+
+.p-wishlist-btn.active {
+  color: #e53e3e;
+}
+
+/* Out of stock tag on image */
+.p-stock-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fff1f1;
+  color: var(--danger, #dc2626);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Body fills the rest of the card */
 .p-body {
   display: flex;
   flex-direction: column;
-  padding: 10px 12px;
-  gap: 3px;
+  gap: 6px;
+  padding: 12px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-/* Brand */
-.p-brand {
-  font-size: 11px;
-  color: var(--slate-light, #6b7280);
-  text-transform: uppercase;
-  margin-bottom: -2px;
-}
-
-/* Title area */
+/* Product name: always 2 lines tall so prices line up across cards */
 .p-title {
-  min-height: 28px;
+  margin: 0;
+  min-height: 34px;
+  max-height: 34px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--ink, #111827);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  text-decoration: none;
 }
 
 .p-title:hover {
   color: var(--signal, #2563eb);
 }
 
-/* Price */
+/* Price (no "% off" text) */
 .p-price-row {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
   gap: 6px;
-  min-height: 18px;
-  margin-top: 1px;
+  min-height: 22px;
+  margin: 0;
 }
 
 .p-price {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--ink, #111827);
 }
 
 .p-mrp {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--slate-light, #6b7280);
   text-decoration: line-through;
 }
 
-.p-discount {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--verified, #10b981);
-}
-
-/* Color Picker Selection Row */
-.p-color-picker {
+/* Highlight chips (fills the middle of the card) */
+.p-tags {
   display: flex;
-  align-items: center;
+  flex-wrap: nowrap;
   gap: 6px;
-  margin: 2px 0;
+  margin: 2px 0 0;
 }
 
-.p-color-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--slate, #4b5563);
-}
-
-.p-color-options {
-  display: flex;
-  flex-wrap: wrap;
+.p-tag {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
-}
-
-.p-color-chip {
-  background: #f3f4f6;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid var(--paper-line, #d1d5db);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-size: 10px;
-  cursor: pointer;
-  color: var(--ink, #111827);
-  transition: all 0.1s ease;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--slate, #4b5563);
+  white-space: nowrap;
 }
 
-.p-color-chip:hover {
-  background: #e5e7eb;
-}
-
-.p-color-chip.active {
-  background: var(--ink, #111827);
-  color: #fff;
-  border-color: var(--ink, #111827);
-}
-
-/* Description */
-.p-desc {
-  font-size: 10px;
-  color: var(--slate-light, #6b7280);
-  line-height: 1.3;
-  margin: 2px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Stock and delivery info row */
+/* Stock + delivery row, pinned to the bottom of every card */
 .p-info-row {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
-  color: var(--slate, #4b5563);
-  margin-bottom: 2px;
-}
-
-.p-info-row svg {
-  vertical-align: middle;
-  margin-right: 2px;
-}
-
-/* Quantity selector */
-.p-quantity {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 2px 0;
-}
-
-.p-quantity-label {
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--paper-line, #e5e7eb);
   font-size: 11px;
-  font-weight: 600;
   color: var(--slate, #4b5563);
 }
 
-.p-quantity-controls {
-  display: flex;
+.p-stock,
+.p-dispatch {
+  display: inline-flex;
   align-items: center;
-  overflow: hidden;
-  border: 1px solid var(--paper-line, #d1d5db);
-  border-radius: 4px;
-  background: #fff;
-}
-
-.p-quantity-controls button {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--ink, #111827);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.p-quantity-controls button:hover:not(:disabled) {
-  background: var(--paper-dim, #f9fafb);
-}
-
-.p-quantity-controls button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.p-quantity-controls span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 20px;
-  border-right: 1px solid var(--paper-line, #d1d5db);
-  border-left: 1px solid var(--paper-line, #d1d5db);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink, #111827);
-}
-
-/* Buttons sit tightly right underneath the quantity controls */
-.p-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid var(--paper-line, #f3f4f6);
-}
-
-.p-btn {
-  flex: 1;
-  min-width: 0;
-  padding: 5px 6px;
-  font-size: 11px;
+  gap: 4px;
   white-space: nowrap;
+}
+
+.p-stock {
+  color: var(--verified, #10b981);
+  font-weight: 600;
+}
+
+.p-stock-out {
+  color: var(--danger, #dc2626);
+}
+
+/* Grid helper: equal-height cards */
+.p-card-grid,
+.product-grid,
+.pd-related-grid {
+  display: grid;
+  align-items: start;
+}
+
+.p-card-grid > .p-card,
+.product-grid > .p-card,
+.pd-related-grid > .p-card {
+  height: auto;
+  min-width: 0;
 }

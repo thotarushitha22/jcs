@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
-  Headphones,
   ShoppingCart,
   UserRound,
   UserCircle,
   LogOut,
-  PackagePlus,
   ShieldCheck,
   Store,
   Heart,
@@ -16,7 +14,6 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import LocationPicker from "./LocationPicker";
-import LanguagePicker from "./LanguagePicker";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -92,8 +89,6 @@ export default function Navbar() {
 
   return (
     <header className="nav">
-      <div className="nav-topbar" />
-
       {/* ================= TOP NAVBAR ================= */}
       <div className="nav-row-top">
 
@@ -130,72 +125,8 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* LANGUAGE + ACCOUNT */}
-        <div className="nav-right">
-          <LanguagePicker />
-
-          <div className="nav-account">
-
-            {currentUser?.email ? (
-              <Link
-                to="/account"
-                data-tour="account"
-              >
-                <small>Welcome</small>
-
-                <strong>
-                  {currentUser.email}
-                </strong>
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                className="btn btn-primary nav-btn"
-                data-tour="account"
-              >
-                Sign in
-              </Link>
-            )}
-
-          </div>
-        </div>
-      </div>
-
-      {/* ================= BOTTOM NAVBAR ================= */}
-      <div className="nav-row-bottom">
-
-        {/* SELL / MERCHANT / ADMIN */}
-        <Link
-          to={
-            isMerchant
-              ? "/merchant"
-              : isAdmin
-              ? "/admin"
-              : "/sell"
-          }
-          className="sell-pill"
-          data-tour="merchant"
-        >
-          <PackagePlus size={16} />
-
-          {isMerchant
-            ? "Merchant Dashboard"
-            : isAdmin
-            ? "Admin Control"
-            : "Sell to JCSGlobal"}
-        </Link>
-
-        {/* NAV ACTIONS */}
+        {/* ICONS (wishlist, cart, account) */}
         <div className="nav-actions">
-
-          {/* SUPPORT */}
-          <Link
-            to="/support"
-            className="icon-btn"
-            aria-label="Help and support"
-          >
-            <Headphones size={22} />
-          </Link>
 
           {/* WISHLIST */}
           <Link
