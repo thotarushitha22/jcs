@@ -485,3 +485,63 @@
   font-size: 13px;
   font-style: italic;
 }
+/* =========================================
+   1. FIX SIDEBAR TEXT COLOR & HOVER/ACTIVE STATES
+   ========================================= */
+
+/* Target all sidebar buttons/links in the merchant panel */
+.sidebar-nav button,
+.sidebar-nav a,
+.merchant-sidebar button,
+.merchant-sidebar a,
+.sidebar button,
+.sidebar a {
+  color: #ffffff !important; /* Ensure text is pure white and visible */
+  background: transparent !important;
+}
+
+/* Active or selected state (like Dashboard) */
+.sidebar-nav button.active,
+.sidebar-nav a.active,
+.merchant-sidebar button.active,
+.merchant-sidebar a.active,
+.sidebar button.active,
+.sidebar a.active {
+  background-color: #ffffff !important;
+  color: #111827 !important; /* Dark text on white background when active */
+  font-weight: 700 !important;
+}
+
+/* Hover state for inactive links */
+.sidebar-nav button:hover:not(.active),
+.sidebar-nav a:hover:not(.active),
+.merchant-sidebar button:hover:not(.active),
+.merchant-sidebar a:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================================
+   2. REMOVE / HIDE THE ABOVE BOX (Merchant Dashboard Header Banner)
+   ========================================= */
+
+/* Hides the dark banner strip containing "Merchant Dashboard" and the icons */
+.merchant-dashboard-header,
+.dashboard-top-banner,
+.merchant-header-bar {
+  display: none !important;
+}
+/* Completely hide the merchant dashboard header bar */
+.merchant-dashboard-header,
+.dashboard-header,
+.merchant-header {
+  display: none !important;
+}
+/* Hide only the action icons container inside the merchant dashboard header */
+.merchant-dashboard-header .header-icons,
+.dashboard-header .icon-group,
+.merchant-header .actions,
+.merchant-dashboard-header > div:last-child {
+  display: none !important;
+}

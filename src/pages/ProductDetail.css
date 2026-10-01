@@ -716,3 +716,47 @@
     padding: 9px 12px;
   }
 }
+/* Ensure the reviews section header container is properly aligned */
+.reviews-header, 
+.customer-reviews-header,
+.reviews-section h3 {
+  background-color: #0f2a15 !important; /* Dark slate background */
+  color: #ffffff !important;           /* Pure white text */
+  padding: 14px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Force text and title inside the header to be white and fully visible */
+.reviews-header h2,
+.reviews-header h3,
+.reviews-header span,
+.reviews-header .title {
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+/* Make the "Write a Review" button contrast nicely and remain readable */
+.reviews-header button,
+.write-review-btn {
+  background-color: #2563eb !important; /* Bright blue button */
+  color: #ffffff !important;           /* White text on button */
+  border: none !important;
+  padding: 8px 14px !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.reviews-header button:hover,
+.write-review-btn:hover {
+  background-color: #1d4ed8 !important;
+}

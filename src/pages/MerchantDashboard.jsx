@@ -1849,17 +1849,17 @@ export default function MerchantDashboard() {
         <div className="sidebar-brand">
 
           <div className="brand-logo-icon">
-            JC
+            MD
           </div>
 
           <div>
 
             <span className="brand-name">
-              JCS Global
+              Merchant
             </span>
 
             <span className="brand-sub">
-              Business
+              Dashboard
             </span>
 
           </div>
