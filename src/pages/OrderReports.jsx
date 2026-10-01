@@ -12,11 +12,19 @@ export default function OrderReports() {
   const [to, setTo] = useState("");
 
   useEffect(() => {
-    fetchMyOrders().then(setOrders).catch(() => {}).finally(() => setLoading(false));
+    fetchMyOrders()
+      .then((res) => {
+        // Defensive array extraction to handle any API response wrapper format
+        const orderData = Array.isArray(res) ? res : (res?.data || res?.orders || []);
+        setOrders(Array.isArray(orderData) ? orderData : []);
+      })
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
-    return orders.filter((o) => {
+    const list = Array.isArray(orders) ? orders : [];
+    return list.filter((o) => {
       if (status !== "all" && o.status !== status) return false;
       const created = new Date(o.createdAt);
       if (from && created < new Date(from)) return false;
@@ -25,16 +33,16 @@ export default function OrderReports() {
     });
   }, [orders, status, from, to]);
 
-  const totalValue = filtered.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+  const totalValue = filtered.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
 
   const exportCsv = () => {
     const rows = [
       ["Order ID", "Date", "Items", "Total (₹)", "Status"],
       ...filtered.map((o) => [
-        `JCS-${String(o.id).padStart(5, "0")}`,
+        `JCS-${String(o.id || o._id || "0").padStart(5, "0")}`,
         new Date(o.createdAt).toLocaleDateString("en-IN"),
-        o.items?.map((i) => `${i.product?.title} x${i.qty}`).join("; "),
-        Number(o.totalAmount).toFixed(2),
+        o.items?.map((i) => `${i.product?.title || i.title} x${i.qty || i.quantity}`).join("; "),
+        Number(o.totalAmount || 0).toFixed(2),
         o.status,
       ]),
     ];
@@ -89,11 +97,11 @@ export default function OrderReports() {
 
       <div className="reports-table">
         {filtered.map((o) => (
-          <div className="card reports-row" key={o.id}>
-            <span className="mono">JCS-{String(o.id).padStart(5, "0")}</span>
-            <span>{new Date(o.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span>
-            <span className="reports-items">{o.items?.map((i) => `${i.product?.title} × ${i.qty}`).join(", ")}</span>
-            <span className="mono">₹{Number(o.totalAmount).toLocaleString("en-IN")}</span>
+          <div className="card reports-row" key={o.id || o._id}>
+            <span className="mono">JCS-{String(o.id || o._id || "0").padStart(5, "0")}</span>
+            <span>{o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "N/A"}</span>
+            <span className="reports-items">{o.items?.map((i) => `${i.product?.title || i.title || "Item"} × ${i.qty || i.quantity || 1}`).join(", ")}</span>
+            <span className="mono">₹{Number(o.totalAmount || 0).toLocaleString("en-IN")}</span>
             <span className={`badge order-status status-${o.status}`}>{o.status}</span>
           </div>
         ))}
