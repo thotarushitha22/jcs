@@ -5,6 +5,7 @@ import "./Orders.css";
 import "./OrderDetail.css";
 
 
+import { getOrderItems } from "../utils/orderItems";
 // =========================================================
 // SHIPMENT TRACKING - 10 STOPS
 // Edit the places below to match your real delivery route.
@@ -31,10 +32,13 @@ const TRACKING_STOPS = [
  * Set SIMULATE_TRANSIT to false to move stops only when the order status
  * changes (Shipped -> Out for delivery -> Delivered).
  */
-const SIMULATE_TRANSIT = true;
+const SIMULATE_TRANSIT = false;
 const HOURS_PER_HUB = 3;
 
 const HOUR = 60 * 60 * 1000;
+
+// order status -> number of completed stops
+const HUB_STOPS = { HUB_1: 5, HUB_2: 6, HUB_3: 7, HUB_4: 8 };
 
 // =========================================================
 // INVOICE - seller details (shown at the top of the printed invoice)
@@ -114,6 +118,8 @@ function TrackingTimeline({ order, status, destination }) {
     done = total;
   } else if (status === "OUT_FOR_DELIVERY") {
     done = 9;
+  } else if (HUB_STOPS[status]) {
+    done = HUB_STOPS[status];
   } else if (status === "SHIPPED" || status === "DISPATCHED") {
     done = 4 + hubsDone;
   } else if (
@@ -154,7 +160,15 @@ function TrackingTimeline({ order, status, destination }) {
                 {place && <span className="trk-place">{place}</span>}
                 {isDone && (
                   <span className="trk-time">
-                    {formatStopTime(Math.min(times[index], Date.now()))}
+                    {formatStopTime(
+                      index === done - 1
+                        ? Math.min(Math.max(updated, created), Date.now())
+                        : Math.min(
+                            times[index],
+                            Math.max(updated, created),
+                            Date.now()
+                          )
+                    )}
                   </span>
                 )}
               </div>
@@ -398,28 +412,7 @@ export default function OrderDetails() {
   // ITEMS
   // =========================================================
 
-  let itemsList = order.items;
-
-  if (typeof itemsList === "string") {
-    try {
-      itemsList = JSON.parse(itemsList);
-    } catch {
-      itemsList = [];
-    }
-  }
-
-  if (
-    !Array.isArray(itemsList) ||
-    itemsList.length === 0
-  ) {
-    itemsList = [
-      {
-        title: "Product Item",
-        qty: 1,
-        price: 0,
-      },
-    ];
-  }
+  const itemsList = getOrderItems(order);
 
   // =========================================================
   // AMOUNTS
@@ -755,6 +748,16 @@ export default function OrderDetails() {
           >
             Items
           </h3>
+
+          {itemsList.length === 0 && (
+
+            <p style={{ color: "#64748b", fontSize: "14px" }}>
+
+              Item details are not available for this order.
+
+            </p>
+
+          )}
 
           {itemsList.map((item, idx) => {
 

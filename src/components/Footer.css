@@ -45,7 +45,7 @@
 }
 
 .footer-col a:hover {
-  color: #e8a317;
+  color: #8fb4ff;
   text-decoration: underline;
 }
 
@@ -77,15 +77,15 @@
 }
 
 .footer-social a:hover {
-  color: #e8a317;
-  border-color: #e8a317;
+  color: #8fb4ff;
+  border-color: #8fb4ff;
   text-decoration: none;
 }
 
 .footer-col .footer-phone {
   display: inline;
   margin: 0;
-  color: #e8a317;
+  color: #8fb4ff;
 }
 
 /* ---------- bottom bar ---------- */
@@ -114,11 +114,11 @@
 }
 
 .footer-bottom-link svg {
-  color: #e8a317;
+  color: #8fb4ff;
 }
 
 .footer-bottom-link:hover {
-  color: #e8a317;
+  color: #8fb4ff;
 }
 
 .footer-copy {
@@ -179,6 +179,6 @@
 
 .footer-col .footer-map-link {
   margin-top: 6px;
-  color: #e8a317;
+  color: #8fb4ff;
   font-weight: 500;
 }

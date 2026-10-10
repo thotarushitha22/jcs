@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/products";
 import ProductCard from "../components/ProductCard";
+import { groupProducts } from "../utils/variants";
 import BannerRail from "../components/BannerRail";
 import HowItWorks from "../components/HowItWorks";
 import WhyChooseUs from "../components/WhyChooseUs";
@@ -252,6 +253,9 @@ export default function Home() {
     return resultList;
   }, [products, activeCategory, activeBrand, activePriceRange, activeDiscount, urlSearchQuery, sort]);
 
+  // One card per phone model (storage / colour listings are merged)
+  const displayProducts = useMemo(() => groupProducts(filteredProducts), [filteredProducts]);
+
   return (
     <div className="page">
       <BannerRail />
@@ -383,7 +387,7 @@ export default function Home() {
 
           <div className="catalog-toolbar">
             <span className="mono">
-              {loading ? "Loading…" : `${filteredProducts.length} results`}
+              {loading ? "Loading…" : `${displayProducts.length} results`}
             </span>
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="relevance">Sort: Relevance</option>
@@ -396,13 +400,13 @@ export default function Home() {
             <p className="empty-state">Couldn't load products: {error}</p>
           )}
 
-          {!error && !loading && filteredProducts.length === 0 ? (
+          {!error && !loading && displayProducts.length === 0 ? (
             <p className="empty-state">
               No listings match your selected filters. Try resetting filters.
             </p>
           ) : (
             <div className="grid">
-              {filteredProducts.map((product, index) => (
+              {displayProducts.map((product, index) => (
                 <ProductCard
                   key={product.id || product._id || index}
                   product={product}

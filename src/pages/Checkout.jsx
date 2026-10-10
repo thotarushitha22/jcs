@@ -220,6 +220,7 @@ export default function Checkout() {
       order_id: generatedOrderId,
       orderItems,
       items: items.map(({ product, qty }) => ({
+        productId: product.id || product._id,
         title: product.title || product.name || "Product",
         qty: Number(qty),
         price: Number(product.price),

@@ -2,10 +2,10 @@
    THEME TOKENS - deep green + sage
 ========================================= */
 :root {
-  --ink: #14342b !important;
+  --ink: #0f2a4a !important;
   --ink-soft: #1b4a3d !important;
   --ink-line: rgba(255, 255, 255, 0.14) !important;
-  --signal: #1f8a63 !important;
+  --signal: #2563eb !important;
   --paper-dim: #e4ece1 !important;
   --paper-line: #d3dfd0 !important;
 }
@@ -70,13 +70,13 @@
 }
 
 /* =========================================
-   GLOBAL LIGHT BLUE PAGE BACKGROUND
+   GLOBAL PAGE BACKGROUND (white)
 ========================================= */
 html, 
 body, 
 .page {
-  background-color: #eef3ec !important;
-  color: #14342b !important;
+  background-color: #ffffff !important;
+  color: #0f2a4a !important;
 }
 
 /* =========================================
@@ -109,7 +109,7 @@ body,
    COMPACT MULTI-TIER SIDEBAR BOX (Dark Blue)
 ========================================= */
 .filters {
-  background-color: #14342b !important;
+  background-color: #0f2a4a !important;
   padding: 16px !important;
   border-radius: 12px !important;
   display: flex;
@@ -124,7 +124,7 @@ body,
   width: 5px;
 }
 .filters::-webkit-scrollbar-thumb {
-  background-color: #1f8a63;
+  background-color: #2563eb;
   border-radius: 4px;
 }
 
@@ -133,7 +133,7 @@ body,
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #b7d9c6 !important;
+  color: #c9d8f0 !important;
   margin-top: 14px;
   margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -167,19 +167,19 @@ body,
 }
 
 .filter-item:hover {
-  background-color: #1b5e46 !important;
+  background-color: #1e3f73 !important;
   color: #ffffff !important;
 }
 
 .filter-item.active {
-  background-color: #1f8a63 !important;
+  background-color: #2563eb !important;
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
 .filter-count {
   font-size: 12px;
-  color: #b7d9c6;
+  color: #c9d8f0;
 }
 
 /* Best Sellers heading */
@@ -187,7 +187,7 @@ body,
   font-size: 30px;
   font-weight: 800;
   margin-bottom: 16px;
-  color: #14342b !important;
+  color: #0f2a4a !important;
 }
 
 /* Results and sorting */
@@ -200,7 +200,7 @@ body,
   border: 1px solid rgba(20, 52, 43, 0.15);
   border-radius: 8px;
   padding: 12px 16px;
-  color: #14342b;
+  color: #0f2a4a;
   font-size: 15px;
 }
 
@@ -225,8 +225,8 @@ body,
 div[class*="product-card"],
 .product-card,
 article {
-  background-color: #14342b !important;
-  border: 1px solid #1f8a63 !important;
+  background-color: #0f2a4a !important;
+  border: 1px solid #2563eb !important;
   border-radius: 12px !important;
   color: #f8fafc !important;
 }
@@ -245,7 +245,7 @@ div[class*="product-card"] span,
 .product-desc-snippet, 
 .stock-delivery-row,
 .quantity-row {
-  color: #b7d9c6 !important;
+  color: #c9d8f0 !important;
 }
 
 .empty-state {
@@ -328,18 +328,18 @@ div[class*="product-card"] span,
 .stock-ticker,
 div[class*="stock-ticker"],
 div[class*="ticker"] {
-  background-color: #14342b !important; /* Makes it a matching dark blue box */
+  background-color: #0f2a4a !important; /* Makes it a matching dark blue box */
   color: #f8fafc !important;
-  border-bottom: 1px solid #1f8a63 !important;
+  border-bottom: 1px solid #2563eb !important;
 }
 
 /* Ensure ticker item text color looks sharp */
 .stock-ticker span,
 .stock-ticker div {
-  color: #b7d9c6 !important;
+  color: #c9d8f0 !important;
 }
 .filters {
-  background-color: #14342b !important;
+  background-color: #0f2a4a !important;
   padding: 16px !important;
   border-radius: 12px !important;
   display: flex;
@@ -386,7 +386,7 @@ div[class*="ticker"] {
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #b7d9c6 !important;
+  color: #c9d8f0 !important;
   margin-top: 14px;
   margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -404,7 +404,7 @@ div[class*="ticker"] {
   background: #ffffff !important;
   border: 1px solid #d3dfd0 !important;
   border-radius: 12px !important;
-  color: #14342b !important; /* Deep dark blue text for high contrast */
+  color: #0f2a4a !important; /* Deep dark blue text for high contrast */
 }
 
 /* Force text elements inside the product card to be dark blue and readable */
@@ -430,7 +430,7 @@ div[class*="ticker"] {
 [class*="product-card"] strong,
 [class*="product-card"] small,
 [class*="product-card"] div {
-  color: #14342b !important;
+  color: #0f2a4a !important;
 }
 
 /* Make prices stand out cleanly with a rich accent */
@@ -457,8 +457,8 @@ header,
 .header,
 nav,
 [class*="header"] {
-  background-color: #14342b !important;
-  background: #14342b !important;
+  background-color: #0f2a4a !important;
+  background: #0f2a4a !important;
   color: #ffffff !important;
 }
 
@@ -574,7 +574,7 @@ div[class*="payment"] span::before {
 .sidebar a:not(.active), 
 .sidebar span:not(.active) {
   color: #1f2937 !important;
-}/* Apply light blue background to the entire dashboard container and main content area */
+}/* Apply white background to the entire dashboard container and main content area */
 body, 
 .page, 
 .dashboard-container, 
@@ -582,9 +582,9 @@ body,
 div[class*="dashboard"], 
 main, 
 .content-area {
-  background-color: #eef3ec !important;
+  background-color: #ffffff !important;
 }
-/* Apply light blue background to the entire dashboard container and main content area */
+/* Apply white background to the entire dashboard container and main content area */
 body, 
 .page, 
 .dashboard-container, 
@@ -592,7 +592,7 @@ body,
 div[class*="dashboard"], 
 main, 
 .content-area {
-  background-color: #eef3ec !important;
+  background-color: #ffffff !important;
 }
 /* =========================================
    FULL PAGE SCROLL + FIXED SIDEBAR

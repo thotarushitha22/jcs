@@ -134,7 +134,7 @@
   align-items: center;
   gap: 12px;
 
-  background: var(--paper-dim);
+  background: #ffffff;
   border-radius: var(--radius-sm);
 
   padding: 14px 18px;

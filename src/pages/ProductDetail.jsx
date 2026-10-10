@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, MapPin, HelpCircle } from "lucide-react";
-import { fetchProduct, fetchRelatedProducts } from "../api/products";
+import { fetchProduct, fetchProducts, fetchRelatedProducts } from "../api/products";
+import { buildOptions, groupKey, imageOf } from "../utils/variants";
 import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
 import CustomerReviews from "../components/CustomerReviews";
@@ -30,6 +31,28 @@ export default function ProductDetail() {
     colors: "",
   });
 
+  const [siblings, setSiblings] = useState([]);
+
+  // Load every listing of the same brand + model so storage/colour chips can link between them
+  useEffect(() => {
+    if (!product) return;
+    const key = groupKey(product);
+    if (!key) {
+      setSiblings([]);
+      return;
+    }
+    let active = true;
+    fetchProducts()
+      .then((all) => {
+        if (!active) return;
+        setSiblings(all.filter((p) => groupKey(p) === key));
+      })
+      .catch(() => active && setSiblings([]));
+    return () => {
+      active = false;
+    };
+  }, [product]);
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -38,10 +61,7 @@ export default function ProductDetail() {
       .then((data) => {
         const productData = {
           ...data,
-          variants: data.variants || {
-            storage: ["128 GB", "256 GB", "512 GB"],
-            colors: ["Midnight Black", "Frost Silver", "Ocean Blue"],
-          },
+          variants: data.variants || {},
         };
 
         setProduct(productData);
@@ -243,6 +263,16 @@ export default function ProductDetail() {
       : product.colour
         ? [product.colour]
         : []);
+
+  /* ---- Sibling listings: same brand + model, one listing per storage/colour ---- */
+  const sibOptions = siblings.length > 1 ? buildOptions(siblings, product) : null;
+  const storageItems = sibOptions && sibOptions.storage.length > 1 ? sibOptions.storage : null;
+  const colourItems = sibOptions && sibOptions.colour.length > 1 ? sibOptions.colour : null;
+
+  const pickSibling = (item) => {
+    const targetId = item.product.id || item.product._id;
+    if (String(targetId) !== String(id)) navigate(`/product/${targetId}`);
+  };
 
   const categoryLower = String(
     product.category?.name ||
@@ -460,49 +490,6 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
-
-          {/* Buying assurance (fills the space under the image) */}
-          <div className="pd-trust">
-            <div className="pd-trust-item">
-              <span>🛡️</span>
-              <div>
-                <strong>1 Year Warranty</strong>
-                <p>Manufacturer assured</p>
-              </div>
-            </div>
-
-            <div className="pd-trust-item">
-              <span>🔄</span>
-              <div>
-                <strong>Easy Returns</strong>
-                <p>7-day policy</p>
-              </div>
-            </div>
-
-            <div className="pd-trust-item">
-              <span>⚡</span>
-              <div>
-                <strong>Fast Dispatch</strong>
-                <p>Ships within 24 hrs</p>
-              </div>
-            </div>
-
-            <div className="pd-trust-item">
-              <span>🔒</span>
-              <div>
-                <strong>Secure Payment</strong>
-                <p>Protected at checkout</p>
-              </div>
-            </div>
-
-            <div className="pd-trust-item pd-trust-wide">
-              <span>✅</span>
-              <div>
-                <strong>GST-verified orders</strong>
-                <p>Orders are verified against your GST profile before dispatch</p>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* =====================================
@@ -778,30 +765,49 @@ export default function ProductDetail() {
           ===================================== */}
 
           {(
+            storageItems ||
+            colourItems ||
             variantStorage.length > 0 ||
             variantColors.length > 0
           ) && (
 
             <div className="pd-variants">
 
-              {variantStorage.length > 0 && (
-                <VariantGroup
+              {storageItems ? (
+                <ChipRow
                   label="Storage Capacity"
-                  options={variantStorage}
-                  group="storage"
-                  selected={selected}
-                  onSelect={selectVariant}
+                  items={storageItems}
+                  onPick={pickSibling}
                 />
+              ) : (
+                variantStorage.length > 0 && (
+                  <VariantGroup
+                    label="Storage Capacity"
+                    options={variantStorage}
+                    group="storage"
+                    selected={selected}
+                    onSelect={selectVariant}
+                  />
+                )
               )}
 
-              {variantColors.length > 0 && (
-                <VariantGroup
+              {colourItems ? (
+                <ChipRow
                   label="Colour Options"
-                  options={variantColors}
-                  group="colors"
-                  selected={selected}
-                  onSelect={selectVariant}
+                  items={colourItems}
+                  onPick={pickSibling}
+                  showImage
                 />
+              ) : (
+                variantColors.length > 0 && (
+                  <VariantGroup
+                    label="Colour Options"
+                    options={variantColors}
+                    group="colors"
+                    selected={selected}
+                    onSelect={selectVariant}
+                  />
+                )
               )}
 
             </div>
@@ -861,13 +867,60 @@ export default function ProductDetail() {
             );
           })()}
 
-          <p className="pd-note">
-            Payment is secured at checkout.
-            Orders are verified against your
-            GST profile before dispatch.
-          </p>
-
         </section>
+      </div>
+
+      {/* Below the two columns: trust bar + payment note (outside the grid so the sticky photo stops above it) */}
+      <div className="pd-below">
+
+        {/* Buying assurance (full-width bar under both columns) */}
+        <div className="pd-trust pd-trust-bar">
+          <div className="pd-trust-item">
+            <span>🛡️</span>
+            <div>
+              <strong>1 Year Warranty</strong>
+              <p>Manufacturer assured</p>
+            </div>
+          </div>
+
+          <div className="pd-trust-item">
+            <span>🔄</span>
+            <div>
+              <strong>Easy Returns</strong>
+              <p>7-day policy</p>
+            </div>
+          </div>
+
+          <div className="pd-trust-item">
+            <span>⚡</span>
+            <div>
+              <strong>Fast Dispatch</strong>
+              <p>Ships within 24 hrs</p>
+            </div>
+          </div>
+
+          <div className="pd-trust-item">
+            <span>🔒</span>
+            <div>
+              <strong>Secure Payment</strong>
+              <p>Protected at checkout</p>
+            </div>
+          </div>
+
+          <div className="pd-trust-item">
+            <span>✅</span>
+            <div>
+              <strong>GST-verified orders</strong>
+              <p>Verified against your GST profile</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="pd-note pd-note-full">
+          Payment is secured at checkout.
+          Orders are verified against your
+          GST profile before dispatch.
+        </p>
       </div>
 
       {/* =========================================
@@ -1180,6 +1233,32 @@ export default function ProductDetail() {
   );
 }
 
+
+function ChipRow({ label, items, onPick, showImage = false }) {
+  return (
+    <div className="pd-variant-group">
+      <span className="pd-variant-label">{label}</span>
+      <div className="pd-variant-options">
+        {items.map((item) => {
+          const img = showImage ? imageOf(item.product) : "";
+          return (
+            <button
+              key={item.key}
+              type="button"
+              className={`pd-variant-chip ${img ? "pd-variant-chip-img" : ""} ${
+                item.active ? "pd-variant-chip-active" : ""
+              }`}
+              onClick={() => onPick(item)}
+            >
+              {img && <img src={img} alt={item.label} />}
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 /* =========================================
    VARIANT GROUP

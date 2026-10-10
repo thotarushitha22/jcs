@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/api";
+import { getOrderItems } from "../utils/orderItems";
 import "./Orders.css";
 
 export default function CustomerOrders() {
@@ -122,6 +123,7 @@ export default function CustomerOrders() {
             if (!rawId) return null;
 
             const displayId = rawId.replace(/^JCS-/i, "");
+            const orderItems = getOrderItems(order);
 
             // Normalize backend status
             const orderStatus = String(
@@ -136,6 +138,7 @@ export default function CustomerOrders() {
             );
 
             const isOnlinePaid =
+              String(order.paymentStatus || "").toLowerCase() === "paid" ||
               paymentMethodStr.toLowerCase().includes("razorpay") ||
               orderStatus === "PAID" ||
               rawId.toUpperCase().includes("RAZORPAY_SANDBOX");
@@ -155,8 +158,8 @@ export default function CustomerOrders() {
               0;
 
             const calculatedTotal =
-              Number(rawTotal) === 0 && Array.isArray(order.items)
-                ? order.items.reduce(
+              Number(rawTotal) === 0 && orderItems.length > 0
+                ? orderItems.reduce(
                     (sum, item) =>
                       sum +
                       Number(item.price || 0) *
@@ -255,7 +258,12 @@ export default function CustomerOrders() {
                           color: "#64748b",
                         }}
                       >
-                        via {paymentMethodStr}
+                        via{" "}
+                        {{
+                          upi: "UPI / Card / Netbanking",
+                          credit: "Credit Terms",
+                          cod: "Cash on Delivery",
+                        }[paymentMethodStr.toLowerCase()] || paymentMethodStr}
                       </span>
                     </div>
                   </div>
@@ -319,17 +327,12 @@ export default function CustomerOrders() {
                       gap: "8px",
                     }}
                   >
-                    {Array.isArray(order.items) &&
-                    order.items.length > 0 ? (
-                      order.items.map((item, idx) => {
-                        const title =
-                          item.product?.title ||
-                          item.title ||
-                          item.name ||
-                          "Product item";
+                    {orderItems.length > 0 ? (
+                      orderItems.map((item, idx) => {
+                        const title = item.title;
 
-                        const qty = item.qty ?? item.quantity ?? 1;
-                        const price = Number(item.price || 0);
+                        const qty = item.qty;
+                        const price = item.price;
 
                         return (
                           <div

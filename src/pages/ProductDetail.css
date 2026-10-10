@@ -933,7 +933,8 @@
   flex-direction: column;
   gap: 2px;
   padding: 9px 12px;
-  background: var(--paper-dim);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
 
@@ -984,7 +985,8 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: var(--paper-dim);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
 
@@ -1067,4 +1069,92 @@
     width: 40px;
     height: 40px;
   }
+}
+
+/* colour chips with product image above the name */
+.pd-variant-chip-img {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 12px;
+}
+.pd-variant-chip-img img {
+  width: 64px; height: 64px; object-fit: contain; border-radius: 8px; background: #000;
+}
+
+/* ===================================
+   PAYMENT NOTE (full width under both columns)
+=================================== */
+.pd-grid {
+  row-gap: 10px !important;
+}
+
+.pd-note-full {
+  grid-column: 1 / -1;
+  margin: 0;
+  max-width: none;
+}
+
+/* ===================================
+   TRUST BAR - full width under both columns, five equal boxes
+=================================== */
+.pd-trust-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.pd-trust-bar .pd-trust-item {
+  flex: 1 1 240px;
+  min-height: 76px;
+  box-sizing: border-box;
+}
+
+.pd-trust-bar .pd-trust-item p {
+  white-space: nowrap;
+}
+
+@media (max-width: 650px) {
+  .pd-trust-bar { flex-direction: column; }
+  .pd-trust-bar .pd-trust-item { flex: 0 0 auto; }
+}
+
+/* ===================================
+   STICKY GALLERY (desktop)
+   Photo + thumbnails follow you while the right column scrolls,
+   so there is no empty space beside long specs.
+=================================== */
+@media (min-width: 901px) {
+  .pd-gallery {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+  }
+
+  /* keep photo + thumbnails inside one screen height */
+  .pd-image {
+    height: min(560px, calc(100vh - 280px)) !important;
+    min-height: 320px;
+  }
+}
+
+/* trust bar + note live outside the two-column grid */
+.pd-below {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ===================================
+   TIGHTER GALLERY - photo fills its box, less blank space
+=================================== */
+.pd-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.pd-gallery {
+  gap: 8px;
 }

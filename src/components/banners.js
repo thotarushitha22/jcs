@@ -6,7 +6,7 @@ import { getCountdown } from "./festivals";
 // Optional fields per card: price ("From ₹X"), href, image, badge (Big Billion Days only).
 
 // Site colours (taken from the navbar and sidebar). Change these 5 values to retune every card.
-const SITE = { deep: "#163a2d", mid: "#1f5c43", bright: "#2b8a5e", pale: "#dfeadf", paler: "#c8dcca" };
+const SITE = { deep: "#0f2a4a", mid: "#1e3f73", bright: "#2563eb", pale: "#e7eef9", paler: "#d3dff2" };
 
 const A = "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=900&q=80";
 const B = "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=900&q=80";
@@ -14,19 +14,19 @@ const S = "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=900&q=
 
 // Everyday cards (when no festival is on). dark:true means white text.
 const DEFAULT_CARDS = [
-  { id: "n1", bg: [SITE.pale, SITE.paler], dark: false, accent: "#fde047", chip: "B2B only",
+  { id: "n1", bg: [SITE.pale, SITE.paler], dark: false, accent: "#2563eb", chip: "B2B only",
     title: "Genuine stock from verified suppliers", offer: "Bulk pricing from 10 units", sub: "Dispatch within 24 hours", image: A, href: "/" },
-  { id: "n2", bg: [SITE.deep, SITE.mid], dark: true, accent: "#fde047", chip: "New lots",
+  { id: "n2", bg: [SITE.deep, SITE.mid], dark: true, accent: "#93c5fd", chip: "New lots",
     title: "Flagship smartphones at wholesale rates", offer: "Limited lots available", sub: "GST invoice on every order", image: B, href: "/" },
-  { id: "n4", bg: [SITE.deep, "#0f2a20"], dark: true, accent: "#fde047", chip: "Ready stock",
+  { id: "n4", bg: [SITE.deep, "#0b1f38"], dark: true, accent: "#93c5fd", chip: "Ready stock",
     title: "Tablets, TVs and accessories", offer: "Ships from verified suppliers", sub: "Track every order", image: A, href: "/" },
-  { id: "n5", bg: ["#f3f0dc", "#e4dfb8"], dark: false, accent: SITE.bright, chip: "GST invoice",
+  { id: "n5", bg: ["#eef2f8", "#dde6f3"], dark: false, accent: SITE.bright, chip: "GST invoice",
     title: "Every order comes with a GST invoice", offer: "Claim your input credit", sub: "No paperwork chasing", image: B, href: "/" },
-  { id: "n6", bg: [SITE.pale, SITE.paler], dark: false, accent: "#fde047", chip: "Support",
+  { id: "n6", bg: [SITE.pale, SITE.paler], dark: false, accent: "#2563eb", chip: "Support",
     title: "Need help with a bulk order?", offer: "Talk to our team", sub: "We reply within a day", image: S, href: "/support" },
 ];
 
-// Festival cards: green backgrounds to match the site. Tag colour and artwork come from the festival theme in festivals.js.
+// Festival cards: blue backgrounds to match the site. Tag colour and artwork come from the festival theme in festivals.js.
 const FEST = {
   bbd: [
     { badge: "SALE", chip: "Sale week", title: "Festive stock at sale-week prices", offer: "Bulk rates on phones and TVs", sub: "GST invoice on every order", image: A },

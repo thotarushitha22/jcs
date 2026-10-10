@@ -1,45 +1,42 @@
-import axios from "axios";
+import api from "./axios";
 
-// Backend root URL
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
-  "https://jcs-server-1.onrender.com";
-
-const getAuthHeaders = () => {
-  const token =
-    localStorage.getItem("token") ||
-    JSON.parse(localStorage.getItem("user") || "{}")?.token;
-
-  return {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-      "Content-Type": "application/json",
-    },
-  };
+// Place a new order (customer checkout)
+export const createOrder = async (payload) => {
+  const { data } = await api.post("/orders", payload);
+  return data;
 };
 
-// Fetch merchant orders
+// Logged-in customer's own orders
+export const fetchMyOrders = async () => {
+  const { data } = await api.get("/orders");
+  return data;
+};
+
+// One of the customer's own orders
+export const fetchOrder = async (id) => {
+  const { data } = await api.get(`/orders/${id}`);
+  return data;
+};
+
+// Admin and merchant: every order in the store
+export const fetchAllOrders = async () => {
+  const { data } = await api.get("/orders/all");
+  return data;
+};
+
+// Used by MerchantDashboard
 export const fetchMerchantOrders = async () => {
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/orders/`,
-      getAuthHeaders()
-    );
-
-    return response.data;
+    const { data } = await api.get("/orders/all");
+    return data;
   } catch (error) {
-    console.warn(
-      "API request failed, using local storage fallback.",
-      error
-    );
-
-    const localOrders = JSON.parse(
-      localStorage.getItem("orders") || "[]"
-    );
-
-    return localOrders;
+    console.warn("API request failed, using local storage fallback.", error);
+    return JSON.parse(localStorage.getItem("orders") || "[]");
   }
 };
 
-// Alias
-export const fetchMyOrders = fetchMerchantOrders;
+// Update an order's status (admin: any stop, merchant: up to SHIPPED)
+export const updateOrderStatus = async (id, status) => {
+  const { data } = await api.put(`/orders/${id}/status`, { status });
+  return data;
+};

@@ -165,13 +165,13 @@
 }
 
 .trk-stop.current .trk-dot {
-  box-shadow: 0 0 0 5px rgba(31, 138, 99, 0.2);
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.2);
   animation: trk-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes trk-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(31, 138, 99, 0.2); }
-  50%      { box-shadow: 0 0 0 9px rgba(31, 138, 99, 0.08); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+  50%      { box-shadow: 0 0 0 9px rgba(37, 99, 235, 0.08); }
 }
 
 .trk-text {
