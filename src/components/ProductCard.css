@@ -220,3 +220,22 @@
   border: 1px solid rgba(0, 0, 0, 0.25); display: inline-block;
 }
 .p-swatch:hover { outline: 2px solid #2563eb; outline-offset: 1px; }
+/* Add at the END of ProductCard.css */
+
+/* Colour swatches are buttons now */
+button.p-swatch {
+  padding: 0;
+  appearance: none;
+  cursor: pointer;
+}
+.p-swatch-active {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Current storage option */
+.p-tag-active {
+  border-color: #2563eb;
+  color: #2563eb;
+  font-weight: 600;
+}

@@ -545,3 +545,95 @@
 .merchant-dashboard-header > div:last-child {
   display: none !important;
 }
+
+/* Dashboard boxes that open another tab when clicked */
+.metric-icon.stock { background: #dcfce7; color: #16a34a; }
+
+.metric-link {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.metric-link:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.metric-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.metric-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.metric-info {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.metric-arrow {
+  margin-left: auto;
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+.metric-link:hover .metric-arrow {
+  color: #2563eb;
+}
+/* Add at the END of MerchantDashboard.css */
+
+/* Third dashboard box (Manage Products) icon */
+.metric-icon.products {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Clickable boxes (Orders / Manage Products) */
+.metric-card-link {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.metric-card-link:hover,
+.metric-card-link:focus-visible {
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+  outline: none;
+}
+.metric-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #2563eb;
+}
+
+/* ---- Manage Products: only the phone list scrolls, the form stays as it is ---- */
+
+.merchant-grid {
+  align-items: start;           /* columns no longer stretch to the same height */
+}
+
+.merchant-list {
+  /* stays in its own side box, level with the top of the form */
+  max-height: 85vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* keep the "Your inventory listings (N)" title visible while the list scrolls */
+.merchant-list > h3 {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 12px;
+  padding: 8px 0;
+  background: #fff;
+}

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, ShoppingCart, Heart, Image as ImageIcon, PackageCheck } from "lucide-react";
+import {
+  Trash2,
+  ShoppingCart,
+  Heart,
+  Image as ImageIcon,
+  PackageCheck,
+} from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -18,118 +24,262 @@ const readList = (key) => {
   }
 };
 
-const getId = (item) => Number(item?.productId || item?.id || item?._id);
-
-// Same image logic as the product cards on the home page
-const getImage = (product) => {
-  const first = Array.isArray(product.images) ? product.images[0] : null;
-  const raw =
-    (typeof first === "string" ? first : first?.url || first?.image) ||
-    product.image ||
-    product.imageUrl ||
-    product.productImage ||
-    "";
-  return typeof raw === "string" && !raw.includes("undefined") ? raw.trim() : "";
+const getId = (item) => {
+  const id = item?.productId ?? item?.product?.id ?? item?.product?._id ?? item?.id;
+  const numberId = Number(id);
+  return Number.isFinite(numberId) && numberId > 0 ? numberId : null;
 };
+
+const getImage = (product) => {
+  const first = Array.isArray(product?.images)
+    ? product.images[0]
+    : null;
+
+  const raw =
+    (typeof first === "string"
+      ? first
+      : first?.url || first?.image) ||
+    product?.image ||
+    product?.imageUrl ||
+    product?.productImage ||
+    "";
+
+  if (typeof raw !== "string" || raw.includes("undefined")) {
+    return "";
+  }
+
+  return raw.trim();
+};
+
+const getUserId = (user) => user?.id ?? user?.userId ?? user?._id ?? null;
 
 export default function Wishlist() {
   const { user } = useAuth();
   const { addToCart } = useCart();
 
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const storedUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
   const currentUser = user || storedUser;
-  const userId = currentUser?.id || currentUser?.userId;
+  const userId = getUserId(currentUser);
 
   const [wishlistItems, setWishlistItems] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [removingIds, setRemovingIds] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+    let cancelled = false;
 
-        const [wishlistRes, productsRes] = await Promise.all([
-          axios.get(`${API_BASE}/wishlist/${userId}`).catch(() => ({ data: { data: [] } })),
-          axios.get(`${API_BASE}/products`).catch(() => ({ data: [] })),
+    const fetchData = async () => {
+      if (!userId) {
+        setWishlistItems([]);
+        setAllProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const [wishlistResult, productsResult] = await Promise.allSettled([
+          axios.get(`${API_BASE}/wishlist/${userId}`),
+          axios.get(`${API_BASE}/products`),
         ]);
 
-        let items = wishlistRes.data?.data || wishlistRes.data || [];
-        if (!Array.isArray(items)) items = [];
+        if (cancelled) return;
 
-        const prodData = productsRes.data?.data || productsRes.data;
-        const products = Array.isArray(prodData) ? prodData : [];
+        let items = [];
+
+        if (wishlistResult.status === "fulfilled") {
+          const data = wishlistResult.value.data;
+          const result = data?.data ?? data?.wishlist ?? data;
+          items = Array.isArray(result) ? [...result] : [];
+        }
+
+        let products = [];
+
+        if (productsResult.status === "fulfilled") {
+          const data = productsResult.value.data;
+          const result = data?.data ?? data?.products ?? data;
+          products = Array.isArray(result) ? result : [];
+        }
+
         setAllProducts(products);
 
-        // hearts added on this device but not (yet) saved on the server
+        // Restore locally added products that have not reached the server.
         const localAdded = readList(`added_wishlist_${userId}`);
-        const serverIds = items.map(getId);
+        const serverProductIds = new Set(items.map(getId));
+
         localAdded.forEach((id) => {
-          if (!serverIds.includes(id)) {
-            const found = products.find((p) => getId(p) === id);
-            if (found) items.push({ productId: id });
+          const numericId = Number(id);
+
+          if (
+            Number.isFinite(numericId) &&
+            numericId > 0 &&
+            !serverProductIds.has(numericId)
+          ) {
+            const product = products.find(
+              (p) => getId(p) === numericId
+            );
+
+            if (product) {
+              items.push({
+                productId: numericId,
+                ...product,
+              });
+            }
           }
         });
 
-        // hearts removed on this device
-        const localDeleted = readList(`deleted_wishlist_${userId}`);
-        items = items.filter((i) => !localDeleted.includes(getId(i)));
+        // Locally removed products must not reappear on refresh.
+        const deletedIds = new Set(
+          readList(`deleted_wishlist_${userId}`).map(Number)
+        );
+
+        items = items.filter((item) => {
+          const id = getId(item);
+          return id !== null && !deletedIds.has(id);
+        });
 
         setWishlistItems(items);
       } catch (error) {
-        // ignore - empty state is shown
+        if (!cancelled) {
+          console.error("Failed to load wishlist:", error);
+          toast.error("Unable to load wishlist");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    if (userId) {
-      fetchData();
-    } else {
-      setLoading(false);
-    }
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
-  const removeFromList = (item, silent = false) => {
-    const prodId = getId(item);
+  const removeFromList = async (item, silent = false) => {
+    const productId = getId(item);
 
-    setWishlistItems((prev) => prev.filter((i) => getId(i) !== prodId));
+    if (!userId || !productId) {
+      toast.error("Unable to identify this wishlist product");
+      return false;
+    }
 
-    const localDeleted = readList(`deleted_wishlist_${userId}`);
-    if (!localDeleted.includes(prodId)) localDeleted.push(prodId);
-    localStorage.setItem(`deleted_wishlist_${userId}`, JSON.stringify(localDeleted));
+    if (removingIds.includes(productId)) return false;
 
-    // keep the heart buttons in sync
-    const localAdded = readList(`added_wishlist_${userId}`).filter((id) => id !== prodId);
-    localStorage.setItem(`added_wishlist_${userId}`, JSON.stringify(localAdded));
+    setRemovingIds((prev) => [...prev, productId]);
 
-    if (!silent) toast.success("Removed from wishlist");
+    // Update the screen immediately.
+    setWishlistItems((prev) =>
+      prev.filter((entry) => getId(entry) !== productId)
+    );
+
+    const deletedKey = `deleted_wishlist_${userId}`;
+    const addedKey = `added_wishlist_${userId}`;
+
+    const deletedIds = readList(deletedKey).map(Number);
+
+    if (!deletedIds.includes(productId)) {
+      deletedIds.push(productId);
+    }
+
+    localStorage.setItem(deletedKey, JSON.stringify(deletedIds));
+
+    const addedIds = readList(addedKey).filter(
+      (id) => Number(id) !== productId
+    );
+
+    localStorage.setItem(addedKey, JSON.stringify(addedIds));
+
+    try {
+      // This route must match the DELETE route implemented by your backend.
+      await axios.delete(
+        `${API_BASE}/wishlist/${userId}/${productId}`
+      );
+
+      if (!silent) toast.success("Removed from wishlist");
+
+      return true;
+    } catch (error) {
+      console.error(
+        "Wishlist deletion API failed:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
+
+      // Keep the item hidden locally if the API route is unavailable.
+      if (!silent) {
+        if (error.response?.status === 404) {
+          toast.error(
+            "Removed on this device. Backend delete route needs fixing."
+          );
+        } else {
+          toast.error(
+            "Removed on this device, but server deletion failed."
+          );
+        }
+      }
+
+      return false;
+    } finally {
+      setRemovingIds((prev) =>
+        prev.filter((id) => id !== productId)
+      );
+    }
   };
 
-  const handleMoveToCart = (item, product) => {
-    addToCart(product, 1);
-    removeFromList(item, true);
-    toast.success("Moved to cart");
+  const handleMoveToCart = async (item, product) => {
+    if (!product?.id) {
+      toast.error("Product information is unavailable");
+      return;
+    }
+
+    if (product.stock !== null && product.stock <= 0) {
+      toast.error("This product is out of stock");
+      return;
+    }
+
+    try {
+      await Promise.resolve(addToCart(product, 1));
+      await removeFromList(item, true);
+      toast.success("Moved to cart");
+    } catch (error) {
+      console.error("Move to cart failed:", error);
+      toast.error("Unable to move this product to cart");
+    }
   };
 
-  // live product data first, saved wishlist data fills any gaps
   const getProductDetails = (item) => {
-    const prodId = getId(item);
-    const matched = allProducts.find((p) => getId(p) === prodId) || {};
+    const productId = getId(item);
+
+    const matched =
+      allProducts.find((product) => getId(product) === productId) || {};
+
     const merged = { ...item, ...matched };
+
+    const stock =
+      merged.stock === undefined || merged.stock === null
+        ? null
+        : Number(merged.stock);
 
     return {
       ...merged,
-      id: prodId || matched.id || matched._id,
+      id: productId,
       title: merged.title || merged.name || "Product",
       price: Number(merged.price || 0),
       mrp: Number(merged.mrp || 0),
-      stock: merged.stock === undefined ? null : Number(merged.stock),
+      stock,
       image: getImage(merged),
     };
   };
-
-  /* ---------------- states ---------------- */
 
   if (!userId) {
     return (
@@ -138,7 +288,9 @@ export default function Wishlist() {
           <Heart size={44} />
           <h2>Sign in to view your wishlist</h2>
           <p>Keep track of the items you want to buy later.</p>
-          <Link to="/login" className="btn btn-primary">Sign in</Link>
+          <Link to="/login" className="btn btn-primary">
+            Sign in
+          </Link>
         </div>
       </div>
     );
@@ -161,13 +313,13 @@ export default function Wishlist() {
           <Heart size={44} />
           <h2>Your wishlist is empty</h2>
           <p>Tap the heart on any product to save it here.</p>
-          <Link to="/" className="btn btn-primary">Start shopping</Link>
+          <Link to="/" className="btn btn-primary">
+            Start shopping
+          </Link>
         </div>
       </div>
     );
   }
-
-  /* ---------------- list ---------------- */
 
   return (
     <div className="page wl-page">
@@ -176,38 +328,57 @@ export default function Wishlist() {
           <Heart size={26} fill="currentColor" />
           My wishlist
         </h1>
+
         <span className="wl-count mono">
-          {wishlistItems.length} {wishlistItems.length === 1 ? "item" : "items"}
+          {wishlistItems.length}{" "}
+          {wishlistItems.length === 1 ? "item" : "items"}
         </span>
       </div>
 
       <div className="wl-grid">
         {wishlistItems.map((item) => {
           const product = getProductDetails(item);
-          const outOfStock = product.stock !== null && product.stock <= 0;
+          const productId = product.id;
+          const outOfStock =
+            product.stock !== null && product.stock <= 0;
+
           const discount =
             product.mrp > product.price && product.mrp > 0
-              ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+              ? Math.round(
+                  ((product.mrp - product.price) / product.mrp) * 100
+                )
               : 0;
 
           return (
-            <div key={product.id || item._id} className="wl-card">
-              <Link to={`/product/${product.id}`} className="wl-image">
+            <div className="wl-card" key={productId}>
+              <Link to={`/product/${productId}`} className="wl-image">
                 {product.image ? (
-                  <img src={product.image} alt={product.title} loading="lazy" />
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    loading="lazy"
+                  />
                 ) : (
                   <span className="wl-no-image">
                     <ImageIcon size={34} />
                     No image
                   </span>
                 )}
-                {outOfStock && <span className="wl-oos">Out of stock</span>}
+
+                {outOfStock && (
+                  <span className="wl-oos">Out of stock</span>
+                )}
               </Link>
 
               <div className="wl-body">
-                {product.brand && <span className="wl-brand">{product.brand}</span>}
+                {product.brand && (
+                  <span className="wl-brand">{product.brand}</span>
+                )}
 
-                <Link to={`/product/${product.id}`} className="wl-name">
+                <Link
+                  to={`/product/${productId}`}
+                  className="wl-name"
+                >
                   {product.title}
                 </Link>
 
@@ -215,12 +386,16 @@ export default function Wishlist() {
                   <span className="wl-price mono">
                     ₹{product.price.toLocaleString("en-IN")}
                   </span>
+
                   {product.mrp > product.price && (
                     <span className="wl-mrp mono">
                       ₹{product.mrp.toLocaleString("en-IN")}
                     </span>
                   )}
-                  {discount > 0 && <span className="wl-off">{discount}% off</span>}
+
+                  {discount > 0 && (
+                    <span className="wl-off">{discount}% off</span>
+                  )}
                 </div>
 
                 {product.stock !== null && !outOfStock && (
@@ -235,7 +410,9 @@ export default function Wishlist() {
                     type="button"
                     className="btn btn-primary wl-cart"
                     onClick={() => handleMoveToCart(item, product)}
-                    disabled={outOfStock}
+                    disabled={
+                      outOfStock || removingIds.includes(productId)
+                    }
                   >
                     <ShoppingCart size={16} />
                     {outOfStock ? "Unavailable" : "Move to cart"}
@@ -245,8 +422,9 @@ export default function Wishlist() {
                     type="button"
                     className="wl-remove"
                     onClick={() => removeFromList(item)}
+                    disabled={removingIds.includes(productId)}
                     title="Remove from wishlist"
-                    aria-label="Remove from wishlist"
+                    aria-label={`Remove ${product.title} from wishlist`}
                   >
                     <Trash2 size={18} />
                   </button>

@@ -43,6 +43,10 @@ export default function Home() {
       .replace(/\s+/g, " ");
   };
 
+  // Whole-word match: "led" no longer matches "OLED", "tv" no longer matches "activity"
+  const hasWord = (text, words) =>
+    words.some((w) => new RegExp(`(^|[^a-z0-9])${w}s?($|[^a-z0-9])`).test(text));
+
   const getProductCategory = (product) => {
     if (!product) return "";
     
@@ -78,44 +82,45 @@ export default function Home() {
     const textToCheck = normalizeCategory(
       `${product.title || product.name || ""} ${product.brand || ""} ${product.model || ""} ${product.description || ""}`
     );
+    const has = (word) => hasWord(textToCheck, [word]);
 
     if (
-      textToCheck.includes("laptop") || 
-      textToCheck.includes("notebook") || 
-      textToCheck.includes("macbook") || 
-      textToCheck.includes("ebook") ||
-      textToCheck.includes("chromebook")
+      has("laptop") || 
+      has("notebook") || 
+      has("macbook") || 
+      has("ebook") ||
+      has("chromebook")
     ) {
       return "laptops";
     }
 
-    if (textToCheck.includes("tv") || textToCheck.includes("television") || textToCheck.includes("led")) {
+    if (has("tv") || has("television") || has("led tv")) {
       return "tvs";
     }
 
-    if (textToCheck.includes("accessory") || textToCheck.includes("headphones") || textToCheck.includes("charger") || textToCheck.includes("case")) {
+    if (has("accessory") || has("headphones") || has("charger") || has("case")) {
       return "accessories";
     }
 
     // Now check Smartphones safely
     if (
-      textToCheck.includes("phone") || 
-      textToCheck.includes("mobile") || 
-      textToCheck.includes("smartphone") || 
-      textToCheck.includes("cell") || 
-      textToCheck.includes("5g") || 
-      textToCheck.includes("4g") ||
-      textToCheck.includes("moto") || 
-      textToCheck.includes("galaxy") || 
-      textToCheck.includes("poco") || 
-      textToCheck.includes("iphone") || 
-      textToCheck.includes("redmi") || 
-      textToCheck.includes("vivo") || 
-      textToCheck.includes("oppo") ||
-      textToCheck.includes("oneplus") ||
-      textToCheck.includes("realme") ||
-      textToCheck.includes("nokia") ||
-      textToCheck.includes("samsung")
+      has("phone") || 
+      has("mobile") || 
+      has("smartphone") || 
+      has("cell") || 
+      has("5g") || 
+      has("4g") ||
+      has("moto") || has("motorola") || 
+      has("galaxy") || 
+      has("poco") || 
+      has("iphone") || 
+      has("redmi") || 
+      has("vivo") || 
+      has("oppo") ||
+      has("oneplus") ||
+      has("realme") ||
+      has("nokia") ||
+      has("samsung")
     ) {
       return "smartphones";
     }
@@ -184,7 +189,7 @@ export default function Home() {
         const productTitle = normalizeCategory(product.title || product.name || "");
         
         return activeAliases.some(
-          (alias) => productCategory.includes(alias) || productTitle.includes(alias)
+          (alias) => productCategory.includes(alias) || hasWord(productTitle, [alias])
         ) || productCategory.includes(selectedCategory);
       });
     }

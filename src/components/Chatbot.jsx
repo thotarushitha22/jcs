@@ -1,172 +1,343 @@
-import { useState, useEffect } from "react";
-import { MessageCircle, X, Send, Bot } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  User,
+  Sparkles,
+  RotateCcw,
+  ChevronDown,
+} from "lucide-react";
 import "./Chatbot.css";
 
-function getBotReply(message) {
-  const text = message.toLowerCase();
+const API_URL = "https://jcs-server-1.onrender.com/api/chat";
 
-  if (text.includes("hello") || text.includes("hi")) {
-    return "Hello! 👋 Welcome to JCS Global. How can I help you?";
-  }
+const WELCOME_MESSAGE = {
+  role: "assistant",
+  content:
+    "Welcome to JCS Global! I'm your AI assistant. I can help you explore products, understand B2B purchasing, track orders, learn about merchant services, or answer general questions. What would you like to know?",
+  time: new Date(),
+};
 
-  if (text.includes("moq")) {
-    return "MOQ means Minimum Order Quantity. It is the minimum number of units you need to purchase for a product.";
-  }
-
-  if (text.includes("merchant") || text.includes("sell")) {
-    return "You can become a JCS Global merchant by registering and accessing the Merchant Dashboard, where you can manage products, stock and orders.";
-  }
-
-  if (text.includes("gst")) {
-    return "JCS Global is a B2B marketplace designed for GST-related business purchasing. GST details may vary by product and order.";
-  }
-
-  if (text.includes("order")) {
-    return "You can check your orders from My Account → My Orders. Select an order to view its details and status.";
-  }
-
-  if (text.includes("cart")) {
-    return "You can add products to your cart and review quantities before proceeding to checkout.";
-  }
-
-  if (
-    text.includes("smartphone") ||
-    text.includes("phone") ||
-    text.includes("laptop") ||
-    text.includes("tv")
-  ) {
-    return "You can browse Smartphones, Laptops, TVs and Accessories from the JCS Global marketplace. You can also use the search bar to find a specific product.";
-  }
-
-  if (text.includes("support") || text.includes("contact")) {
-    return "For support, please use the Help & Support section of JCS Global.";
-  }
-
-  return "I'm the JCS Global Assistant. I can help with products, MOQ, GST, orders, cart, merchant accounts and website navigation. Try asking me one of these.";
-}
+const SUGGESTIONS = [
+  "How does JCS Global work?",
+  "Explain MOQ and bulk orders",
+  "How can I become a merchant?",
+  "Tell me about cloud computing",
+];
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
-
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hi! 👋 I'm the JCS Global Assistant. How can I help you today?",
-    },
-  ]);
-
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
 
-  // Listen for the custom event fired from ProductDetail Q&A button
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
   useEffect(() => {
-    const handleOpenChat = (e) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, loading]);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const handleOpenChat = (event) => {
       setOpen(true);
-      if (e.detail?.question) {
-        const userQ = e.detail.question;
-        const botReply = getBotReply(userQ);
-        setMessages((previous) => [
-          ...previous,
-          { role: "user", content: userQ },
-          { role: "assistant", content: botReply },
-        ]);
+
+      const question = event.detail?.question;
+      if (question) {
+        sendQuestion(question);
       }
     };
 
     window.addEventListener("open_chatbot", handleOpenChat);
-    return () => window.removeEventListener("open_chatbot", handleOpenChat);
+
+    return () => {
+      window.removeEventListener("open_chatbot", handleOpenChat);
+    };
   }, []);
 
-  const sendMessage = () => {
-    const text = input.trim();
+  const sendQuestion = async (question) => {
+    const text = question.trim();
 
-    if (!text) return;
+    if (!text || loading) return;
 
-    const reply = getBotReply(text);
-
-    setMessages((previous) => [
-      ...previous,
-      {
-        role: "user",
-        content: text,
-      },
-      {
-        role: "assistant",
-        content: reply,
-      },
-    ]);
-
+    setError("");
     setInput("");
+    setLoading(true);
+
+    const userMessage = {
+      role: "user",
+      content: text,
+      time: new Date(),
+    };
+
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: text,
+          history: updatedMessages
+            .slice(-12)
+            .map(({ role, content }) => ({ role, content })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 429
+            ? "Too many requests. Please wait a moment and try again."
+            : response.status === 503
+              ? "The AI assistant is temporarily unavailable. Please try again shortly."
+              : "I couldn't get a response. Please try again."
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data.reply || typeof data.reply !== "string") {
+        throw new Error("The assistant returned an empty response.");
+      }
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          role: "assistant",
+          content: data.reply,
+          time: new Date(),
+        },
+      ]);
+    } catch (err) {
+      setError(
+        err.message === "Failed to fetch"
+          ? "Unable to connect to the assistant. Check your internet connection and backend deployment."
+          : err.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    sendMessage();
+    sendQuestion(input);
+  };
+
+  const resetChat = () => {
+    if (loading) return;
+    setMessages([
+      { ...WELCOME_MESSAGE, time: new Date() },
+    ]);
+    setError("");
+  };
+
+  const formatTime = (time) => {
+    return new Date(time).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
     <>
       {!open && (
         <button
-          className="chatbot-button"
+          className="chatbot-launcher"
           onClick={() => setOpen(true)}
-          aria-label="Open JCS Global Assistant"
+          aria-label="Open JCS Global AI Assistant"
         >
-          <MessageCircle size={26} />
+          <MessageCircle size={25} />
         </button>
       )}
 
       {open && (
-        <div className="chatbot-window">
-          <div className="chatbot-header">
-            <div className="chatbot-title">
+        <section
+          className="chatbot-window"
+          aria-label="JCS Global AI Assistant"
+        >
+          <header className="chatbot-header">
+            <div className="chatbot-brand">
               <div className="chatbot-avatar">
-                <Bot size={20} />
+                <Bot size={23} />
               </div>
 
-              <div>
+              <div className="chatbot-brand-text">
                 <strong>JCS Global Assistant</strong>
-                <span>Online</span>
+                <span>AI-powered support</span>
               </div>
             </div>
 
-            <button
-              className="chatbot-close"
-              onClick={() => setOpen(false)}
-              aria-label="Close chatbot"
-            >
-              <X size={20} />
-            </button>
+            <div className="chatbot-header-actions">
+              <button
+                type="button"
+                onClick={resetChat}
+                disabled={loading}
+                aria-label="Start a new conversation"
+                title="New conversation"
+              >
+                <RotateCcw size={17} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Minimize chatbot"
+                title="Minimize"
+              >
+                <ChevronDown size={22} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close chatbot"
+                title="Close"
+              >
+                <X size={19} />
+              </button>
+            </div>
+          </header>
+
+          <div className="chatbot-intro">
+            <div className="chatbot-intro-icon">
+              <Sparkles size={15} />
+            </div>
+            <div>
+              <strong>How can I help you?</strong>
+              <p>Ask about JCS Global or any general topic.</p>
+            </div>
           </div>
 
-          <div className="chatbot-messages">
+          <main className="chatbot-messages" aria-live="polite">
             {messages.map((message, index) => (
               <div
-                key={index}
-                className={
-                  message.role === "user"
-                    ? "chat-message user-message"
-                    : "chat-message bot-message"
-                }
+                key={`${index}-${message.role}`}
+                className={`chatbot-message-row ${
+                  message.role === "user" ? "is-user" : "is-assistant"
+                }`}
               >
-                {message.content}
+                <div className="chatbot-message-avatar">
+                  {message.role === "user" ? (
+                    <User size={16} />
+                  ) : (
+                    <Bot size={17} />
+                  )}
+                </div>
+
+                <div className="chatbot-message-content">
+                  <div className="chatbot-message-label">
+                    {message.role === "user" ? "You" : "JCS Assistant"}
+                  </div>
+
+                  <div className="chatbot-bubble">
+                    {message.content}
+                  </div>
+
+                  <time className="chatbot-message-time">
+                    {formatTime(message.time)}
+                  </time>
+                </div>
               </div>
             ))}
-          </div>
 
-          <form className="chatbot-input" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="Ask JCS Assistant..."
-            />
+            {messages.length === 1 && !loading && (
+              <div className="chatbot-suggestions">
+                <span>TRY ASKING</span>
+                {SUGGESTIONS.map((suggestion) => (
+                  <button
+                    type="button"
+                    key={suggestion}
+                    onClick={() => sendQuestion(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            <button type="submit" disabled={!input.trim()}>
-              <Send size={18} />
-            </button>
+            {loading && (
+              <div className="chatbot-message-row is-assistant">
+                <div className="chatbot-message-avatar">
+                  <Bot size={17} />
+                </div>
+                <div className="chatbot-message-content">
+                  <div className="chatbot-message-label">
+                    JCS Assistant
+                  </div>
+                  <div className="chatbot-bubble chatbot-typing">
+                    <span />
+                    <span />
+                    <span />
+                    <small>Preparing your answer...</small>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="chatbot-error" role="alert">
+                <p>{error}</p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    sendQuestion(
+                      messages.filter((m) => m.role === "user").at(-1)
+                        ?.content || ""
+                    )
+                  }
+                  disabled={loading}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </main>
+
+          <form className="chatbot-composer" onSubmit={handleSubmit}>
+            <div className="chatbot-input-wrap">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Ask anything..."
+                aria-label="Your message"
+                maxLength={2000}
+                disabled={loading}
+              />
+
+              <button
+                type="submit"
+                disabled={!input.trim() || loading}
+                aria-label="Send message"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+
+            <p className="chatbot-disclaimer">
+              AI can make mistakes. Verify important information.
+            </p>
           </form>
-        </div>
+        </section>
       )}
     </>
   );

@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import { Toaster } from "react-hot-toast";
@@ -57,6 +58,8 @@ function ProtectedRoute({
   allowedRoles,
 }) {
 
+  const location = useLocation();
+
   const { user } =
     useAuth();
 
@@ -89,6 +92,10 @@ function ProtectedRoute({
       <Navigate
         to="/login"
         replace
+        state={{
+          from: location.pathname,
+          message: "Please sign in to continue.",
+        }}
       />
     );
   }
@@ -103,6 +110,7 @@ function ProtectedRoute({
   // Strict admin-only protection
 
   const isStrictAdminOnly =
+    Array.isArray(allowedRoles) &&
     allowedRoles.length === 1 &&
     allowedRoles.includes(
       "admin"
@@ -192,7 +200,9 @@ function MainStoreLayout() {
         <Route
           path="/checkout"
           element={
-            <Checkout />
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
           }
         />
 

@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { Star, MapPin, HelpCircle } from "lucide-react";
-import { fetchProduct, fetchProducts, fetchRelatedProducts } from "../api/products";
+import { fetchProduct, fetchRelatedProducts, fetchProducts } from "../api/products";
 import { buildOptions, groupKey, imageOf } from "../utils/variants";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 import ProductCard from "../components/ProductCard";
 import CustomerReviews from "../components/CustomerReviews";
-import WishlistButton from "../components/WishlistButton"; // <-- Import Wishlist Button
+import WishlistButton from "../components/WishlistButton";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
+  const [siblings, setSiblings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,37 +36,19 @@ export default function ProductDetail() {
     colors: "",
   });
 
-  const [siblings, setSiblings] = useState([]);
-
-  // Load every listing of the same brand + model so storage/colour chips can link between them
-  useEffect(() => {
-    if (!product) return;
-    const key = groupKey(product);
-    if (!key) {
-      setSiblings([]);
-      return;
-    }
-    let active = true;
-    fetchProducts()
-      .then((all) => {
-        if (!active) return;
-        setSiblings(all.filter((p) => groupKey(p) === key));
-      })
-      .catch(() => active && setSiblings([]));
-    return () => {
-      active = false;
-    };
-  }, [product]);
-
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setSiblings([]);
 
     fetchProduct(id)
       .then((data) => {
         const productData = {
           ...data,
-          variants: data.variants || {},
+          variants: data.variants || {
+            storage: ["128 GB", "256 GB", "512 GB"],
+            colors: ["Midnight Black", "Frost Silver", "Ocean Blue"],
+          },
         };
 
         setProduct(productData);
@@ -91,6 +78,17 @@ export default function ProductDetail() {
           storage: storageOptions[0] || "",
           colors: colorOptions[0] || "",
         });
+
+        // Load the other listings of the same phone (same brand + model)
+        const key = groupKey(productData);
+        if (key) {
+          fetchProducts()
+            .then((res) => {
+              const list = Array.isArray(res) ? res : res?.products || [];
+              setSiblings(list.filter((p) => groupKey(p) === key));
+            })
+            .catch(() => setSiblings([]));
+        }
       })
       .catch((err) => {
         setError(err.message);
@@ -157,6 +155,10 @@ export default function ProductDetail() {
   const outOfStock =
     Number(product.stock || 0) <= 0;
 
+  // Storage / colour options built from the sibling listings
+  const options = siblings.length > 1 ? buildOptions(siblings, product) : null;
+  const pid = (p) => p.id || p._id;
+
   const handleAdd = () => {
     if (outOfStock) return;
 
@@ -175,8 +177,33 @@ export default function ProductDetail() {
     }, 1800);
   };
 
+  // A buyer is signed in when there is a saved token and a user with an email
+  const isSignedIn = () => {
+    let stored = {};
+    try {
+      stored = JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      stored = {};
+    }
+    return Boolean(
+      localStorage.getItem("token") && (user?.email || stored?.email)
+    );
+  };
+
   const handleBuyNow = () => {
     if (outOfStock) return;
+
+    // Checkout is only for signed-in buyers: otherwise ask them to sign in first
+    if (!isSignedIn()) {
+      toast.error("Please sign in to buy this product.");
+      navigate("/login", {
+        state: {
+          from: location.pathname,
+          message: "Please sign in to continue with your purchase.",
+        },
+      });
+      return;
+    }
 
     addToCart(
       {
@@ -185,8 +212,7 @@ export default function ProductDetail() {
       },
       qty
     );
-
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   const increaseQuantity = () => {
@@ -209,7 +235,7 @@ export default function ProductDetail() {
     }
   };
 
-  // Updated variant selector that also switches the active image view for colors
+  // Variant selector that also switches the active image view for colors
   const selectVariant = (group, value) => {
     setSelected((previous) => ({
       ...previous,
@@ -217,7 +243,6 @@ export default function ProductDetail() {
     }));
 
     if (group === "colors") {
-      // Find if any image explicitly matches this color variant
       const matchingIndex = rawGallery.findIndex(
         (img) => typeof img === "object" && img !== null && img.color?.toLowerCase() === value.toLowerCase()
       );
@@ -264,16 +289,6 @@ export default function ProductDetail() {
         ? [product.colour]
         : []);
 
-  /* ---- Sibling listings: same brand + model, one listing per storage/colour ---- */
-  const sibOptions = siblings.length > 1 ? buildOptions(siblings, product) : null;
-  const storageItems = sibOptions && sibOptions.storage.length > 1 ? sibOptions.storage : null;
-  const colourItems = sibOptions && sibOptions.colour.length > 1 ? sibOptions.colour : null;
-
-  const pickSibling = (item) => {
-    const targetId = item.product.id || item.product._id;
-    if (String(targetId) !== String(id)) navigate(`/product/${targetId}`);
-  };
-
   const categoryLower = String(
     product.category?.name ||
       product.category ||
@@ -290,40 +305,12 @@ export default function ProductDetail() {
       categoryLower.includes("notebook")
     ) {
       return [
-        {
-          icon: "⚡",
-          text: `${prodRam || "4GB"} | ${
-            prodStorage || "64GB"
-          }`,
-        },
-        {
-          icon: "💻",
-          text:
-            product.processor ||
-            "Intel Celeron N4020",
-        },
-        {
-          icon: "📷",
-          text:
-            product.rearCamera || "N/A",
-        },
-        {
-          icon: "📸",
-          text:
-            product.frontCamera || "HD Webcam",
-        },
-        {
-          icon: "📱",
-          text:
-            product.screenSize ||
-            "11.6 inch HD",
-        },
-        {
-          icon: "🔋",
-          text:
-            product.battery ||
-            "Long-lasting battery",
-        },
+        { icon: "⚡", text: `${prodRam || "4GB"} | ${prodStorage || "64GB"}` },
+        { icon: "💻", text: product.processor || "Intel Celeron N4020" },
+        { icon: "📷", text: product.rearCamera || "N/A" },
+        { icon: "📸", text: product.frontCamera || "HD Webcam" },
+        { icon: "📱", text: product.screenSize || "11.6 inch HD" },
+        { icon: "🔋", text: product.battery || "Long-lasting battery" },
       ];
     }
 
@@ -332,30 +319,10 @@ export default function ProductDetail() {
       categoryLower.includes("television")
     ) {
       return [
-        {
-          icon: "📺",
-          text:
-            product.screenSize ||
-            "55 inch 4K UHD Display",
-        },
-        {
-          icon: "🔊",
-          text:
-            product.audio ||
-            "Dolby Audio & Surround Sound",
-        },
-        {
-          icon: "🔌",
-          text:
-            product.ports ||
-            "Multiple HDMI & USB Ports",
-        },
-        {
-          icon: "🌐",
-          text:
-            product.os ||
-            "Smart TV OS with Built-in Apps",
-        },
+        { icon: "📺", text: product.screenSize || "55 inch 4K UHD Display" },
+        { icon: "🔊", text: product.audio || "Dolby Audio & Surround Sound" },
+        { icon: "🔌", text: product.ports || "Multiple HDMI & USB Ports" },
+        { icon: "🌐", text: product.os || "Smart TV OS with Built-in Apps" },
       ];
     }
 
@@ -365,69 +332,23 @@ export default function ProductDetail() {
       categoryLower.includes("audio")
     ) {
       return [
-        {
-          icon: "🎧",
-          text:
-            product.connectivity ||
-            "Wireless Bluetooth Connectivity",
-        },
-        {
-          icon: "🔋",
-          text:
-            product.battery ||
-            "Extended Playback Hours",
-        },
-        {
-          icon: "🛡️",
-          text:
-            product.build ||
-            "Ergonomic & Durable Design",
-        },
+        { icon: "🎧", text: product.connectivity || "Wireless Bluetooth Connectivity" },
+        { icon: "🔋", text: product.battery || "Extended Playback Hours" },
+        { icon: "🛡️", text: product.build || "Ergonomic & Durable Design" },
       ];
     }
 
     return [
-      {
-        icon: "⚡",
-        text: `${prodRam || "4 GB RAM"} | ${
-          prodStorage || "64 GB ROM"
-        }`,
-      },
-      {
-        icon: "💻",
-        text:
-          product.processor ||
-          "Octa Core Processor",
-      },
-      {
-        icon: "📷",
-        text:
-          product.rearCamera ||
-          "50MP + 2MP Rear Camera",
-      },
-      {
-        icon: "📸",
-        text:
-          product.frontCamera ||
-          "8MP Front Camera",
-      },
-      {
-        icon: "📱",
-        text:
-          product.screenSize ||
-          "6.7 inch display",
-      },
-      {
-        icon: "🔋",
-        text:
-          product.battery ||
-          "5000 mAh Battery",
-      },
+      { icon: "⚡", text: `${prodRam || "4 GB RAM"} | ${prodStorage || "64 GB ROM"}` },
+      { icon: "💻", text: product.processor || "Octa Core Processor" },
+      { icon: "📷", text: product.rearCamera || "50MP + 2MP Rear Camera" },
+      { icon: "📸", text: product.frontCamera || "8MP Front Camera" },
+      { icon: "📱", text: product.screenSize || "6.7 inch display" },
+      { icon: "🔋", text: product.battery || "5000 mAh Battery" },
     ];
   };
 
-  const dynamicHighlights =
-    getHighlights();
+  const dynamicHighlights = getHighlights();
 
   return (
     <main className="page pd">
@@ -490,6 +411,49 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+
+          {/* Buying assurance (fills the space under the image) */}
+          <div className="pd-trust">
+            <div className="pd-trust-item">
+              <span>🛡️</span>
+              <div>
+                <strong>1 Year Warranty</strong>
+                <p>Manufacturer assured</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>🔄</span>
+              <div>
+                <strong>Easy Returns</strong>
+                <p>7-day policy</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>⚡</span>
+              <div>
+                <strong>Fast Dispatch</strong>
+                <p>Ships within 24 hrs</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item">
+              <span>🔒</span>
+              <div>
+                <strong>Secure Payment</strong>
+                <p>Protected at checkout</p>
+              </div>
+            </div>
+
+            <div className="pd-trust-item pd-trust-wide">
+              <span>✅</span>
+              <div>
+                <strong>GST-verified orders</strong>
+                <p>Orders are verified against your GST profile before dispatch</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* =====================================
@@ -591,6 +555,10 @@ export default function ProductDetail() {
 
           </div>
 
+          <div className="pd-buy-row">
+
+          <div className="pd-buy-left">
+
           {/* OUT OF STOCK */}
 
           {outOfStock ? (
@@ -611,7 +579,9 @@ export default function ProductDetail() {
 
             <>
 
-              {/* STOCK */}
+              {/* STOCK + QUANTITY side by side */}
+
+              <div className="pd-top-row">
 
               <div className="pd-specs">
 
@@ -648,9 +618,7 @@ export default function ProductDetail() {
 
                   <button
                     type="button"
-                    onClick={
-                      decreaseQuantity
-                    }
+                    onClick={decreaseQuantity}
                     aria-label="Decrease quantity"
                   >
                     −
@@ -662,9 +630,7 @@ export default function ProductDetail() {
 
                   <button
                     type="button"
-                    onClick={
-                      increaseQuantity
-                    }
+                    onClick={increaseQuantity}
                     aria-label="Increase quantity"
                   >
                     +
@@ -674,23 +640,25 @@ export default function ProductDetail() {
 
               </div>
 
-              {/* BUTTONS WITH WISHLIST */}
+              </div>
 
-              <div className="pd-cta-row flex items-center gap-3">
+              {/* BUTTONS (small) */}
+
+              <div className="pd-cta-row">
 
                 <button
                   type="button"
-                  className="btn btn-outline pd-cta flex-1"
+                  className="btn btn-outline pd-cta"
                   onClick={handleAdd}
                 >
                   {added
-                    ? "Added to cart ✓"
+                    ? "Added ✓"
                     : "Add to cart"}
                 </button>
 
                 <button
                   type="button"
-                  className="btn btn-primary pd-cta flex-1"
+                  className="btn btn-primary pd-cta"
                   onClick={handleBuyNow}
                 >
                   Buy Now
@@ -761,26 +729,53 @@ export default function ProductDetail() {
           )}
 
           {/* =====================================
-              INTERACTIVE VARIANTS
+              VARIANTS: every GB option + phone images per colour
           ===================================== */}
 
-          {(
-            storageItems ||
-            colourItems ||
-            variantStorage.length > 0 ||
-            variantColors.length > 0
-          ) && (
-
+          {options && (options.storage.length > 0 || options.colour.length > 0) ? (
             <div className="pd-variants">
+              {options.storage.length > 0 && (
+                <div className="pd-variant-group">
+                  <span className="pd-variant-label">Storage Capacity</span>
+                  <div className="pd-variant-options">
+                    {options.storage.map((o) => (
+                      <Link
+                        key={o.key}
+                        to={`/product/${pid(o.product)}`}
+                        className={`pd-variant-chip ${o.active ? "pd-variant-chip-active" : ""}`}
+                      >
+                        {o.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {storageItems ? (
-                <ChipRow
-                  label="Storage Capacity"
-                  items={storageItems}
-                  onPick={pickSibling}
-                />
-              ) : (
-                variantStorage.length > 0 && (
+              {options.colour.length > 0 && (
+                <div className="pd-variant-group">
+                  <span className="pd-variant-label">Colour Options</span>
+                  <div className="pd-variant-options">
+                    {options.colour.map((o) => (
+                      <Link
+                        key={o.key}
+                        to={`/product/${pid(o.product)}`}
+                        className={`pd-color-card ${o.active ? "pd-color-card-active" : ""}`}
+                        title={o.label}
+                      >
+                        {imageOf(o.product) && (
+                          <img src={imageOf(o.product)} alt={o.label} />
+                        )}
+                        <span>{o.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            (variantStorage.length > 0 || variantColors.length > 0) && (
+              <div className="pd-variants">
+                {variantStorage.length > 0 && (
                   <VariantGroup
                     label="Storage Capacity"
                     options={variantStorage}
@@ -788,18 +783,9 @@ export default function ProductDetail() {
                     selected={selected}
                     onSelect={selectVariant}
                   />
-                )
-              )}
+                )}
 
-              {colourItems ? (
-                <ChipRow
-                  label="Colour Options"
-                  items={colourItems}
-                  onPick={pickSibling}
-                  showImage
-                />
-              ) : (
-                variantColors.length > 0 && (
+                {variantColors.length > 0 && (
                   <VariantGroup
                     label="Colour Options"
                     options={variantColors}
@@ -807,11 +793,14 @@ export default function ProductDetail() {
                     selected={selected}
                     onSelect={selectVariant}
                   />
-                )
-              )}
-
-            </div>
+                )}
+              </div>
+            )
           )}
+
+          </div>
+
+          <div className="pd-buy-right">
 
           {/* =====================================
               QUICK INFO (fills the right column)
@@ -867,60 +856,17 @@ export default function ProductDetail() {
             );
           })()}
 
+          </div>
+
+          </div>
+
+          <p className="pd-note">
+            Payment is secured at checkout.
+            Orders are verified against your
+            GST profile before dispatch.
+          </p>
+
         </section>
-      </div>
-
-      {/* Below the two columns: trust bar + payment note (outside the grid so the sticky photo stops above it) */}
-      <div className="pd-below">
-
-        {/* Buying assurance (full-width bar under both columns) */}
-        <div className="pd-trust pd-trust-bar">
-          <div className="pd-trust-item">
-            <span>🛡️</span>
-            <div>
-              <strong>1 Year Warranty</strong>
-              <p>Manufacturer assured</p>
-            </div>
-          </div>
-
-          <div className="pd-trust-item">
-            <span>🔄</span>
-            <div>
-              <strong>Easy Returns</strong>
-              <p>7-day policy</p>
-            </div>
-          </div>
-
-          <div className="pd-trust-item">
-            <span>⚡</span>
-            <div>
-              <strong>Fast Dispatch</strong>
-              <p>Ships within 24 hrs</p>
-            </div>
-          </div>
-
-          <div className="pd-trust-item">
-            <span>🔒</span>
-            <div>
-              <strong>Secure Payment</strong>
-              <p>Protected at checkout</p>
-            </div>
-          </div>
-
-          <div className="pd-trust-item">
-            <span>✅</span>
-            <div>
-              <strong>GST-verified orders</strong>
-              <p>Verified against your GST profile</p>
-            </div>
-          </div>
-        </div>
-
-        <p className="pd-note pd-note-full">
-          Payment is secured at checkout.
-          Orders are verified against your
-          GST profile before dispatch.
-        </p>
       </div>
 
       {/* =========================================
@@ -991,127 +937,85 @@ export default function ProductDetail() {
 
           {product.title && (
             <div className="pd-spec-item">
-              <strong>
-                Product Title:
-              </strong>{" "}
-              {product.title}
+              <strong>Product Title:</strong> {product.title}
             </div>
           )}
 
           {product.brand && (
             <div className="pd-spec-item">
-              <strong>
-                Brand:
-              </strong>{" "}
-              {product.brand}
+              <strong>Brand:</strong> {product.brand}
             </div>
           )}
 
           {product.category && (
             <div className="pd-spec-item">
-              <strong>
-                Category:
-              </strong>{" "}
-              {product.category}
+              <strong>Category:</strong> {product.category}
             </div>
           )}
 
           {prodColour && (
             <div className="pd-spec-item">
-              <strong>
-                Colour:
-              </strong>{" "}
-              {prodColour}
+              <strong>Colour:</strong> {prodColour}
             </div>
           )}
 
           {prodStorage && (
             <div className="pd-spec-item">
-              <strong>
-                Storage Capacity:
-              </strong>{" "}
-              {prodStorage}
+              <strong>Storage Capacity:</strong> {prodStorage}
             </div>
           )}
 
           {prodRam && (
             <div className="pd-spec-item">
-              <strong>
-                RAM:
-              </strong>{" "}
-              {prodRam}
+              <strong>RAM:</strong> {prodRam}
             </div>
           )}
 
           {product.screenSize && (
             <div className="pd-spec-item">
-              <strong>
-                Screen Size:
-              </strong>{" "}
-              {product.screenSize}
+              <strong>Screen Size:</strong> {product.screenSize}
             </div>
           )}
 
           {product.processor && (
             <div className="pd-spec-item">
-              <strong>
-                Processor:
-              </strong>{" "}
-              {product.processor}
+              <strong>Processor:</strong> {product.processor}
             </div>
           )}
 
           {product.battery && (
             <div className="pd-spec-item">
-              <strong>
-                Battery:
-              </strong>{" "}
-              {product.battery}
+              <strong>Battery:</strong> {product.battery}
             </div>
           )}
 
           {product.weight && (
             <div className="pd-spec-item">
-              <strong>
-                Weight:
-              </strong>{" "}
-              {product.weight}
+              <strong>Weight:</strong> {product.weight}
             </div>
           )}
 
           {price > 0 && (
             <div className="pd-spec-item">
-              <strong>
-                Price:
-              </strong>{" "}
-              ₹{price.toLocaleString("en-IN")}
+              <strong>Price:</strong> ₹{price.toLocaleString("en-IN")}
             </div>
           )}
 
           {mrp > 0 && (
             <div className="pd-spec-item">
-              <strong>
-                MRP:
-              </strong>{" "}
-              ₹{mrp.toLocaleString("en-IN")}
+              <strong>MRP:</strong> ₹{mrp.toLocaleString("en-IN")}
             </div>
           )}
 
           {product.stock !== undefined && (
             <div className="pd-spec-item">
-              <strong>
-                Stock:
-              </strong>{" "}
-              {product.stock}
+              <strong>Stock:</strong> {product.stock}
             </div>
           )}
 
           {product.moq && (
             <div className="pd-spec-item">
-              <strong>
-                MOQ:
-              </strong>{" "}
-              {product.moq}
+              <strong>MOQ:</strong> {product.moq}
             </div>
           )}
 
@@ -1234,34 +1138,8 @@ export default function ProductDetail() {
 }
 
 
-function ChipRow({ label, items, onPick, showImage = false }) {
-  return (
-    <div className="pd-variant-group">
-      <span className="pd-variant-label">{label}</span>
-      <div className="pd-variant-options">
-        {items.map((item) => {
-          const img = showImage ? imageOf(item.product) : "";
-          return (
-            <button
-              key={item.key}
-              type="button"
-              className={`pd-variant-chip ${img ? "pd-variant-chip-img" : ""} ${
-                item.active ? "pd-variant-chip-active" : ""
-              }`}
-              onClick={() => onPick(item)}
-            >
-              {img && <img src={img} alt={item.label} />}
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 /* =========================================
-   VARIANT GROUP
+   VARIANT GROUP (fallback when no sibling listings exist)
 ========================================= */
 
 function VariantGroup({

@@ -15,7 +15,7 @@
 /* Left Pane: Vibrant Blue Gradient Brand Side */
 .auth-left-pane {
   flex: 1.1;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
+  background: linear-gradient(145deg, #0a1f38 0%, #0f2a4a 55%, #1b4b82 135%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -106,7 +106,7 @@
 /* Right Pane: Clean Light Form Side */
 .auth-right-pane {
   flex: 0.9;
-  background: #ffffff;
+  background: #f3f6fb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,7 +185,7 @@
 
 .role-btn.active {
   background: #ffffff;
-  color: #1e3a8a;
+  color: #0f2a4a;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
@@ -193,7 +193,7 @@
 .form-main-heading {
   font-size: 32px;
   font-weight: 700;
-  color: #0f172a;
+  color: #0f2a4a;
   margin-bottom: 6px;
   letter-spacing: -0.5px;
 }
@@ -326,7 +326,7 @@
 }
 
 .forgot-password-row a {
-  color: #5274c4;
+  color: #2563eb;
   font-size: 13px;
   font-weight: 600;
 
@@ -337,4 +337,133 @@
 
 .forgot-password-row a:hover {
   text-decoration: underline;
+}
+
+/* =========================================================
+   NAVY + BLUE THEME (same colours as the site header)
+   navy #0f2a4a   blue #2563eb   dark blue #1d4ed8
+========================================================= */
+
+/* Two older rules in other files also style these classes
+   (Home.css turns every "...header..." class dark, MerchantDashboard.css
+   sizes ".brand-logo-icon"). The rules below are more specific, so the login keeps its own look. */
+.auth-split-container .brand-header-area {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* blue "logo box", like the JCS box in the header */
+.auth-split-container .brand-logo-icon {
+  width: auto;
+  height: auto;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.auth-split-container .brand-logo-text {
+  color: #ffffff;
+}
+
+/* soft light on the navy side */
+.auth-left-pane {
+  isolation: isolate;
+}
+
+.auth-left-pane::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(96, 165, 250, 0.14) 0, transparent 38%),
+    radial-gradient(circle at 88% 82%, rgba(96, 165, 250, 0.12) 0, transparent 42%);
+}
+
+.brand-points {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.brand-points li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 14px;
+  color: #e6eefb;
+}
+
+.brand-points li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* the form sits in a white card */
+.auth-card-wrapper {
+  background: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 16px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 10px 30px -12px rgba(15, 42, 74, 0.22);
+}
+
+/* "please sign in" notice */
+.auth-info-alert {
+  color: #0f2a4a;
+  background: #e8effb;
+  border: 1px solid #cddcf4;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+/* show / hide password */
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 64px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.password-toggle:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .auth-card-wrapper {
+    padding: 22px 18px 26px;
+  }
 }

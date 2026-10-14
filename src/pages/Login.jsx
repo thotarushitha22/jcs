@@ -155,10 +155,19 @@ export default function Login() {
 
       /* REDIRECT */
 
+      // customers go back to the page they came from (for example the mobiles list)
+      const from = location.state?.from;
+      const safeFrom =
+        typeof from === "string" &&
+        from.startsWith("/") &&
+        !from.startsWith("//")
+          ? from
+          : "/";
+
       if (selectedRole === "merchant") {
         navigate("/merchant");
       } else {
-        navigate("/");
+        navigate(safeFrom, { replace: true });
       }
     } catch (err) {
       console.error(
