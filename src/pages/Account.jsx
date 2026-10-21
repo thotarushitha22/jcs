@@ -4,7 +4,7 @@ import "./Account.css";
 
 const sections = [
   { icon: Package, title: "My Orders", text: "Your recent and past orders, all in one place", to: "/orders", tint: "amber" },
-  { icon: Package, title: "Selling History", text: "Track your sell requests and their status", to: "/sell", tint: "amber" },
+  // Selling History removed
   { icon: FileBarChart2, title: "Order Reports", text: "Generate and export filtered order reports", to: "/account/order-reports", tint: "blue" },
   { icon: ShieldCheck, title: "Account Information", text: "Check your account information", to: "/account/info", tint: "rose" },
   { icon: FileText, title: "KYC Documents", text: "View or update your verification documents", to: "/account/kyc", tint: "violet" },
@@ -17,9 +17,9 @@ const sections = [
 export default function Account() {
   return (
     <div
-  className="page container account"
-  data-tour="account-page"
->
+      className="page container account"
+      data-tour="account-page"
+    >
       <span className="account-crumb">My Account</span>
       <h1>My Account</h1>
 

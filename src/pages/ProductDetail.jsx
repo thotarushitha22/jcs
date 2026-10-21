@@ -79,7 +79,6 @@ export default function ProductDetail() {
           colors: colorOptions[0] || "",
         });
 
-        // Load the other listings of the same phone (same brand + model)
         const key = groupKey(productData);
         if (key) {
           fetchProducts()
@@ -134,50 +133,26 @@ export default function ProductDetail() {
   );
 
   const rawGallery = (() => {
-    if (
-      Array.isArray(product.images) &&
-      product.images.length > 0
-    ) {
+    if (Array.isArray(product.images) && product.images.length > 0) {
       return product.images;
     }
-
-    const singleImage =
-      product.image ||
-      product.imageUrl ||
-      product.img;
-
+    const singleImage = product.image || product.imageUrl || product.img;
     return singleImage ? [singleImage] : [];
   })();
 
-  // Normalize gallery items to strings if they are objects, and keep track of mapping
   const gallery = rawGallery.map((img) => (typeof img === "object" && img !== null ? img.url : img));
+  const outOfStock = Number(product.stock || 0) <= 0;
 
-  const outOfStock =
-    Number(product.stock || 0) <= 0;
-
-  // Storage / colour options built from the sibling listings
   const options = siblings.length > 1 ? buildOptions(siblings, product) : null;
   const pid = (p) => p.id || p._id;
 
   const handleAdd = () => {
     if (outOfStock) return;
-
-    addToCart(
-      {
-        ...product,
-        selectedVariants: selected,
-      },
-      qty
-    );
-
+    addToCart({ ...product, selectedVariants: selected }, qty);
     setAdded(true);
-
-    setTimeout(() => {
-      setAdded(false);
-    }, 1800);
+    setTimeout(() => setAdded(false), 1800);
   };
 
-  // A buyer is signed in when there is a saved token and a user with an email
   const isSignedIn = () => {
     let stored = {};
     try {
@@ -185,15 +160,11 @@ export default function ProductDetail() {
     } catch {
       stored = {};
     }
-    return Boolean(
-      localStorage.getItem("token") && (user?.email || stored?.email)
-    );
+    return Boolean(localStorage.getItem("token") && (user?.email || stored?.email));
   };
 
   const handleBuyNow = () => {
     if (outOfStock) return;
-
-    // Checkout is only for signed-in buyers: otherwise ask them to sign in first
     if (!isSignedIn()) {
       toast.error("Please sign in to buy this product.");
       navigate("/login", {
@@ -204,30 +175,15 @@ export default function ProductDetail() {
       });
       return;
     }
-
-    addToCart(
-      {
-        ...product,
-        selectedVariants: selected,
-      },
-      qty
-    );
+    addToCart({ ...product, selectedVariants: selected }, qty);
     navigate("/checkout");
   };
 
-  const increaseQuantity = () => {
-    setQty((currentQty) => currentQty + 1);
-  };
-
-  const decreaseQuantity = () => {
-    setQty((currentQty) =>
-      Math.max(1, currentQty - 1)
-    );
-  };
+  const increaseQuantity = () => setQty((currentQty) => currentQty + 1);
+  const decreaseQuantity = () => setQty((currentQty) => Math.max(1, currentQty - 1));
 
   const checkDelivery = (event) => {
     event?.preventDefault?.();
-
     if (/^[1-6][0-9]{5}$/.test(pincode)) {
       setDeliveryStatus("ok");
     } else {
@@ -235,75 +191,36 @@ export default function ProductDetail() {
     }
   };
 
-  // Variant selector that also switches the active image view for colors
   const selectVariant = (group, value) => {
-    setSelected((previous) => ({
-      ...previous,
-      [group]: value,
-    }));
-
+    setSelected((previous) => ({ ...previous, [group]: value }));
     if (group === "colors") {
       const matchingIndex = rawGallery.findIndex(
         (img) => typeof img === "object" && img !== null && img.color?.toLowerCase() === value.toLowerCase()
       );
-
-      if (matchingIndex !== -1) {
-        setActiveImage(matchingIndex);
-      }
+      if (matchingIndex !== -1) setActiveImage(matchingIndex);
     }
   };
 
-  const prodOverview =
-    product.overview ||
-    product.description ||
-    product.details ||
-    product.about;
-
-  const prodColour =
-    product.colour || product.color;
-
-  const prodStorage =
-    product.storage ||
-    product.storageCapacity ||
-    product.gb;
-
-  const prodRam =
-    product.ram || product.memory;
+  const prodOverview = product.overview || product.description || product.details || product.about;
+  const prodColour = product.colour || product.color;
+  const prodStorage = product.storage || product.storageCapacity || product.gb;
+  const prodRam = product.ram || product.memory;
 
   const variantStorage =
     product.variants?.storage ||
     product.variants?.gb ||
-    (Array.isArray(product.storage)
-      ? product.storage
-      : product.storage
-        ? [product.storage]
-        : []);
+    (Array.isArray(product.storage) ? product.storage : product.storage ? [product.storage] : []);
 
   const variantColors =
     product.variants?.colors ||
     product.variants?.colour ||
     product.variants?.colorOptions ||
-    (Array.isArray(product.colour)
-      ? product.colour
-      : product.colour
-        ? [product.colour]
-        : []);
+    (Array.isArray(product.colour) ? product.colour : product.colour ? [product.colour] : []);
 
-  const categoryLower = String(
-    product.category?.name ||
-      product.category ||
-      ""
-  ).toLowerCase();
-
-  /* =========================================
-     PRODUCT HIGHLIGHTS
-  ========================================= */
+  const categoryLower = String(product.category?.name || product.category || "").toLowerCase();
 
   const getHighlights = () => {
-    if (
-      categoryLower.includes("laptop") ||
-      categoryLower.includes("notebook")
-    ) {
+    if (categoryLower.includes("laptop") || categoryLower.includes("notebook")) {
       return [
         { icon: "⚡", text: `${prodRam || "4GB"} | ${prodStorage || "64GB"}` },
         { icon: "💻", text: product.processor || "Intel Celeron N4020" },
@@ -313,11 +230,7 @@ export default function ProductDetail() {
         { icon: "🔋", text: product.battery || "Long-lasting battery" },
       ];
     }
-
-    if (
-      categoryLower.includes("tv") ||
-      categoryLower.includes("television")
-    ) {
+    if (categoryLower.includes("tv") || categoryLower.includes("television")) {
       return [
         { icon: "📺", text: product.screenSize || "55 inch 4K UHD Display" },
         { icon: "🔊", text: product.audio || "Dolby Audio & Surround Sound" },
@@ -325,19 +238,13 @@ export default function ProductDetail() {
         { icon: "🌐", text: product.os || "Smart TV OS with Built-in Apps" },
       ];
     }
-
-    if (
-      categoryLower.includes("accessory") ||
-      categoryLower.includes("accessories") ||
-      categoryLower.includes("audio")
-    ) {
+    if (categoryLower.includes("accessory") || categoryLower.includes("accessories") || categoryLower.includes("audio")) {
       return [
         { icon: "🎧", text: product.connectivity || "Wireless Bluetooth Connectivity" },
         { icon: "🔋", text: product.battery || "Extended Playback Hours" },
         { icon: "🛡️", text: product.build || "Ergonomic & Durable Design" },
       ];
     }
-
     return [
       { icon: "⚡", text: `${prodRam || "4 GB RAM"} | ${prodStorage || "64 GB ROM"}` },
       { icon: "💻", text: product.processor || "Octa Core Processor" },
@@ -353,7 +260,6 @@ export default function ProductDetail() {
   return (
     <main className="page pd">
 
-      {/* BACK */}
       <Link to="/" className="pd-back">
         ← Back to browse
       </Link>
@@ -361,23 +267,16 @@ export default function ProductDetail() {
       <div className="pd-grid">
 
         {/* =====================================
-            PRODUCT IMAGE GALLERY
+            PRODUCT IMAGE GALLERY (Left Side)
         ===================================== */}
-
         <section className="pd-gallery">
           <div className="pd-image">
             {gallery[activeImage] ? (
-              <img
-                src={gallery[activeImage]}
-                alt={product.title}
-              />
+              <img src={gallery[activeImage]} alt={product.title} />
             ) : (
-              <div className="pd-no-image">
-                Product image unavailable
-              </div>
+              <div className="pd-no-image">Product image unavailable</div>
             )}
 
-            {/* Wishlist heart on the image */}
             <div className="pd-wishlist-overlay">
               <WishlistButton product={product} productId={id} />
             </div>
@@ -389,30 +288,222 @@ export default function ProductDetail() {
                 <button
                   key={`${image}-${index}`}
                   type="button"
-                  className={`pd-thumb ${
-                    index === activeImage
-                      ? "pd-thumb-active"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    setActiveImage(index)
-                  }
-                  aria-label={`View product image ${
-                    index + 1
-                  }`}
+                  className={`pd-thumb ${index === activeImage ? "pd-thumb-active" : ""}`}
+                  onClick={() => setActiveImage(index)}
+                  aria-label={`View product image ${index + 1}`}
                 >
-                  <img
-                    src={image}
-                    alt={`${product.title} view ${
-                      index + 1
-                    }`}
-                  />
+                  <img src={image} alt={`${product.title} view ${index + 1}`} />
                 </button>
               ))}
             </div>
           )}
+        </section>
 
-          {/* Buying assurance (fills the space under the image) */}
+        {/* =====================================
+            PRODUCT DETAILS (Right Side)
+        ===================================== */}
+        <section className="pd-info">
+
+          <div className="pd-title-row">
+            {product.verified && (
+              <span className="badge badge-verified">VERIFIED SUPPLIER</span>
+            )}
+            {outOfStock && (
+              <span className="badge badge-rejected">OUT OF STOCK</span>
+            )}
+          </div>
+
+          {product.brand && <span className="pd-brand">{product.brand}</span>}
+
+          <h1 className="pd-title">{product.title}</h1>
+
+          {product.rating && (
+            <div className="pd-rating">
+              <Star size={17} fill="currentColor" />
+              <span>{product.rating}</span>
+              {product.reviewCount && (
+                <span className="pd-rating-count">({product.reviewCount} reviews)</span>
+              )}
+            </div>
+          )}
+
+          <div className="pd-price-row">
+            <span className="mono pd-price">₹{price.toLocaleString("en-IN")}</span>
+            {mrp > 0 && (
+              <span className="mono pd-mrp">₹{mrp.toLocaleString("en-IN")}</span>
+            )}
+            <span className="pd-per">per unit, excl. GST</span>
+          </div>
+
+          <div className="pd-ids mono">
+            {product.sku && <>SKU: {product.sku}</>}
+            {product.model && <>{" · "}Model: {product.model}</>}
+            {product.gstPercent !== undefined && <>{" · "}GST: {product.gstPercent}%</>}
+          </div>
+
+          <div className="pd-buy-row">
+
+            <div className="pd-buy-left">
+              {outOfStock ? (
+                <div className="pd-oos-banner">
+                  <strong>Currently out of stock.</strong> This product is temporarily unavailable. Please check again later.
+                </div>
+              ) : (
+                <>
+                  <div className="pd-top-row">
+                    <div className="pd-specs">
+                      <div>
+                        <span>In stock</span>
+                        <b>{Number(product.stock || 0).toLocaleString("en-IN")} units</b>
+                      </div>
+                      <div>
+                        <span>Dispatch</span>
+                        <b>within 24 hrs</b>
+                      </div>
+                    </div>
+
+                    <div className="pd-qty">
+                      <label>Quantity</label>
+                      <div className="pd-qty-controls">
+                        <button type="button" onClick={decreaseQuantity} aria-label="Decrease quantity">−</button>
+                        <span className="mono">{qty}</span>
+                        <button type="button" onClick={increaseQuantity} aria-label="Increase quantity">+</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pd-cta-row">
+                    <button type="button" className="btn btn-outline pd-cta" onClick={handleAdd}>
+                      {added ? "Added ✓" : "Add to cart"}
+                    </button>
+                    <button type="button" className="btn btn-primary pd-cta" onClick={handleBuyNow}>
+                      Buy Now
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <div className="pd-delivery" style={{ gap: 12 }}>
+                <MapPin size={17} />
+                <input
+                  className="pd-pin-input"
+                  onKeyDown={(event) => { if (event.key === "Enter") checkDelivery(event); }}
+                  inputMode="numeric"
+                  placeholder="Enter delivery pincode"
+                  value={pincode}
+                  maxLength={6}
+                  onChange={(event) => {
+                    const value = event.target.value.replace(/\D/g, "");
+                    setPincode(value);
+                    setDeliveryStatus(null);
+                  }}
+                />
+                <button type="button" className="btn btn-outline" style={{ marginLeft: 8 }} onClick={checkDelivery}>
+                  Check
+                </button>
+              </div>
+
+              {deliveryStatus === "ok" && (
+                <p className="pd-delivery-ok">Deliverable to {pincode}. Dispatch within 24 hours.</p>
+              )}
+              {deliveryStatus === "unavailable" && (
+                <p className="pd-delivery-bad">Enter a valid 6-digit Indian pincode.</p>
+              )}
+
+              {/* VARIANTS */}
+              {options && (options.storage.length > 0 || options.colour.length > 0) ? (
+                <div className="pd-variants">
+                  {options.storage.length > 0 && (
+                    <div className="pd-variant-group">
+                      <span className="pd-variant-label">Storage Capacity</span>
+                      <div className="pd-variant-options">
+                        {options.storage.map((o) => (
+                          <Link key={o.key} to={`/product/${pid(o.product)}`} className={`pd-variant-chip ${o.active ? "pd-variant-chip-active" : ""}`}>
+                            {o.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {options.colour.length > 0 && (
+                    <div className="pd-variant-group">
+                      <span className="pd-variant-label">Colour Options</span>
+                      <div className="pd-variant-options">
+                        {options.colour.map((o) => (
+                          <Link key={o.key} to={`/product/${pid(o.product)}`} className={`pd-color-card ${o.active ? "pd-color-card-active" : ""}`} title={o.label}>
+                            {imageOf(o.product) && <img src={imageOf(o.product)} alt={o.label} />}
+                            <span>{o.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                (variantStorage.length > 0 || variantColors.length > 0) && (
+                  <div className="pd-variants">
+                    {variantStorage.length > 0 && (
+                      <VariantGroup label="Storage Capacity" options={variantStorage} group="storage" selected={selected} onSelect={selectVariant} />
+                    )}
+                    {variantColors.length > 0 && (
+                      <VariantGroup label="Colour Options" options={variantColors} group="colors" selected={selected} onSelect={selectVariant} />
+                    )}
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="pd-buy-right">
+              {(() => {
+                const categoryName = typeof product.category === "object" ? product.category?.name : product.category;
+                const quickSpecs = [
+                  ["Brand", product.brand],
+                  ["Model", product.model],
+                  ["Category", categoryName],
+                  ["Storage", prodStorage],
+                  ["RAM", prodRam],
+                  ["Colour", prodColour],
+                  ["Min. order", product.moq],
+                ].filter(([, value]) => value);
+
+                const summary = prodOverview
+                  ? String(prodOverview).length > 260
+                    ? `${String(prodOverview).slice(0, 260).trim()}…`
+                    : String(prodOverview)
+                  : "";
+
+                if (!summary && quickSpecs.length === 0) return null;
+
+                return (
+                  <div className="pd-quick">
+                    {summary && (
+                      <>
+                        <h3>About this product</h3>
+                        <p className="pd-quick-text">{summary}</p>
+                      </>
+                    )}
+                    {quickSpecs.length > 0 && (
+                      <>
+                        <h3>Quick specs</h3>
+                        <div className="pd-quick-grid">
+                          {quickSpecs.map(([label, value]) => (
+                            <div className="pd-quick-item" key={label}>
+                              <span>{label}</span>
+                              <b>{String(value)}</b>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+          </div>
+
+          {/* TRUST BOXES (Now filling the empty space on the right) */}
           <div className="pd-trust">
             <div className="pd-trust-item">
               <span>🛡️</span>
@@ -421,7 +512,6 @@ export default function ProductDetail() {
                 <p>Manufacturer assured</p>
               </div>
             </div>
-
             <div className="pd-trust-item">
               <span>🔄</span>
               <div>
@@ -429,7 +519,6 @@ export default function ProductDetail() {
                 <p>7-day policy</p>
               </div>
             </div>
-
             <div className="pd-trust-item">
               <span>⚡</span>
               <div>
@@ -437,7 +526,6 @@ export default function ProductDetail() {
                 <p>Ships within 24 hrs</p>
               </div>
             </div>
-
             <div className="pd-trust-item">
               <span>🔒</span>
               <div>
@@ -445,7 +533,6 @@ export default function ProductDetail() {
                 <p>Protected at checkout</p>
               </div>
             </div>
-
             <div className="pd-trust-item pd-trust-wide">
               <span>✅</span>
               <div>
@@ -454,657 +541,88 @@ export default function ProductDetail() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* =====================================
-            PRODUCT DETAILS
-        ===================================== */}
-
-        <section className="pd-info">
-
-          <div className="pd-title-row">
-
-            {product.verified && (
-              <span className="badge badge-verified">
-                VERIFIED SUPPLIER
-              </span>
-            )}
-
-            {outOfStock && (
-              <span className="badge badge-rejected">
-                OUT OF STOCK
-              </span>
-            )}
-
-          </div>
-
-          {product.brand && (
-            <span className="pd-brand">
-              {product.brand}
-            </span>
-          )}
-
-          <h1 className="pd-title">
-            {product.title}
-          </h1>
-
-          {product.rating && (
-            <div className="pd-rating">
-
-              <Star
-                size={17}
-                fill="currentColor"
-              />
-
-              <span>
-                {product.rating}
-              </span>
-
-              {product.reviewCount && (
-                <span className="pd-rating-count">
-                  ({product.reviewCount} reviews)
-                </span>
-              )}
-
-            </div>
-          )}
-
-          {/* PRICE */}
-
-          <div className="pd-price-row">
-
-            <span className="mono pd-price">
-              ₹{price.toLocaleString("en-IN")}
-            </span>
-
-            {mrp > 0 && (
-              <span className="mono pd-mrp">
-                ₹{mrp.toLocaleString("en-IN")}
-              </span>
-            )}
-
-            <span className="pd-per">
-              per unit, excl. GST
-            </span>
-
-          </div>
-
-          {/* PRODUCT IDS */}
-
-          <div className="pd-ids mono">
-
-            {product.sku && (
-              <>
-                SKU: {product.sku}
-              </>
-            )}
-
-            {product.model && (
-              <>
-                {" · "}
-                Model: {product.model}
-              </>
-            )}
-
-            {product.gstPercent !== undefined && (
-              <>
-                {" · "}
-                GST: {product.gstPercent}%
-              </>
-            )}
-
-          </div>
-
-          <div className="pd-buy-row">
-
-          <div className="pd-buy-left">
-
-          {/* OUT OF STOCK */}
-
-          {outOfStock ? (
-
-            <div className="pd-oos-banner">
-
-              <strong>
-                Currently out of stock.
-              </strong>{" "}
-
-              This product is temporarily
-              unavailable. Please check again
-              later.
-
-            </div>
-
-          ) : (
-
-            <>
-
-              {/* STOCK + QUANTITY side by side */}
-
-              <div className="pd-top-row">
-
-              <div className="pd-specs">
-
-                <div>
-                  <span>In stock</span>
-
-                  <b>
-                    {Number(
-                      product.stock || 0
-                    ).toLocaleString("en-IN")}{" "}
-                    units
-                  </b>
-                </div>
-
-                <div>
-                  <span>Dispatch</span>
-
-                  <b>
-                    within 24 hrs
-                  </b>
-                </div>
-
-              </div>
-
-              {/* QUANTITY */}
-
-              <div className="pd-qty">
-
-                <label>
-                  Quantity
-                </label>
-
-                <div className="pd-qty-controls">
-
-                  <button
-                    type="button"
-                    onClick={decreaseQuantity}
-                    aria-label="Decrease quantity"
-                  >
-                    −
-                  </button>
-
-                  <span className="mono">
-                    {qty}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={increaseQuantity}
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-
-                </div>
-
-              </div>
-
-              </div>
-
-              {/* BUTTONS (small) */}
-
-              <div className="pd-cta-row">
-
-                <button
-                  type="button"
-                  className="btn btn-outline pd-cta"
-                  onClick={handleAdd}
-                >
-                  {added
-                    ? "Added ✓"
-                    : "Add to cart"}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-primary pd-cta"
-                  onClick={handleBuyNow}
-                >
-                  Buy Now
-                </button>
-
-              </div>
-
-            </>
-          )}
-
-          {/* PINCODE */}
-
-          {/* div instead of form: global "form input" styles (pink boxes)
-              can no longer reach this input */}
-          <div
-            className="pd-delivery"
-            style={{ gap: 12 }}
-          >
-
-            <MapPin size={17} />
-
-            <input
-              className="pd-pin-input"
-              onKeyDown={(event) => {
-                if (event.key === "Enter") checkDelivery(event);
-              }}
-              inputMode="numeric"
-              placeholder="Enter delivery pincode"
-              value={pincode}
-              maxLength={6}
-              onChange={(event) => {
-
-                const value =
-                  event.target.value.replace(
-                    /\D/g,
-                    ""
-                  );
-
-                setPincode(value);
-                setDeliveryStatus(null);
-
-              }}
-            />
-
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ marginLeft: 8 }}
-              onClick={checkDelivery}
-            >
-              Check
-            </button>
-
-          </div>
-
-          {deliveryStatus === "ok" && (
-            <p className="pd-delivery-ok">
-              Deliverable to {pincode}.
-              Dispatch within 24 hours.
-            </p>
-          )}
-
-          {deliveryStatus === "unavailable" && (
-            <p className="pd-delivery-bad">
-              Enter a valid 6-digit Indian
-              pincode.
-            </p>
-          )}
-
-          {/* =====================================
-              VARIANTS: every GB option + phone images per colour
-          ===================================== */}
-
-          {options && (options.storage.length > 0 || options.colour.length > 0) ? (
-            <div className="pd-variants">
-              {options.storage.length > 0 && (
-                <div className="pd-variant-group">
-                  <span className="pd-variant-label">Storage Capacity</span>
-                  <div className="pd-variant-options">
-                    {options.storage.map((o) => (
-                      <Link
-                        key={o.key}
-                        to={`/product/${pid(o.product)}`}
-                        className={`pd-variant-chip ${o.active ? "pd-variant-chip-active" : ""}`}
-                      >
-                        {o.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {options.colour.length > 0 && (
-                <div className="pd-variant-group">
-                  <span className="pd-variant-label">Colour Options</span>
-                  <div className="pd-variant-options">
-                    {options.colour.map((o) => (
-                      <Link
-                        key={o.key}
-                        to={`/product/${pid(o.product)}`}
-                        className={`pd-color-card ${o.active ? "pd-color-card-active" : ""}`}
-                        title={o.label}
-                      >
-                        {imageOf(o.product) && (
-                          <img src={imageOf(o.product)} alt={o.label} />
-                        )}
-                        <span>{o.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            (variantStorage.length > 0 || variantColors.length > 0) && (
-              <div className="pd-variants">
-                {variantStorage.length > 0 && (
-                  <VariantGroup
-                    label="Storage Capacity"
-                    options={variantStorage}
-                    group="storage"
-                    selected={selected}
-                    onSelect={selectVariant}
-                  />
-                )}
-
-                {variantColors.length > 0 && (
-                  <VariantGroup
-                    label="Colour Options"
-                    options={variantColors}
-                    group="colors"
-                    selected={selected}
-                    onSelect={selectVariant}
-                  />
-                )}
-              </div>
-            )
-          )}
-
-          </div>
-
-          <div className="pd-buy-right">
-
-          {/* =====================================
-              QUICK INFO (fills the right column)
-          ===================================== */}
-
-          {(() => {
-            const categoryName =
-              typeof product.category === "object"
-                ? product.category?.name
-                : product.category;
-
-            const quickSpecs = [
-              ["Brand", product.brand],
-              ["Model", product.model],
-              ["Category", categoryName],
-              ["Storage", prodStorage],
-              ["RAM", prodRam],
-              ["Colour", prodColour],
-              ["Min. order", product.moq],
-            ].filter(([, value]) => value);
-
-            const summary = prodOverview
-              ? String(prodOverview).length > 260
-                ? `${String(prodOverview).slice(0, 260).trim()}…`
-                : String(prodOverview)
-              : "";
-
-            if (!summary && quickSpecs.length === 0) return null;
-
-            return (
-              <div className="pd-quick">
-                {summary && (
-                  <>
-                    <h3>About this product</h3>
-                    <p className="pd-quick-text">{summary}</p>
-                  </>
-                )}
-
-                {quickSpecs.length > 0 && (
-                  <>
-                    <h3>Quick specs</h3>
-                    <div className="pd-quick-grid">
-                      {quickSpecs.map(([label, value]) => (
-                        <div className="pd-quick-item" key={label}>
-                          <span>{label}</span>
-                          <b>{String(value)}</b>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })()}
-
-          </div>
-
-          </div>
 
           <p className="pd-note">
-            Payment is secured at checkout.
-            Orders are verified against your
-            GST profile before dispatch.
+            Payment is secured at checkout. Orders are verified against your GST profile before dispatch.
           </p>
 
         </section>
       </div>
 
-      {/* =========================================
-          DYNAMIC PRODUCT HIGHLIGHTS
-      ========================================= */}
-
+      {/* DYNAMIC PRODUCT HIGHLIGHTS */}
       <section className="pd-section">
-
-        <h2>
-          Product highlights
-        </h2>
-
+        <h2>Product highlights</h2>
         <div className="pd-highlights-list">
-
-          {dynamicHighlights.map(
-            (highlight, index) => (
-
-              <div
-                key={index}
-                className="pd-highlights-row"
-              >
-
-                <span className="pd-highlight-icon">
-                  {highlight.icon}
-                </span>
-
-                <span>
-                  {highlight.text}
-                </span>
-
-              </div>
-
-            )
-          )}
-
+          {dynamicHighlights.map((highlight, index) => (
+            <div key={index} className="pd-highlights-row">
+              <span className="pd-highlight-icon">{highlight.icon}</span>
+              <span>{highlight.text}</span>
+            </div>
+          ))}
         </div>
-
       </section>
 
-      {/* =========================================
-          OVERVIEW / DESCRIPTION
-      ========================================= */}
-
+      {/* OVERVIEW / DESCRIPTION */}
       <section className="pd-section">
-
-        <h2>
-          Overview / Description
-        </h2>
-
+        <h2>Overview / Description</h2>
         <p className="pd-overview">
-          {prodOverview ||
-            "Engineered for optimal reliability and peak performance, this premium model features durable building architecture and high fidelity output designed for everyday enterprise and consumer workflows."}
+          {prodOverview || "Engineered for optimal reliability and peak performance, this premium model features durable building architecture and high fidelity output designed for everyday enterprise and consumer workflows."}
         </p>
-
       </section>
 
-      {/* =========================================
-          SPECIFICATIONS
-      ========================================= */}
-
+      {/* SPECIFICATIONS */}
       <section className="pd-section">
-
-        <h2>
-          Specifications
-        </h2>
-
+        <h2>Specifications</h2>
         <div className="pd-spec-grid">
-
-          {product.title && (
-            <div className="pd-spec-item">
-              <strong>Product Title:</strong> {product.title}
-            </div>
-          )}
-
-          {product.brand && (
-            <div className="pd-spec-item">
-              <strong>Brand:</strong> {product.brand}
-            </div>
-          )}
-
-          {product.category && (
-            <div className="pd-spec-item">
-              <strong>Category:</strong> {product.category}
-            </div>
-          )}
-
-          {prodColour && (
-            <div className="pd-spec-item">
-              <strong>Colour:</strong> {prodColour}
-            </div>
-          )}
-
-          {prodStorage && (
-            <div className="pd-spec-item">
-              <strong>Storage Capacity:</strong> {prodStorage}
-            </div>
-          )}
-
-          {prodRam && (
-            <div className="pd-spec-item">
-              <strong>RAM:</strong> {prodRam}
-            </div>
-          )}
-
-          {product.screenSize && (
-            <div className="pd-spec-item">
-              <strong>Screen Size:</strong> {product.screenSize}
-            </div>
-          )}
-
-          {product.processor && (
-            <div className="pd-spec-item">
-              <strong>Processor:</strong> {product.processor}
-            </div>
-          )}
-
-          {product.battery && (
-            <div className="pd-spec-item">
-              <strong>Battery:</strong> {product.battery}
-            </div>
-          )}
-
-          {product.weight && (
-            <div className="pd-spec-item">
-              <strong>Weight:</strong> {product.weight}
-            </div>
-          )}
-
-          {price > 0 && (
-            <div className="pd-spec-item">
-              <strong>Price:</strong> ₹{price.toLocaleString("en-IN")}
-            </div>
-          )}
-
-          {mrp > 0 && (
-            <div className="pd-spec-item">
-              <strong>MRP:</strong> ₹{mrp.toLocaleString("en-IN")}
-            </div>
-          )}
-
-          {product.stock !== undefined && (
-            <div className="pd-spec-item">
-              <strong>Stock:</strong> {product.stock}
-            </div>
-          )}
-
-          {product.moq && (
-            <div className="pd-spec-item">
-              <strong>MOQ:</strong> {product.moq}
-            </div>
-          )}
-
+          {product.title && <div className="pd-spec-item"><strong>Product Title:</strong> {product.title}</div>}
+          {product.brand && <div className="pd-spec-item"><strong>Brand:</strong> {product.brand}</div>}
+          {product.category && <div className="pd-spec-item"><strong>Category:</strong> {product.category}</div>}
+          {prodColour && <div className="pd-spec-item"><strong>Colour:</strong> {prodColour}</div>}
+          {prodStorage && <div className="pd-spec-item"><strong>Storage Capacity:</strong> {prodStorage}</div>}
+          {prodRam && <div className="pd-spec-item"><strong>RAM:</strong> {prodRam}</div>}
+          {product.screenSize && <div className="pd-spec-item"><strong>Screen Size:</strong> {product.screenSize}</div>}
+          {product.processor && <div className="pd-spec-item"><strong>Processor:</strong> {product.processor}</div>}
+          {product.battery && <div className="pd-spec-item"><strong>Battery:</strong> {product.battery}</div>}
+          {product.weight && <div className="pd-spec-item"><strong>Weight:</strong> {product.weight}</div>}
+          {price > 0 && <div className="pd-spec-item"><strong>Price:</strong> ₹{price.toLocaleString("en-IN")}</div>}
+          {mrp > 0 && <div className="pd-spec-item"><strong>MRP:</strong> ₹{mrp.toLocaleString("en-IN")}</div>}
+          {product.stock !== undefined && <div className="pd-spec-item"><strong>Stock:</strong> {product.stock}</div>}
+          {product.moq && <div className="pd-spec-item"><strong>MOQ:</strong> {product.moq}</div>}
         </div>
-
       </section>
 
-      {/* =========================================
-          WARRANTY AND SUPPORT
-      ========================================= */}
-
+      {/* WARRANTY AND SUPPORT */}
       <section className="pd-section">
-
-        <h2>
-          Warranty and support
-        </h2>
-
+        <h2>Warranty and support</h2>
         <p className="pd-overview">
-          {product.warranty ||
-            "1 Year Manufacturer Warranty covering device hardware defects, functional malfunctions, and standard factory faults. Physical or liquid damages are excluded."}
+          {product.warranty || "1 Year Manufacturer Warranty covering device hardware defects, functional malfunctions, and standard factory faults. Physical or liquid damages are excluded."}
         </p>
-
         <p className="pd-overview">
-
-          For technical assistance or authorized
-          service center routing, contact support
-          at{" "}
-
-          <a
-            href="mailto:support@example.com"
-            className="pd-link"
-          >
-            support@example.com
-          </a>
-
-          .
-
+          For technical assistance or authorized service center routing, contact support at <a href="mailto:support@example.com" className="pd-link">support@example.com</a>.
         </p>
-
       </section>
 
-      {/* =========================================
-          RELATED PRODUCTS
-      ========================================= */}
-
+      {/* RELATED PRODUCTS */}
       {related.length > 0 && (
-
         <section className="pd-section">
-
-          <h2>
-            Related products
-          </h2>
-
+          <h2>Related products</h2>
           <div className="grid">
-
-            {related.map(
-              (relatedProduct) => (
-                <ProductCard
-                  key={relatedProduct.id}
-                  product={relatedProduct}
-                />
-              )
-            )}
-
+            {related.map((relatedProduct) => (
+              <ProductCard key={relatedProduct.id} product={relatedProduct} />
+            ))}
           </div>
-
         </section>
       )}
 
-      {/* =========================================
-          CUSTOMER REVIEWS / COMMENTS
-      ========================================= */}
-
+      {/* CUSTOMER REVIEWS / COMMENTS */}
       <section className="pd-section">
         <CustomerReviews productId={id} />
       </section>
 
-      {/* =========================================
-          QUESTIONS
-      ========================================= */}
-
+      {/* QUESTIONS */}
       <section className="pd-section pd-qa">
-
         <div className="pd-qa-head">
-
-          <h2>
-            Questions &amp; answers
-          </h2>
-
+          <h2>Questions &amp; answers</h2>
           <button
             type="button"
             className="btn btn-primary btn-sm"
@@ -1116,69 +634,34 @@ export default function ProductDetail() {
               );
             }}
           >
-
-            <HelpCircle size={16} />
-
-            Ask a question
-
+            <HelpCircle size={16} /> Ask a question
           </button>
-
         </div>
-
         <p className="pd-no-reviews">
-          No answered questions yet.
-          Questions with answers will
-          appear here.
+          No answered questions yet. Questions with answers will appear here.
         </p>
-
       </section>
 
     </main>
   );
 }
 
-
-/* =========================================
-   VARIANT GROUP (fallback when no sibling listings exist)
-========================================= */
-
-function VariantGroup({
-  label,
-  options,
-  group,
-  selected,
-  onSelect,
-}) {
+function VariantGroup({ label, options, group, selected, onSelect }) {
   return (
     <div className="pd-variant-group">
-
-      <span className="pd-variant-label">
-        {label}
-      </span>
-
+      <span className="pd-variant-label">{label}</span>
       <div className="pd-variant-options">
-
         {options.map((option) => (
-
           <button
             key={option}
             type="button"
-            className={`pd-variant-chip ${
-              selected[group] === option
-                ? "pd-variant-chip-active"
-                : ""
-            }`}
-            onClick={() =>
-              onSelect(group, option)
-            }
+            className={`pd-variant-chip ${selected[group] === option ? "pd-variant-chip-active" : ""}`}
+            onClick={() => onSelect(group, option)}
           >
             {option}
           </button>
-
         ))}
-
       </div>
-
     </div>
   );
 }

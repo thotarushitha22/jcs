@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
@@ -18,7 +17,7 @@ const CAMPAIGNS = [
     name: "Dussehra",
     start: "2026-10-11",
     end: "2026-10-21",
-    theme: "warm",
+    theme: "dussehra", // <--- Changed from "warm" to "dussehra"
     slides: [
       {
         eyebrow: "DUSSEHRA SPECIAL",

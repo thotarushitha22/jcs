@@ -23,13 +23,14 @@ import LiveTour from "./components/LiveTour";
 import Chatbot from "./components/Chatbot";
 
 import Home from "./pages/Home";
+import Products from "./pages/Products"; // <-- ADDED: Imported the new Products page
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Sell from "./pages/Sell";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
-import Wishlist from "./pages/Wishlist"; // <-- Wishlist page imported
+import Wishlist from "./pages/Wishlist";
 
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -174,8 +175,15 @@ function MainStoreLayout() {
           }
         />
 
+        {/* All Products Page */}
+        <Route
+          path="/products"
+          element={
+            <Products />
+          }
+        />
 
-        {/* Products */}
+        {/* Single Product Detail */}
 
         <Route
           path="/product/:id"

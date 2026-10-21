@@ -833,3 +833,25 @@
     scroll-behavior: auto;
   }
 }
+/* ===== Header icons: always white =====
+   (overrides the site-wide "[class*=header] button" rule in Home.css) */
+
+.chatbot-header .chatbot-header-actions button {
+  color: #ffffff !important;
+  background: transparent;
+}
+
+.chatbot-header .chatbot-header-actions button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.chatbot-header .chatbot-header-actions button svg {
+  color: #ffffff !important;
+  stroke: #ffffff;
+  fill: none !important; /* outline icons, not solid blobs */
+}
+
+/* the robot icon in the round avatar: navy outline instead of a solid shape */
+.chatbot-header .chatbot-avatar svg {
+  fill: none !important;
+}

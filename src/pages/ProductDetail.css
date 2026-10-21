@@ -41,9 +41,7 @@
 
 .pd-grid {
   display: grid;
-  grid-template-columns:
-    minmax(500px, 720px)
-    minmax(520px, 1fr);
+  grid-template-columns: minmax(500px, 720px) minmax(520px, 1fr);
   gap: 64px;
   align-items: start;
 }
@@ -56,26 +54,36 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  position: sticky;
+  top: 96px; /* Sticky so the image stays visible when scrolling */
+  align-self: start;
 }
 
 .pd-image {
   width: 100%;
-  height: 580px;
+  /* Make the image stretch to fill the space on the left */
+  height: 700px;
+  min-height: calc(100vh - 200px); 
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #ffffff;
-  border: none;
+  background: #f8fafc;
   border-radius: 12px;
+  position: relative;
 }
 
 .pd-image img {
-  width: 75%;
-  height: 75%;
+  width: 90%;
+  height: 90%;
   object-fit: contain;
   display: block;
+  transition: transform 0.3s ease;
+}
+
+.pd-image img:hover {
+  transform: scale(1.02);
 }
 
 .pd-no-image {
@@ -87,25 +95,23 @@
 
 .pd-thumbs {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   padding-left: 2px;
   overflow-x: auto;
 }
 
 .pd-thumb {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
-  padding: 3px;
+  padding: 4px;
   background: #ffffff;
   border: 1px solid #d5dce6;
-  border-radius: 9px;
+  border-radius: 10px;
   overflow: hidden;
-  opacity: 0.75;
+  opacity: 0.7;
   cursor: pointer;
-  transition:
-    border-color 0.2s,
-    opacity 0.2s;
+  transition: all 0.2s ease;
 }
 
 .pd-thumb img {
@@ -122,6 +128,7 @@
 .pd-thumb-active {
   opacity: 1;
   border: 2px solid var(--signal);
+  box-shadow: 0 0 0 2px rgba(45, 91, 210, 0.2);
 }
 
 /* ===================================
@@ -145,16 +152,16 @@
 .pd-brand {
   margin-top: 1px;
   color: #687487;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
 
 .pd-title {
-  margin: 1px 0 3px;
+  margin: 2px 0 6px;
   color: var(--ink);
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 700;
   line-height: 1.15;
 }
@@ -187,26 +194,26 @@
 
 .pd-price {
   color: var(--ink);
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 750;
   line-height: 1;
 }
 
 .pd-mrp {
   color: #8994a5;
-  font-size: 15px;
+  font-size: 17px;
   text-decoration: line-through;
 }
 
 .pd-per {
   color: #728095;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .pd-ids {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   color: #778397;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -220,8 +227,8 @@
   align-self: flex-start;
   gap: 0;
   width: fit-content;
-  padding: 6px 10px;
-  margin-bottom: 8px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
   background: #ffffff;
   border: 1px solid #d7dee8;
   border-radius: 8px;
@@ -232,7 +239,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .pd-specs > div + div {
@@ -247,7 +254,7 @@
 
 .pd-specs b {
   color: var(--ink);
-  font-size: 12px;
+  font-size: 15px;
 }
 
 /* ===================================
@@ -260,14 +267,14 @@
 
 .pd-qty label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   color: var(--slate);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .pd-qty-controls {
-  height: 36px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   overflow: hidden;
@@ -277,12 +284,12 @@
 }
 
 .pd-qty-controls button {
-  width: 38px;
+  width: 46px;
   height: 100%;
   border: none;
   background: transparent;
   color: var(--ink);
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
 }
 
@@ -291,13 +298,13 @@
 }
 
 .pd-qty-controls span {
-  width: 44px;
+  width: 54px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 15px;
   border-left: 1px solid #e0e5ec;
   border-right: 1px solid #e0e5ec;
 }
@@ -309,19 +316,19 @@
 .pd-cta-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  margin: 8px 0 14px;
   width: 100%;
-  max-width: 560px;
+  max-width: 760px;
 }
 
 .pd-cta {
   flex: 1;
-  height: 38px;
-  font-size: 13px;
+  height: 48px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 0;
   padding: 0 14px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* ===================================
@@ -330,16 +337,12 @@
 
 .pd-delivery {
   width: 100%;
-  max-width: 440px;
-  height: 38px;
+  max-width: 760px;
+  height: 48px;
   display: flex;
   align-items: center;
   margin-top: 2px;
-  padding:
-    3px
-    5px
-    3px
-    10px;
+  padding: 3px 5px 3px 10px;
   color: #778397;
   background: #ffffff;
   border: 1px solid #d5dce6;
@@ -350,13 +353,11 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  padding:
-    0
-    6px;
+  padding: 0 6px;
   color: var(--ink);
   background: transparent;
   border: none;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .pd-delivery input:focus {
@@ -364,12 +365,10 @@
 }
 
 .pd-delivery .btn {
-  height: 30px;
-  min-width: 60px;
-  padding:
-    0
-    10px;
-  font-size: 12px;
+  height: 36px;
+  min-width: 76px;
+  padding: 0 10px;
+  font-size: 14px;
 }
 
 .pd-delivery-ok {
@@ -382,50 +381,6 @@
   margin: 2px 0;
   color: var(--danger);
   font-size: 12px;
-}
-
-/* ===================================
-   PRODUCT HIGHLIGHTS BOX
-   WARRANTY / RETURNS / DISPATCH
-=================================== */
-
-.pd-highlights-box {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 6px 0 10px 0;
-  padding: 10px 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 680px;
-  box-sizing: border-box;
-}
-
-.pd-highlight-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  flex: 1;
-}
-
-.pd-highlight-icon {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.pd-highlight-item strong {
-  display: block;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.pd-highlight-item p {
-  margin: 2px 0 0;
-  color: var(--slate-light);
-  font-size: 10px;
 }
 
 /* ===================================
@@ -449,25 +404,26 @@
 
 .pd-variant-label {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 650;
 }
 
 .pd-variant-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pd-variant-chip {
-  min-height: 32px;
-  padding: 4px 12px;
+  min-height: 38px;
+  padding: 6px 16px;
+  font-size: 14px;
   color: #4d596b;
   background: #ffffff;
   border: 1px solid #d5dce6;
   border-radius: 6px;
-  font-size: 12px;
   cursor: pointer;
+  text-decoration: none;
   transition: all 0.2s ease;
 }
 
@@ -476,12 +432,38 @@
   border-color: var(--signal);
 }
 
-.pd-variant-chip-active {
-  color: #ffffff;
+.pd-variant-chip-active,
+.pd-variant-chip.pd-variant-chip-active:hover {
+  color: #ffffff !important;
   background: var(--signal);
   border-color: var(--signal);
   font-weight: 650;
   box-shadow: 0 3px 8px rgba(45, 91, 210, 0.18);
+}
+
+.pd-color-card {
+  width: 84px;
+  padding: 6px;
+  border: 1px solid #d7deea;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  text-decoration: none;
+  color: #1a2740;
+  font-size: 12px;
+}
+
+.pd-color-card img {
+  width: 100%;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.pd-color-card-active {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 2px rgba(45, 91, 210, 0.2);
 }
 
 /* ===================================
@@ -489,10 +471,10 @@
 =================================== */
 
 .pd-note {
-  max-width: 650px;
-  margin-top: 6px;
+  max-width: 760px;
+  margin-top: 12px;
   color: #778397;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -512,7 +494,7 @@
 }
 
 /* ===================================
-   LOWER SECTIONS (EXPANDED WIDTH)
+   LOWER SECTIONS
 =================================== */
 
 .pd-section {
@@ -529,8 +511,6 @@
   font-size: 20px;
   font-weight: 700;
 }
-
-/* Expanded & Larger Overview Text */
 
 .pd-overview {
   max-width: 1400px;
@@ -551,7 +531,7 @@
 }
 
 /* ===================================
-   PRODUCT HIGHLIGHTS - MEDIUM BOXES
+   PRODUCT HIGHLIGHTS
 =================================== */
 
 .pd-highlights-list {
@@ -566,19 +546,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
   padding: 10px 14px;
-
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-
   width: fit-content;
   min-width: 150px;
   max-width: 240px;
-
   box-sizing: border-box;
-
   font-size: 12px;
   font-weight: 600;
   line-height: 1.3;
@@ -596,15 +571,12 @@
 }
 
 /* ===================================
-   SPECIFICATIONS GRID (INCREASED SIZES)
+   SPECIFICATIONS GRID
 =================================== */
 
 .pd-spec-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(320px, 1fr)
-  );
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 14px;
   margin-top: 12px;
   max-width: 1450px;
@@ -647,255 +619,44 @@
 }
 
 /* ===================================
-   RESPONSIVE
+   PERFECT GRID: CONTROLS ON LEFT, BOX ON RIGHT
 =================================== */
 
-@media (max-width: 1250px) {
-  .pd {
-    padding: 20px 28px 50px;
-  }
-
-  .pd-grid {
-    grid-template-columns:
-      minmax(420px, 1fr)
-      minmax(440px, 1fr);
-    gap: 30px;
-  }
-
-  .pd-image {
-    height: 500px;
-  }
+/* Stock box and quantity sit side by side */
+.pd-top-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pd-top-row .pd-specs,
+.pd-top-row .pd-qty {
+  margin: 0;
 }
 
-@media (max-width: 900px) {
-  .pd-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .pd-highlights-box {
-    flex-direction: column;
-  }
-
-  /* Medium highlight boxes remain compact on tablet/mobile */
-  .pd-highlights-list {
-    width: 100%;
-  }
-
-  .pd-highlights-row {
-    min-width: 150px;
-    max-width: 240px;
-  }
-}
-
-@media (max-width: 650px) {
-  .pd {
-    padding: 15px 14px 40px;
-  }
-
-  .pd-image {
-    height: 360px;
-  }
-
-  .pd-cta-row {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .pd-cta {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .pd-highlights-list {
-    gap: 8px;
-  }
-
-  .pd-highlights-row {
-    min-width: 140px;
-    max-width: 100%;
-    padding: 9px 12px;
-  }
-}
-/* Ensure the reviews section header container is properly aligned */
-.reviews-header, 
-.customer-reviews-header,
-.reviews-section h3 {
-  background-color: #0f2a15 !important; /* Dark slate background */
-  color: #ffffff !important;           /* Pure white text */
-  padding: 14px 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-/* Force text and title inside the header to be white and fully visible */
-.reviews-header h2,
-.reviews-header h3,
-.reviews-header span,
-.reviews-header .title {
-  color: #ffffff !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-}
-
-/* Make the "Write a Review" button contrast nicely and remain readable */
-.reviews-header button,
-.write-review-btn {
-  background-color: #2563eb !important; /* Bright blue button */
-  color: #ffffff !important;           /* White text on button */
-  border: none !important;
-  padding: 8px 14px !important;
-  border-radius: 6px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-}
-
-.reviews-header button:hover,
-.write-review-btn:hover {
-  background-color: #1d4ed8 !important;
-}
-
-/* ===================================
-   PINCODE BOX - space between input and Check button
-   (overrides the pink "form input" rule in Home.css)
-=================================== */
-
-.pd-delivery {
-  gap: 10px;
-  padding: 3px 5px 3px 12px;
-}
-
-.pd-delivery svg {
-  flex-shrink: 0;
-}
-
-.pd-delivery input.pd-pin-input,
-.pd-delivery input[type="text"] {
-  flex: 1;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0;
-  height: 100%;
-  padding: 0 6px !important;
-  margin: 0 6px 0 0;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  color: var(--ink) !important;
-  font-size: 13px !important;
-}
-
-.pd-delivery input.pd-pin-input::placeholder {
-  color: var(--slate-light) !important;
-  opacity: 1 !important;
-}
-
-.pd-delivery .btn {
-  flex-shrink: 0;
-  margin-left: 4px;
-}
-
-@media (max-width: 1250px) {
-  .pd-grid {
-    gap: 40px;
-  }
-}
-
-@media (max-width: 900px) {
-  .pd-grid {
-    gap: 24px;
-  }
-}
-
-
-/* ===================================
-   LARGER CONTROLS - FILL THE DETAILS COLUMN
-=================================== */
-
-.pd-brand { font-size: 14px; }
-
-.pd-title {
-  font-size: 38px;
-  margin: 2px 0 6px;
-}
-
-.pd-price { font-size: 40px; }
-.pd-mrp   { font-size: 17px; }
-.pd-per   { font-size: 14px; }
-.pd-ids   { font-size: 13px; margin-bottom: 10px; }
-
-.pd-specs {
-  padding: 10px 16px;
-  margin-bottom: 12px;
-}
-
-.pd-specs > div { font-size: 13px; }
-.pd-specs b     { font-size: 15px; }
-
-.pd-qty label { font-size: 14px; margin-bottom: 6px; }
-
-.pd-qty-controls { height: 44px; }
-.pd-qty-controls button { width: 46px; font-size: 18px; }
-.pd-qty-controls span   { width: 54px; font-size: 15px; }
-
-.pd-cta-row {
-  max-width: 760px;
-  gap: 14px;
-  margin: 8px 0 14px;
-}
-
-.pd-cta {
-  height: 48px;
-  font-size: 15px;
-  border-radius: 8px;
-}
-
-.pd-delivery {
-  max-width: 760px;
-  height: 48px;
-}
-
-.pd-delivery input { font-size: 15px; }
-.pd-delivery .btn  { height: 36px; min-width: 76px; font-size: 14px; }
-
-.pd-highlights-box {
-  max-width: 760px;
-  padding: 14px 18px;
-  margin: 10px 0 14px;
-}
-
-.pd-highlight-item strong { font-size: 14px; }
-.pd-highlight-item p      { font-size: 12px; }
-.pd-highlight-icon        { font-size: 18px; }
-
-.pd-variant-label { font-size: 15px; }
-
-.pd-variant-chip {
-  min-height: 38px;
-  padding: 6px 16px;
-  font-size: 14px;
-}
-
-.pd-note {
-  max-width: 760px;
-  font-size: 12px;
-}
-
-/* ===================================
-   QUICK INFO PANEL
-=================================== */
-
-.pd-quick {
+/* Use the empty space: buying controls on the left, About box on the right */
+.pd-buy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: 8px 40px;
   width: 100%;
-  max-width: 760px;
-  margin: 14px 0 8px;
+}
+.pd-buy-left,
+.pd-buy-right {
+  min-width: 0;
+}
+
+/* Storage + colour stay under the pincode box (left side) */
+.pd-buy-left .pd-variants {
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* About this product box fills the right side */
+.pd-buy-right .pd-quick {
+  max-width: none;
+  margin-top: 0;
   padding: 16px 18px;
   background: #ffffff;
   border: 1px solid var(--paper-line);
@@ -903,32 +664,27 @@
   box-sizing: border-box;
 }
 
-.pd-quick h3 {
+.pd-info .pd-quick h3 {
   margin: 0 0 8px;
   color: var(--ink);
   font-size: 15px;
   font-weight: 700;
 }
 
-.pd-quick h3 + .pd-quick-text,
-.pd-quick h3 + .pd-quick-grid {
-  margin-top: 0;
-}
-
-.pd-quick-text {
+.pd-info .pd-quick-text {
   margin: 0 0 16px;
   color: var(--slate);
   font-size: 14px;
   line-height: 1.65;
 }
 
-.pd-quick-grid {
+.pd-info .pd-quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.pd-quick-item {
+.pd-info .pd-quick-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -938,41 +694,23 @@
   border-radius: 8px;
 }
 
-.pd-quick-item span {
+.pd-info .pd-quick-item span {
   color: var(--slate-light);
   font-size: 12px;
 }
 
-.pd-quick-item b {
+.pd-info .pd-quick-item b {
   color: var(--ink);
   font-size: 14px;
   font-weight: 650;
 }
 
-@media (max-width: 650px) {
-  .pd-title { font-size: 28px; }
-  .pd-price { font-size: 32px; }
-}
-
-
-/* ===================================
-   BIGGER IMAGE + ASSURANCE CARD UNDER IT
-=================================== */
-
-.pd-image {
-  height: 680px;
-}
-
-.pd-image img {
-  width: 85%;
-  height: 85%;
-}
-
+/* Trust Bar (Now placed on the right side to fill space) */
 .pd-trust {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 16px;
   padding: 14px;
   background: #ffffff;
   border: 1px solid var(--paper-line);
@@ -1014,37 +752,6 @@
   grid-column: 1 / -1;
 }
 
-@media (max-width: 1250px) {
-  .pd-image { height: 560px; }
-}
-
-@media (max-width: 650px) {
-  .pd-image { height: 380px; }
-  .pd-trust { grid-template-columns: 1fr; }
-}
-
-/* ===================================
-   SELECTED VARIANT CHIP - keep text visible while hovering
-   (the :hover colour was turning the text green on a green chip)
-=================================== */
-
-.pd-variant-chip.pd-variant-chip-active,
-.pd-variant-chip.pd-variant-chip-active:hover,
-.pd-variant-chip.pd-variant-chip-active:focus {
-  color: #ffffff !important;
-  background: var(--signal);
-  border-color: var(--signal);
-}
-
-
-/* ===================================
-   WISHLIST HEART ON THE IMAGE (top-right)
-=================================== */
-
-.pd-image {
-  position: relative;
-}
-
 .pd-wishlist-overlay {
   position: absolute;
   top: 16px;
@@ -1059,1253 +766,131 @@
   box-shadow: 0 2px 8px rgba(11, 18, 32, 0.18);
 }
 
-@media (max-width: 650px) {
-  .pd-wishlist-overlay {
-    top: 10px;
-    right: 10px;
-  }
-
-  .pd-wishlist-overlay .wl-btn {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* colour chips with product image above the name */
-.pd-variant-chip-img {
-  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 12px;
-}
-.pd-variant-chip-img img {
-  width: 64px; height: 64px; object-fit: contain; border-radius: 8px; background: #000;
-}
-
 /* ===================================
-   PAYMENT NOTE (full width under both columns)
+   RESPONSIVE
 =================================== */
-.pd-grid {
-  row-gap: 10px !important;
-}
 
-.pd-note-full {
-  grid-column: 1 / -1;
-  margin: 0;
-  max-width: none;
-}
-
-/* ===================================
-   TRUST BAR - full width under both columns, five equal boxes
-=================================== */
-.pd-trust-bar {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.pd-trust-bar .pd-trust-item {
-  flex: 1 1 240px;
-  min-height: 76px;
-  box-sizing: border-box;
-}
-
-.pd-trust-bar .pd-trust-item p {
-  white-space: nowrap;
-}
-
-@media (max-width: 650px) {
-  .pd-trust-bar { flex-direction: column; }
-  .pd-trust-bar .pd-trust-item { flex: 0 0 auto; }
-}
-
-/* ===================================
-   STICKY GALLERY (desktop)
-   Photo + thumbnails follow you while the right column scrolls,
-   so there is no empty space beside long specs.
-=================================== */
-@media (min-width: 901px) {
-  .pd-gallery {
-    position: sticky;
-    top: 96px;
-    align-self: start;
+@media (max-width: 1250px) {
+  .pd {
+    padding: 20px 28px 50px;
   }
-
-  /* keep photo + thumbnails inside one screen height */
+  .pd-grid {
+    grid-template-columns: minmax(420px, 1fr) minmax(440px, 1fr);
+    gap: 30px;
+  }
   .pd-image {
-    height: min(560px, calc(100vh - 280px)) !important;
-    min-height: 320px;
+    height: 500px;
+    min-height: 500px;
   }
 }
 
-/* trust bar + note live outside the two-column grid */
-.pd-below {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
+@media (max-width: 1000px) {
+  .pd-buy-row {
+    grid-template-columns: 1fr;
+  }
+  .pd-buy-right {
+    margin-top: 20px;
+  }
 }
 
+@media (max-width: 900px) {
+  .pd-grid {
+    grid-template-columns: 1fr;
+  }
+  .pd-gallery {
+    position: static;
+  }
+  .pd-trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .pd {
+    padding: 15px 14px 40px;
+  }
+  .pd-image {
+    height: 400px;
+    min-height: 400px;
+  }
+  .pd-title {
+    font-size: 28px;
+  }
+  .pd-price {
+    font-size: 32px;
+  }
+  .pd-cta-row {
+    flex-direction: column;
+  }
+  .pd-cta {
+    width: 100%;
+    max-width: 100%;
+  }
+}
 /* ===================================
-   TIGHTER GALLERY - photo fills its box, less blank space
+   CUSTOMER REVIEWS HEADER FIX (NAVY BLUE)
 =================================== */
+
+/* Header Background */
+.reviews-header,
+.customer-reviews-header,
+.reviews-section h3 {
+  background-color: #0f172a !important; /* Navy Blue */
+  color: #ffffff !important;           /* White Text */
+  padding: 16px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Header Title Text */
+.reviews-header h2,
+.reviews-header h3,
+.reviews-header span,
+.reviews-header .title {
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+/* Write a Review Button */
+.reviews-header button,
+.write-review-btn {
+  background-color: #2563eb !important; /* Bright Blue */
+  color: #ffffff !important;           /* White Text */
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Hover Effect */
+.reviews-header button:hover,
+.write-review-btn:hover {
+  background-color: #1d4ed8 !important; /* Darker Blue */
+}
+/* ===================================
+   PRODUCT IMAGE ZOOM EFFECT
+=================================== */
+
+.pd-image {
+  overflow: hidden !important;
+  cursor: zoom-in;
+}
+
 .pd-image img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
+  transition: transform 0.4s ease-in-out !important;
+  transform-origin: center center;
 }
 
-.pd-gallery {
-  gap: 8px;
+.pd-image:hover img {
+  transform: scale(1.5); /* Adjust this number to change zoom strength */
 }
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips and phone image cards */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Buttons share the row, pincode box lines up with them */
-.pd-cta-row .pd-cta { flex: 1 1 0; max-width: 200px; }
-.pd-delivery { max-width: 420px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* One shared width: buttons, pincode box and the "About this product" box
-   all end at the same right edge. Change the number to resize all of them. */
-.pd-cta-row,
-.pd-delivery,
-.pd-quick {
-  width: 100%;
-  max-width: 560px;
-  box-sizing: border-box;
-}
-.pd-cta-row .pd-cta { flex: 1 1 0; max-width: none; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* "About this product" box keeps the full column width */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-}
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* Smaller "About this product" box */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: 420px;      /* make smaller/larger here */
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-.pd-info .pd-quick h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
-}
-.pd-info .pd-quick .pd-quick-text {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 12px;
-}
-.pd-info .pd-quick-grid { gap: 8px; }
-.pd-info .pd-quick-item {
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.pd-info .pd-quick-item span { font-size: 11px; }
-.pd-info .pd-quick-item b { font-size: 13px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-
-/* ---- Use the empty space: buying controls on the left, storage + colours on the right ---- */
-.pd-buy-row {
-  display: flex;
-  flex-wrap: wrap;            /* on narrow screens the right part drops below */
-  align-items: flex-start;
-  gap: 8px 36px;
-}
-.pd-buy-left { flex: 0 0 auto; }
-.pd-buy-right { flex: 1 1 240px; min-width: 0; }
-.pd-buy-right .pd-variants {
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 0;
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* Smaller "About this product" box */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: 420px;      /* make smaller/larger here */
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-.pd-info .pd-quick h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
-}
-.pd-info .pd-quick .pd-quick-text {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 12px;
-}
-.pd-info .pd-quick-grid { gap: 8px; }
-.pd-info .pd-quick-item {
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.pd-info .pd-quick-item span { font-size: 11px; }
-.pd-info .pd-quick-item b { font-size: 13px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-
-/* ---- Use the empty space: buying controls on the left, storage + colours on the right ---- */
-.pd-buy-row {
-  display: flex;
-  flex-wrap: wrap;            /* on narrow screens the right part drops below */
-  align-items: flex-start;
-  gap: 8px 36px;
-}
-.pd-buy-left { flex: 0 0 auto; }
-.pd-buy-right { flex: 1 1 300px; min-width: 0; }
-
-/* Storage + colour stay under the pincode box (left side) */
-.pd-buy-left .pd-variants {
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* "About this product" fills the right side */
-.pd-buy-right .pd-quick { max-width: none; margin-top: 0; }
-.pd-info .pd-quick-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* Smaller "About this product" box */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: 420px;      /* make smaller/larger here */
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-.pd-info .pd-quick h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
-}
-.pd-info .pd-quick .pd-quick-text {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 12px;
-}
-.pd-info .pd-quick-grid { gap: 8px; }
-.pd-info .pd-quick-item {
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.pd-info .pd-quick-item span { font-size: 11px; }
-.pd-info .pd-quick-item b { font-size: 13px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-
-/* ---- Use the empty space: buying controls on the left, storage + colours on the right ---- */
-.pd-buy-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);   /* left = buying controls, right = About box */
-  align-items: start;
-  gap: 8px 36px;
-  width: 100%;
-}
-.pd-buy-left,
-.pd-buy-right { min-width: 0; }
-
-/* very narrow screens: stack them */
-@media (max-width: 640px) {
-  .pd-buy-row { grid-template-columns: 1fr; }
-}
-
-/* Storage + colour stay under the pincode box (left side) */
-.pd-buy-left .pd-variants {
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* "About this product" fills the right side */
-.pd-buy-right .pd-quick { max-width: none; margin-top: 0; }
-.pd-info .pd-quick-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* Smaller "About this product" box */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: 420px;      /* make smaller/larger here */
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-.pd-info .pd-quick h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
-}
-.pd-info .pd-quick .pd-quick-text {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 12px;
-}
-.pd-info .pd-quick-grid { gap: 8px; }
-.pd-info .pd-quick-item {
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.pd-info .pd-quick-item span { font-size: 11px; }
-.pd-info .pd-quick-item b { font-size: 13px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-
-/* ---- Use the empty space: buying controls on the left, storage + colours on the right ---- */
-.pd-buy-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);   /* left = buying controls, right = About box */
-  align-items: start;
-  gap: 8px 36px;
-  width: 100%;
-}
-.pd-buy-left,
-.pd-buy-right { min-width: 0; }
-
-/* very narrow screens: stack them */
-@media (max-width: 640px) {
-  .pd-buy-row { grid-template-columns: 1fr; }
-}
-
-/* Storage + colour stay under the pincode box (left side) */
-.pd-buy-left .pd-variants {
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* "About this product" fills the right side */
-.pd-buy-right .pd-quick { max-width: none; margin-top: 0; }
-.pd-info .pd-quick-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-/* ---- Less empty space under the "Payment is secured..." note ---- */
-.pd-info { padding-bottom: 0; margin-bottom: 0; }
-.pd-info .pd-note { margin: 12px 0 0; }
-.pd-grid { margin-bottom: 0; padding-bottom: 0; }
-.pd-grid + .pd-section {
-  margin-top: 16px;      /* gap before "Product highlights" */
-  padding-top: 20px;
-}
-/* Add this at the END of ProductDetail.css */
-
-/* Smaller Add to cart / Buy now */
-.pd-cta-row { display: flex; gap: 10px; align-items: center; }
-.pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  min-width: 130px;
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-/* Smaller pincode box */
-.pd-delivery {
-  max-width: 300px;
-  padding: 4px 6px 4px 10px;
-  align-items: center;
-}
-.pd-delivery .pd-pin-input { font-size: 13px; padding: 6px 4px; }
-.pd-delivery .btn { padding: 5px 12px; font-size: 13px; }
-
-/* Smaller quantity box */
-.pd-qty-controls button { width: 32px; height: 32px; }
-
-/* Variant chips (GB options) and phone image cards (colours) */
-.pd-variant-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-variant-chip {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7deea;
-  background: #fff;
-  color: #1a2740;
-}
-.pd-variant-chip-active { background: #2563eb; border-color: #2563eb; color: #fff; }
-
-.pd-color-card {
-  width: 84px;
-  padding: 6px;
-  border: 1px solid #d7deea;
-  border-radius: 10px;
-  background: #fff;
-  text-align: center;
-  text-decoration: none;
-  color: #1a2740;
-  font-size: 12px;
-}
-.pd-color-card img {
-  width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 4px;
-}
-.pd-color-card-active { border-color: #2563eb; box-shadow: 0 0 0 2px #2563eb33; }
-
-/* ---- Fill the empty space on the right ---- */
-
-/* Stock box and quantity sit side by side */
-.pd-top-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.pd-top-row .pd-specs,
-.pd-top-row .pd-qty { margin: 0; }
-
-/* Smaller Add to cart, Buy Now and pincode boxes */
-.pd-info .pd-cta-row {
-  width: auto;
-  max-width: none;
-  gap: 10px;
-}
-.pd-info .pd-cta-row .pd-cta {
-  flex: 0 0 auto;
-  width: 140px;          /* make smaller/larger here */
-  min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-
-.pd-info .pd-delivery {
-  width: 100%;
-  max-width: 300px;      /* make smaller/larger here */
-  min-height: 0;
-  padding: 2px 4px 2px 10px;
-  box-sizing: border-box;
-}
-.pd-info .pd-delivery .pd-pin-input {
-  font-size: 13px;
-  padding: 4px;
-}
-.pd-info .pd-delivery .btn {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
-/* Smaller "About this product" box */
-.pd-info .pd-quick {
-  width: 100%;
-  max-width: 420px;      /* make smaller/larger here */
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-}
-.pd-info .pd-quick h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
-}
-.pd-info .pd-quick .pd-quick-text {
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 12px;
-}
-.pd-info .pd-quick-grid { gap: 8px; }
-.pd-info .pd-quick-item {
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.pd-info .pd-quick-item span { font-size: 11px; }
-.pd-info .pd-quick-item b { font-size: 13px; }
-
-/* Storage / colour groups sit next to each other on wide screens */
-.pd-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 40px;
-}
-
-/* ---- Use the empty space: buying controls on the left, storage + colours on the right ---- */
-.pd-buy-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);   /* left = buying controls, right = About box */
-  align-items: start;
-  gap: 8px 36px;
-  width: 100%;
-}
-.pd-buy-left,
-.pd-buy-right { min-width: 0; }
-
-/* very narrow screens: stack them */
-@media (max-width: 640px) {
-  .pd-buy-row { grid-template-columns: 1fr; }
-}
-
-/* Storage + colour stay under the pincode box (left side) */
-.pd-buy-left .pd-variants {
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* "About this product" fills the right side */
-.pd-buy-right .pd-quick { max-width: none; margin-top: 0; }
-.pd-info .pd-quick-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-/* ---- Less empty space under the "Payment is secured..." note ---- */
-.pd-info { padding-bottom: 0; margin-bottom: 0; }
-.pd-info .pd-note { margin: 12px 0 0; }
-.pd-grid { margin-bottom: 0; padding-bottom: 0; }
-.pd-grid + .pd-section {
-  margin-top: 16px;      /* gap before "Product highlights" */
-  padding-top: 20px;
-}
-
-/* ---- The photo column on the left is taller than the details column on the right.
-        Make it shorter so the empty space under the payment note goes away. ---- */
-.pd-grid { align-items: start; }
-
-.pd-gallery .pd-image img {
-  max-height: 340px;      /* phone photo height - change here */
-  width: 100%;
-  object-fit: contain;
-}
-.pd-gallery .pd-thumb { width: 54px; height: 54px; }
-.pd-gallery .pd-trust { gap: 8px; }
-.pd-gallery .pd-trust-item { padding: 8px 10px; }
