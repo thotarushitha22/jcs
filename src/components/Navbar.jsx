@@ -22,9 +22,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [searchText, setSearchText] = useState(
-    searchParams.get("search") || ""
-  );
+  const [searchText, setSearchText] = useState(searchParams.get("search") || "");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -38,8 +36,7 @@ export default function Navbar() {
   const userRole = String(currentUser?.role || "").toLowerCase();
   const userEmail = String(currentUser?.email || "").toLowerCase();
 
-  const isMerchant =
-    userRole === "merchant" || userRole === "seller";
+  const isMerchant = userRole === "merchant" || userRole === "seller";
 
   // STRICT ADMIN CHECK
   const isAdmin =
@@ -49,10 +46,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
@@ -60,24 +54,24 @@ export default function Navbar() {
     document.addEventListener("mousedown", onClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        onClickOutside
-      );
+      document.removeEventListener("mousedown", onClickOutside);
     };
   }, []);
 
+  // Sync search input with URL if they navigate back
+  useEffect(() => {
+    setSearchText(searchParams.get("search") || "");
+  }, [searchParams]);
+
   const handleSearch = (e) => {
     e.preventDefault();
-
     const query = searchText.trim();
 
     if (query) {
-      navigate(
-        `/?search=${encodeURIComponent(query)}`
-      );
+      // CHANGED: Navigate to /products instead of /
+      navigate(`/products?search=${encodeURIComponent(query)}`);
     } else {
-      navigate("/");
+      navigate("/products");
     }
   };
 
@@ -91,7 +85,6 @@ export default function Navbar() {
     <header className="nav">
       {/* ================= TOP NAVBAR ================= */}
       <div className="nav-row-top">
-
         {/* BRAND + LOCATION */}
         <div className="nav-left">
           <Link to="/" className="brand">
@@ -103,22 +96,14 @@ export default function Navbar() {
         </div>
 
         {/* SEARCH */}
-        <div
-          className="nav-search-wrap"
-          data-tour="search"
-        >
-          <form
-            className="nav-search"
-            onSubmit={handleSearch}
-          >
+        <div className="nav-search-wrap" data-tour="search">
+          <form className="nav-search" onSubmit={handleSearch}>
             <Search size={20} />
 
             <input
               type="search"
               value={searchText}
-              onChange={(e) =>
-                setSearchText(e.target.value)
-              }
+              onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search by product name, brand, or SKU"
               aria-label="Search products"
             />
@@ -127,7 +112,6 @@ export default function Navbar() {
 
         {/* ICONS (wishlist, cart, account) */}
         <div className="nav-actions">
-
           {/* WISHLIST */}
           <Link
             to="/wishlist"
@@ -147,26 +131,17 @@ export default function Navbar() {
           >
             <ShoppingCart size={22} />
 
-            {count > 0 && (
-              <span className="cart-count">
-                {count}
-              </span>
-            )}
+            {count > 0 && <span className="cart-count">{count}</span>}
           </Link>
 
           {/* ACCOUNT MENU */}
           {currentUser?.email ? (
-            <div
-              className="account-menu-wrap"
-              ref={menuRef}
-            >
+            <div className="account-menu-wrap" ref={menuRef}>
               <button
                 type="button"
                 className="icon-btn"
                 aria-label="Account menu"
-                onClick={() =>
-                  setMenuOpen((prev) => !prev)
-                }
+                onClick={() => setMenuOpen((prev) => !prev)}
                 data-tour="account"
               >
                 <UserRound size={22} />
@@ -174,14 +149,11 @@ export default function Navbar() {
 
               {menuOpen && (
                 <div className="account-menu">
-
                   {/* MY ACCOUNT */}
                   <Link
                     to="/account"
                     className="account-menu-item"
-                    onClick={() =>
-                      setMenuOpen(false)
-                    }
+                    onClick={() => setMenuOpen(false)}
                   >
                     <UserCircle size={18} />
                     My Account
@@ -192,9 +164,7 @@ export default function Navbar() {
                     <Link
                       to="/merchant"
                       className="account-menu-item"
-                      onClick={() =>
-                        setMenuOpen(false)
-                      }
+                      onClick={() => setMenuOpen(false)}
                     >
                       <Store size={18} />
                       Merchant Dashboard
@@ -206,9 +176,7 @@ export default function Navbar() {
                     <Link
                       to="/admin"
                       className="account-menu-item"
-                      onClick={() =>
-                        setMenuOpen(false)
-                      }
+                      onClick={() => setMenuOpen(false)}
                     >
                       <ShieldCheck size={18} />
                       Admin Dashboard
@@ -224,7 +192,6 @@ export default function Navbar() {
                     <LogOut size={18} />
                     Sign Out
                   </button>
-
                 </div>
               )}
             </div>
@@ -238,7 +205,6 @@ export default function Navbar() {
               <UserRound size={22} />
             </Link>
           )}
-
         </div>
       </div>
     </header>

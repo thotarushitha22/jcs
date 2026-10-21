@@ -16,7 +16,9 @@ const availableBrands = ["Samsung", "Apple", "OnePlus", "Nokia", "Motorola", "Re
 
 export default function Products() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Read search from URL (from top navbar)
   const urlSearchQuery = searchParams.get("search") || "";
 
   const [categories] = useState(myCategories);
@@ -28,9 +30,15 @@ export default function Products() {
   const [activeBrand, setActiveBrand] = useState("all");
   const [activePriceRange, setActivePriceRange] = useState("all");
   const [activeDiscount, setActiveDiscount] = useState("all");
-  
   const [sort, setSort] = useState("relevance");
-  const [sidebarSearch, setSidebarSearch] = useState("");
+  
+  // Sidebar search state
+  const [sidebarSearch, setSidebarSearch] = useState(urlSearchQuery);
+
+  // Keep sidebar search box synced with URL
+  useEffect(() => {
+    setSidebarSearch(urlSearchQuery);
+  }, [urlSearchQuery]);
 
   const normalizeCategory = (value) => {
     if (value == null) return "";
@@ -58,7 +66,7 @@ export default function Products() {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const data = await fetchProducts({ search: urlSearchQuery || undefined });
+        const data = await fetchProducts();
         if (cancelled) return;
         const productList = Array.isArray(data) ? data : data?.products || data?.data || [];
         setProducts(Array.isArray(productList) ? productList : []);
@@ -71,11 +79,12 @@ export default function Products() {
     };
     loadProducts();
     return () => { cancelled = true; };
-  }, [urlSearchQuery]);
+  }, []);
 
   const filteredProducts = useMemo(() => {
     let resultList = [...products];
 
+    // 1. Category Filter
     if (activeCategory !== "all") {
       const selectedCategory = normalizeCategory(activeCategory);
       const categoryAliases = {
@@ -93,6 +102,7 @@ export default function Products() {
       });
     }
 
+    // 2. Brand Filter
     if (activeBrand !== "all") {
       resultList = resultList.filter((product) => {
         const productBrand = normalizeCategory(product.brand || product.manufacturer || product.title || product.name || "");
@@ -100,6 +110,7 @@ export default function Products() {
       });
     }
 
+    // 3. Price Filter
     if (activePriceRange !== "all") {
       resultList = resultList.filter((product) => {
         const price = Number(product.price || product.cost || 0);
@@ -112,6 +123,7 @@ export default function Products() {
       });
     }
 
+    // 4. Discount Filter
     if (activeDiscount !== "all") {
       resultList = resultList.filter((product) => {
         const discount = Number(product.discount || product.discountPercentage || product.off || 0);
@@ -119,30 +131,68 @@ export default function Products() {
       });
     }
 
-    if (sidebarSearch.trim()) {
-      const q = normalizeCategory(sidebarSearch);
+    // 5. SEARCH FILTER (Uses URL first, then sidebar)
+    const query = urlSearchQuery.trim() || sidebarSearch.trim();
+    if (query) {
+      const q = normalizeCategory(query);
       resultList = resultList.filter((product) => {
         const title = normalizeCategory(product.title || product.name || "");
-        return title.includes(q);
+        const brand = normalizeCategory(product.brand || "");
+        const sku = normalizeCategory(product.sku || "");
+        const model = normalizeCategory(product.model || "");
+        return title.includes(q) || brand.includes(q) || sku.includes(q) || model.includes(q);
       });
     }
 
+    // 6. Sorting
     if (sort === "price-asc") resultList.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
     if (sort === "price-desc") resultList.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
 
     return resultList;
-  }, [products, activeCategory, activeBrand, activePriceRange, activeDiscount, sidebarSearch, sort]);
+  }, [products, activeCategory, activeBrand, activePriceRange, activeDiscount, urlSearchQuery, sidebarSearch, sort]);
 
   const displayProducts = useMemo(() => groupProducts(filteredProducts), [filteredProducts]);
 
+  // Handle typing in sidebar search
+  const handleSidebarSearch = (e) => {
+    const val = e.target.value;
+    setSidebarSearch(val);
+    if (val.trim()) {
+      setSearchParams({ search: val });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   return (
-    /* Increased padding here to give space around the whole layout */
-    <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", padding: "32px 24px" }}>
+    /* Main container - locked to screen height */
+    <div style={{ backgroundColor: "#f8fafc", height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       
-      {/* Increased max-width and gap between sidebar and products */}
-      <div style={{ maxWidth: "1440px", margin: "0 auto", display: "flex", gap: "32px", alignItems: "flex-start" }}>
+      {/* Fixed Top Bar */}
+      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", padding: "24px 24px 10px 24px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <button 
+            onClick={() => navigate(-1)}
+            style={{ 
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: "40px", height: "40px", borderRadius: "50%", 
+              border: "1px solid #e2e8f0", backgroundColor: "#ffffff", 
+              cursor: "pointer", color: "#0f172a", fontSize: "18px", fontWeight: "bold",
+              transition: "all 0.2s ease", flexShrink: 0
+            }}
+          >
+            &lt;
+          </button>
+          <h2 style={{ fontSize: "26px", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+            {urlSearchQuery ? `Search Results for "${urlSearchQuery}"` : "Products"}
+          </h2>
+        </div>
+      </div>
+
+      {/* Main Content Area (Sidebar + Grid) */}
+      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", display: "flex", gap: "32px", padding: "0 24px 24px 24px", flex: 1, overflow: "hidden" }}>
         
-        {/* SIDEBAR */}
+        {/* SIDEBAR (Fixed height, scrolls if needed) */}
         <aside 
           style={{ 
             width: "280px", 
@@ -151,13 +201,10 @@ export default function Products() {
             borderRadius: "12px", 
             border: "1px solid #e5e7eb", 
             padding: "24px",
-            position: "sticky",
-            top: "24px",
-            maxHeight: "calc(100vh - 48px)",
-            overflowY: "auto"
+            overflowY: "auto",
+            height: "100%"
           }}
         >
-          
           {/* Sort Dropdown */}
           <select 
             value={sort} 
@@ -178,7 +225,7 @@ export default function Products() {
               type="text" 
               placeholder="Search products..." 
               value={sidebarSearch}
-              onChange={(e) => setSidebarSearch(e.target.value)}
+              onChange={handleSidebarSearch}
               style={{ width: "100%", padding: "10px 10px 10px 34px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", fontSize: "14px" }}
             />
           </div>
@@ -249,41 +296,29 @@ export default function Products() {
           </div>
         </aside>
 
-        {/* PRODUCTS GRID */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        {/* PRODUCTS GRID (Only this scrolls) */}
+        <div style={{ flex: 1, minWidth: 0, overflowY: "auto", height: "100%", paddingRight: "10px" }}>
           
-          {/* Back Arrow + Title Row */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
-            <button 
-              onClick={() => navigate(-1)}
-              style={{ 
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: "40px", height: "40px", borderRadius: "50%", 
-                border: "1px solid #e2e8f0", 
-                backgroundColor: "#f8fafc", 
-                cursor: "pointer", 
-                color: "#0f172a", 
-                fontSize: "18px", 
-                fontWeight: "bold",
-                transition: "all 0.2s ease"
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#f1f5f9"; }}
-              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#f8fafc"; }}
-            >
-              &lt;
-            </button>
-
-            <div style={{ display: "inline-block", borderBottom: "2px solid #2563eb", paddingBottom: "4px" }}>
-              <h2 style={{ fontSize: "26px", fontWeight: "700", color: "#2563eb", margin: 0 }}>Products</h2>
-            </div>
+          <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "#6b7280", fontSize: "14px", fontWeight: "500" }}>
+              {loading ? "Loading…" : `${displayProducts.length} results`}
+            </span>
           </div>
 
           {loading ? (
             <p>Loading...</p>
           ) : displayProducts.length === 0 ? (
-            <p>No products match your filters.</p>
+            <div style={{ textAlign: "center", padding: "60px 20px", color: "#6b7280", backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
+              <p>No products found matching "{urlSearchQuery}".</p>
+              <button 
+                onClick={() => { setSidebarSearch(""); setSearchParams({}); }} 
+                style={{ marginTop: "12px", padding: "8px 16px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
+              >
+                Clear Search
+              </button>
+            </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px", paddingBottom: "40px" }}>
               {displayProducts.map((product, index) => (
                 <ProductCard key={product.id || product._id || index} product={product} />
               ))}

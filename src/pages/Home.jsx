@@ -11,6 +11,7 @@ import "./Home.css";
 
 export default function Home() {
   const [searchParams] = useSearchParams();
+  // Get the search query from the URL (e.g., "?search=apple")
   const urlSearchQuery = searchParams.get("search") || "";
 
   const [products, setProducts] = useState([]);
@@ -23,7 +24,9 @@ export default function Home() {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchProducts({ search: urlSearchQuery || undefined });
+        
+        // Fetch all products from the backend
+        const data = await fetchProducts();
 
         if (cancelled) return;
         const productList = Array.isArray(data) ? data : data?.products || data?.data || [];
@@ -38,19 +41,35 @@ export default function Home() {
     };
     loadProducts();
     return () => { cancelled = true; };
-  }, [urlSearchQuery]);
+  }, []);
 
-  const displayProducts = useMemo(() => groupProducts(products), [products]);
+  // Filter the products based on the search query
+  const displayProducts = useMemo(() => {
+    let result = [...products];
+
+    if (urlSearchQuery.trim()) {
+      const q = urlSearchQuery.toLowerCase().trim();
+      result = result.filter((product) => {
+        const title = String(product.title || product.name || "").toLowerCase();
+        const brand = String(product.brand || "").toLowerCase();
+        const sku = String(product.sku || "").toLowerCase();
+        const model = String(product.model || "").toLowerCase();
+        
+        return title.includes(q) || brand.includes(q) || sku.includes(q) || model.includes(q);
+      });
+    }
+
+    return groupProducts(result);
+  }, [products, urlSearchQuery]);
 
   return (
     <div className="page">
       <BannerRail />
 
-      {/* Increased bottom padding (pb-24 or 96px) to create the empty space you want */}
       <section style={{ padding: "20px", maxWidth: "1400px", margin: "0 auto", marginBottom: "96px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h2 style={{ fontSize: "28px", fontWeight: "800", color: "#111827", margin: 0 }}>
-            Featured Products
+            {urlSearchQuery ? `Search Results for "${urlSearchQuery}"` : "Featured Products"}
           </h2>
           
           <Link 
@@ -66,23 +85,29 @@ export default function Home() {
 
         {error && <p style={{ color: "red" }}>Couldn't load products: {error}</p>}
 
-        {!error && !loading && displayProducts.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#6b7280" }}>No products found.</p>
+        {loading ? (
+          <p>Loading products...</p>
+        ) : displayProducts.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 20px", backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
+            <p style={{ fontSize: "16px", color: "#6b7280" }}>No products found matching "{urlSearchQuery}".</p>
+            <Link to="/" style={{ display: "inline-block", marginTop: "12px", padding: "8px 16px", backgroundColor: "#2563eb", color: "#fff", borderRadius: "6px", textDecoration: "none" }}>
+              Clear Search
+            </Link>
+          </div>
         ) : (
           <div 
             className="grid" 
             style={{ 
               display: "grid", 
-              // This creates exactly 4 or 5 columns depending on screen width
               gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", 
               gap: "20px" 
             }}
           >
             {/* 
-              Changed .slice(0, 8) to .slice(0, 10). 
-              This ensures exactly 2 rows on wide screens, and leaves space below 
+              If searching, show all results. 
+              If not searching, show only 10 (2 rows) on the homepage.
             */}
-            {displayProducts.slice(0, 10).map((product, index) => (
+            {(urlSearchQuery ? displayProducts : displayProducts.slice(0, 10)).map((product, index) => (
               <ProductCard key={product.id || product._id || index} product={product} />
             ))}
           </div>
