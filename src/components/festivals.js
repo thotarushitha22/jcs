@@ -1,391 +1,249 @@
-// Festival / sale calendar for the hero carousel.
-// - start/end are inclusive, format YYYY-MM-DD.
-// - Diwali, Dussehra, Holi move every year. Check the dates against a panchang each year.
-// - Big Billion Days dates are only placeholders until the sale is officially announced.
-// - If two windows overlap, the higher "priority" wins.
-// - "image" (optional) is a photo URL. Set it on a campaign or on a single slide.
-
-const PHONE_A =
-  "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=1400&q=80";
-
-const PHONE_B =
-  "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=1400&q=80";
-
-const SELL =
-  "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1400&q=80";
-
-// ---------------------------------------------------------
-// DEFAULT CAMPAIGN
-// ---------------------------------------------------------
-
-export const DEFAULT_CAMPAIGN = {
-  id: "default",
-
-  slides: [
-    {
-      id: "d1",
-      eyebrow: "GST-VERIFIED · B2B ONLY",
-      title: "Genuine stock, straight from verified suppliers.",
-      sub:
-        "Smartphones, tablets, TVs and accessories — bulk pricing, dispatch within 24 hours.",
-      image: PHONE_A,
-      cta: {
-        label: "Browse listings",
-        href: "/",
-      },
-    },
-
-    {
-      id: "d2",
-      eyebrow: "SEASONAL DEALS",
-      title: "Bulk pricing on flagship smartphones.",
-      sub:
-        "Lock in wholesale rates before the festive restock — limited lots available.",
-      image: PHONE_B,
-      cta: {
-        label: "Shop smartphones",
-        href: "/",
-      },
-    },
-
-    {
-      id: "d3",
-      eyebrow: "SELL TO US",
-      title: "Turn excess inventory into cash, fast.",
-      sub:
-        "Submit a lot, get KYC-verified, and go live within 48 hours.",
-      image: SELL,
-      cta: {
-        label: "Start selling",
-        href: "/sell",
-      },
-    },
-  ],
-};
-
-// ---------------------------------------------------------
-// FESTIVAL / SALE CAMPAIGNS
-// ---------------------------------------------------------
-
-export const CAMPAIGNS = [
+const festivalBanners = [
+  // ==================== DIWALI ====================
   {
-    id: "bbd",
-    priority: 5,
-    start: "2026-09-28",
-    end: "2026-10-05",
-
-    theme: {
-      from: "#0b1f4d",
-      to: "#1d4ed8",
-      accent: "#ffd23f",
-    },
-
-    slides: [
-      {
-        id: "b1",
-        eyebrow: "BIG BILLION DAYS · B2B WINDOW",
-        title: "Festive-season stock at sale-week prices.",
-        sub:
-          "Smartphones, TVs and accessories in bulk. GST invoice on every order.",
-        image: PHONE_A,
-        cta: {
-          label: "Shop the sale",
-          href: "/",
-        },
-      },
-
-      {
-        id: "b2",
-        eyebrow: "LIMITED STOCK",
-        title: "Lock your festive inventory now.",
-        sub:
-          "Verified suppliers, dispatch within 24 hours.",
-        image: PHONE_B,
-        cta: {
-          label: "Browse listings",
-          href: "/",
-        },
-      },
-    ],
+    id: "diwali-1",
+    festival: "Diwali",
+    theme: "br-dark br-diwali",
+    chip: "🪔 DIWALI SPECIAL",
+    eyebrow: "FESTIVE WHOLESALE COLLECTION",
+    title: "Light Up Your Sales This Diwali",
+    offer: "Make the festive season count",
+    description: "Exclusive wholesale deals on smartphones, laptops, TVs and accessories.",
+    button: "Shop Diwali Deals",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "diwali-2",
+    festival: "Diwali",
+    theme: "br-dark br-diwali",
+    chip: "✨ FESTIVE SAVINGS",
+    eyebrow: "DIWALI BUSINESS OFFERS",
+    title: "Bright Deals. Bigger Business.",
+    offer: "Celebrate with smarter sourcing",
+    description: "Stock up on premium mobile phones and business-ready electronics.",
+    button: "Explore Diwali Offers",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "diwali-3",
+    festival: "Diwali",
+    theme: "br-dark br-diwali",
+    chip: "🪔 DIWALI WHOLESALE",
+    eyebrow: "YOUR FESTIVE STOCKING PARTNER",
+    title: "Make This Diwali a Record-Breaker",
+    offer: "More products. More opportunities.",
+    description: "Discover wholesale options across smartphones, laptops and accessories.",
+    button: "Shop Festive Stock",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 
+  // ==================== DUSSEHRA ====================
   {
-    id: "dussehra",
-    priority: 4,
-    start: "2026-10-11",
-    end: "2026-10-21",
-
-    theme: {
-      from: "#4a1203",
-      to: "#c2410c",
-      accent: "#fde047",
-    },
-
-    slides: [
-      {
-        id: "du1",
-        eyebrow: "NAVRATRI TO DUSSEHRA",
-        title: "Start the festive season with full shelves.",
-        sub:
-          "Bulk pricing on mobiles, tablets and TVs from GST-verified suppliers.",
-        image: PHONE_A,
-        cta: {
-          label: "Browse listings",
-          href: "/",
-        },
-      },
-
-      {
-        id: "du2",
-        eyebrow: "FAST DISPATCH",
-        title: "Order today, ship within 24 hours.",
-        sub:
-          "Get stock to your store before the Diwali rush.",
-        image: PHONE_B,
-        cta: {
-          label: "Shop smartphones",
-          href: "/",
-        },
-      },
-    ],
+    id: "dussehra-1",
+    festival: "Dussehra",
+    theme: "br-light br-dussehra",
+    chip: "🏹 DUSSEHRA SPECIAL",
+    eyebrow: "FESTIVE BUSINESS COLLECTION",
+    title: "Get Your Store Ready for Dussehra",
+    offer: "Celebrate success with smarter sourcing",
+    description: "Restock electronics at competitive wholesale prices.",
+    button: "Shop Dussehra Deals",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "dussehra-2",
+    festival: "Dussehra",
+    theme: "br-light br-dussehra",
+    chip: "🏹 FESTIVE RESTOCK",
+    eyebrow: "DUSSEHRA WHOLESALE OFFERS",
+    title: "Victory Begins with Better Business",
+    offer: "Choose quality for your next restock",
+    description: "Explore smartphones, tablets, laptops and electronics for your store.",
+    button: "Explore Dussehra Offers",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "dussehra-3",
+    festival: "Dussehra",
+    theme: "br-light br-dussehra",
+    chip: "✨ DUSSEHRA DEALS",
+    eyebrow: "SMARTER SOURCING STARTS HERE",
+    title: "Upgrade Your Inventory This Season",
+    offer: "Better selection for growing businesses",
+    description: "Source popular electronics categories through JCS Global.",
+    button: "Browse Electronics",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 
+  // ==================== HOLI ====================
   {
-    id: "diwali",
-    priority: 4,
-    start: "2026-10-25",
-    end: "2026-11-10",
-
-    theme: {
-      from: "#2a0a3d",
-      to: "#b45309",
-      accent: "#fbbf24",
-    },
-
-    slides: [
-      {
-        id: "di1",
-        eyebrow: "DIWALI WHOLESALE",
-        title: "Light up your sales this Diwali.",
-        sub:
-          "Festive bulk deals on smartphones, TVs and accessories.",
-        image: PHONE_A,
-        cta: {
-          label: "Shop Diwali deals",
-          href: "/",
-        },
-      },
-
-      {
-        id: "di2",
-        eyebrow: "GIFTING SEASON",
-        title: "Top gifting picks, priced for resellers.",
-        sub:
-          "Earbuds, smartwatches and power banks in bulk.",
-        image: PHONE_B,
-        cta: {
-          label: "View gifting range",
-          href: "/",
-        },
-      },
-
-      {
-        id: "di3",
-        eyebrow: "BEFORE DHANTERAS",
-        title: "Restock before the weekend rush.",
-        sub:
-          "Verified suppliers. Dispatch within 24 hours.",
-        image: SELL,
-        cta: {
-          label: "Browse listings",
-          href: "/",
-        },
-      },
-    ],
+    id: "holi-1",
+    festival: "Holi",
+    theme: "br-light br-holi",
+    chip: "🎨 HOLI SPECIAL",
+    eyebrow: "FESTIVE WHOLESALE COLLECTION",
+    title: "Colour Your Sales This Holi",
+    offer: "Bring more colour to your business",
+    description: "Great wholesale opportunities on mobiles, TVs, laptops and accessories.",
+    button: "Shop Holi Deals",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "holi-2",
+    festival: "Holi",
+    theme: "br-light br-holi",
+    chip: "🌈 COLOURFUL DEALS",
+    eyebrow: "HOLI BUSINESS FESTIVAL",
+    title: "Add More Colour to Your Store",
+    offer: "Fresh deals for a fresh season",
+    description: "Discover electronics to refresh your store inventory.",
+    button: "Explore Holi Offers",
+    image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "holi-3",
+    festival: "Holi",
+    theme: "br-light br-holi",
+    chip: "🎨 HOLI WHOLESALE",
+    eyebrow: "CELEBRATE COLOURFUL GROWTH",
+    title: "Bright Colours. Bigger Opportunities.",
+    offer: "Bring fresh choices to your customers",
+    description: "Shop business-ready smartphones, computers and accessories.",
+    button: "Browse Holi Collection",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 
+  // ==================== WINTER ====================
   {
-    id: "xmas-ny",
-    priority: 3,
-    start: "2026-12-20",
-    end: "2027-01-02",
-
-    theme: {
-      from: "#052e2b",
-      to: "#0f766e",
-      accent: "#fca5a5",
-    },
-
-    slides: [
-      {
-        id: "x1",
-        eyebrow: "YEAR-END CLEARANCE",
-        title: "Close the year with better margins.",
-        sub:
-          "Clearance lots from verified suppliers. Bulk pricing applies.",
-        image: PHONE_A,
-        cta: {
-          label: "See clearance",
-          href: "/",
-        },
-      },
-    ],
+    id: "winter-1",
+    festival: "Winter",
+    theme: "br-light br-winter",
+    chip: "❄ WINTER COLLECTION",
+    eyebrow: "WINTER BUSINESS COLLECTION",
+    title: "Stay Ahead This Winter Season",
+    offer: "Fresh opportunities for your business",
+    description: "Explore smartphones, laptops, TVs and accessories.",
+    button: "Shop Winter Deals",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "winter-2",
+    festival: "Winter",
+    theme: "br-light br-winter",
+    chip: "❄ WINTER SAVINGS",
+    eyebrow: "SEASONAL WHOLESALE OFFERS",
+    title: "Keep Your Business Moving",
+    offer: "Find the right electronics for your customers",
+    description: "Discover laptops, audio products and everyday electronics.",
+    button: "Explore Winter Offers",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "winter-3",
+    festival: "Winter",
+    theme: "br-light br-winter",
+    chip: "❄ SEASONAL PICKS",
+    eyebrow: "SMART WINTER SOURCING",
+    title: "Cool Season. Smarter Sourcing.",
+    offer: "Refresh your electronics inventory",
+    description: "Browse devices and accessories for your next wholesale order.",
+    button: "Browse Products",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 
+  // ==================== NEW YEAR ====================
   {
-    id: "republic",
-    priority: 3,
-    start: "2027-01-20",
-    end: "2027-01-27",
-
-    theme: {
-      from: "#7c2d12",
-      to: "#166534",
-      accent: "#ffffff",
-    },
-
-    slides: [
-      {
-        id: "r1",
-        eyebrow: "REPUBLIC DAY SALE",
-        title: "Republic Day deals for resellers.",
-        sub:
-          "Bulk pricing on TVs, tablets and accessories.",
-        image: PHONE_B,
-        cta: {
-          label: "Shop the sale",
-          href: "/",
-        },
-      },
-    ],
+    id: "new-year-1",
+    festival: "New Year",
+    theme: "br-dark br-newyear",
+    chip: "🎆 NEW YEAR",
+    eyebrow: "NEW YEAR WHOLESALE COLLECTION",
+    title: "New Year. Bigger Opportunities.",
+    offer: "Start the year with smarter sourcing",
+    description: "Find electronics to support your next business goals.",
+    button: "Explore New Year Deals",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "new-year-2",
+    festival: "New Year",
+    theme: "br-dark br-newyear",
+    chip: "✨ NEW YEAR OFFERS",
+    eyebrow: "A FRESH START FOR YOUR BUSINESS",
+    title: "Start Strong. Stock Smart.",
+    offer: "Make room for new opportunities",
+    description: "Explore wholesale electronics for your growing business.",
+    button: "Shop New Year Offers",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "new-year-3",
+    festival: "New Year",
+    theme: "br-dark br-newyear",
+    chip: "🎆 FRESH START DEALS",
+    eyebrow: "YOUR NEXT BUSINESS CHAPTER",
+    title: "New Goals. Smarter Electronics.",
+    offer: "Build your next success story",
+    description: "Source smartphones, laptops and accessories in one place.",
+    button: "Discover Products",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 
+  // ==================== REPUBLIC DAY ====================
   {
-    id: "holi",
-    priority: 3,
-    start: "2027-03-14",
-    end: "2027-03-23",
-
-    theme: {
-      from: "#5b0f3f",
-      to: "#7c3aed",
-      accent: "#fde68a",
-    },
-
-    slides: [
-      {
-        id: "h1",
-        eyebrow: "HOLI OFFERS",
-        title: "Colour your margins this Holi.",
-        sub:
-          "Phones, speakers and accessories in bulk.",
-        image: PHONE_A,
-        cta: {
-          label: "Browse Holi deals",
-          href: "/",
-        },
-      },
-    ],
+    id: "republic-day-1",
+    festival: "Republic Day",
+    theme: "br-light br-republic",
+    chip: "🇮🇳 REPUBLIC DAY",
+    eyebrow: "REPUBLIC DAY WHOLESALE COLLECTION",
+    title: "Celebrate Progress. Grow Your Business.",
+    offer: "Start the year with smarter sourcing",
+    description: "Business-ready electronics at wholesale prices.",
+    button: "Shop Republic Day Deals",
+    image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "republic-day-2",
+    festival: "Republic Day",
+    theme: "br-light br-republic",
+    chip: "🇮🇳 PROUDLY INDIAN",
+    eyebrow: "REPUBLIC DAY BUSINESS OFFERS",
+    title: "Power Your Business Forward",
+    offer: "A smarter choice for your next restock",
+    description: "Discover popular electronics categories with JCS Global.",
+    button: "Explore Republic Day Offers",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
+  },
+  {
+    id: "republic-day-3",
+    festival: "Republic Day",
+    theme: "br-light br-republic",
+    chip: "🇮🇳 GROW WITH CONFIDENCE",
+    eyebrow: "REPUBLIC DAY WHOLESALE DEALS",
+    title: "Smart Technology. Stronger Businesses.",
+    offer: "Celebrate growth with smarter sourcing",
+    description: "Browse smartphones, laptops, TVs and accessories for your store.",
+    button: "Browse Electronics",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1800&q=90",
+    imagePosition: "center",
   },
 ];
 
-// ---------------------------------------------------------
-// LOCAL DATE HELPER
-// ---------------------------------------------------------
-
-// Local date as YYYY-MM-DD.
-// This avoids the UTC off-by-one problem caused by toISOString()
-// when the application is used in India or another timezone.
-
-const ymd = (d) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(d.getDate()).padStart(2, "0")}`;
-
-// ---------------------------------------------------------
-// GET ACTIVE CAMPAIGN
-// ---------------------------------------------------------
-
-// Test any date by opening the site with:
-// ?previewDate=2026-11-05
-
-export function getActiveCampaign(now = new Date()) {
-  let preview = "";
-
-  // window exists in the browser, but checking it makes the
-  // function safer if it is ever used during a server build.
-
-  if (typeof window !== "undefined") {
-    preview = new URLSearchParams(window.location.search).get(
-      "previewDate"
-    );
-  }
-
-  const today = /^\d{4}-\d{2}-\d{2}$/.test(preview || "")
-    ? preview
-    : ymd(now);
-
-  const live = CAMPAIGNS
-    .filter(
-      (campaign) =>
-        today >= campaign.start &&
-        today <= campaign.end
-    )
-    .sort(
-      (a, b) => b.priority - a.priority
-    );
-
-  return live[0] || DEFAULT_CAMPAIGN;
-}
-
-// ---------------------------------------------------------
-// COUNTDOWN
-// ---------------------------------------------------------
-
-// Returns a readable countdown string for the banner cards.
-//
-// Example:
-// "4d 8h 21m 10s"
-//
-// This function is exported because banners.js imports it:
-//
-// import { getCountdown } from "./festivals";
-
-export function getCountdown(campaign) {
-  if (!campaign?.end) {
-    return null;
-  }
-
-  // Campaign ends at the end of the specified date.
-  const end = new Date(
-    `${campaign.end}T23:59:59`
-  );
-
-  const now = new Date();
-
-  const difference = end.getTime() - now.getTime();
-
-  // Campaign has already ended.
-  if (difference <= 0) {
-    return null;
-  }
-
-  const days = Math.floor(
-    difference / (1000 * 60 * 60 * 24)
-  );
-
-  const hours = Math.floor(
-    (difference / (1000 * 60 * 60)) % 24
-  );
-
-  const minutes = Math.floor(
-    (difference / (1000 * 60)) % 60
-  );
-
-  const seconds = Math.floor(
-    (difference / 1000) % 60
-  );
-
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
+export default festivalBanners;

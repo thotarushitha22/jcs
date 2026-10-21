@@ -1,82 +1,749 @@
-.br { position: relative; max-width: 1440px; margin: 0 auto; padding: 24px 0 10px; }
+
+.br {
+  --br-accent: #f5bd4f;
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  margin: 12px auto 22px;
+  padding: 0 42px 25px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
 
 .br-track {
   display: flex;
-  gap: 20px;
+  width: 100%;
   overflow-x: auto;
-  padding: 0 24px;
-  scroll-padding: 0 24px;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   scrollbar-width: none;
+  border-radius: 16px;
+  overscroll-behavior-x: contain;
 }
-.br-track::-webkit-scrollbar { display: none; }
+
+.br-track::-webkit-scrollbar {
+  display: none;
+}
 
 .br-card {
-  position: relative;
-  flex: 0 0 38%;
-  min-width: 300px;
-  aspect-ratio: 2.05 / 1;
-  border-radius: 18px;
-  overflow: hidden;
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
   scroll-snap-align: start;
-  text-decoration: none;
-  display: block;
+  box-sizing: border-box;
 }
-.br-dark  { color: #fff; }
-.br-light { color: #0f172a; }
 
 .br-media {
-  position: absolute; top: 0; right: 0; bottom: 0; width: 58%;
-  background-size: cover; background-position: center;
-  opacity: 0.9;
-  background-blend-mode: multiply;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
-          mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
-}
-.br-card .hc-art {
-  position: absolute; right: 2%; top: 50%; transform: translateY(-50%);
-  width: 52%; height: 94%; pointer-events: none;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  height: 340px;
+  min-height: 340px;
+  max-height: 340px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #10223d;
+  color: #ffffff;
 }
 
-.br-chip {
-  position: absolute; top: 14px; right: 14px; z-index: 3;
-  background: var(--chip, #f59e0b); color: #1b1300;
-  font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 6px;
+.br-media > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.br-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgba(12, 35, 75, 0.96) 0%,
+    rgba(25, 61, 113, 0.78) 45%,
+    rgba(12, 35, 75, 0.12) 100%
+  );
+}
+
+/* DIWALI: gold and purple */
+.br-theme-diwali {
+  --br-accent: #ffc857;
+}
+
+.br-theme-diwali .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(43, 17, 65, 0.96) 0%,
+    rgba(74, 28, 83, 0.78) 45%,
+    rgba(43, 17, 65, 0.12) 100%
+  );
+}
+
+/* DUSSEHRA: saffron and maroon */
+.br-theme-warm {
+  --br-accent: #ffb347;
+}
+
+.br-theme-warm .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(91, 20, 28, 0.96) 0%,
+    rgba(143, 42, 27, 0.78) 45%,
+    rgba(91, 20, 28, 0.12) 100%
+  );
+}
+
+/* HOLI: pink and vibrant magenta */
+.br-theme-holi {
+  --br-accent: #ffdf5d;
+}
+
+.br-theme-holi .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(112, 14, 93, 0.96) 0%,
+    rgba(184, 35, 113, 0.78) 45%,
+    rgba(112, 14, 93, 0.12) 100%
+  );
+}
+
+/* WINTER: icy blue and navy */
+.br-theme-winter {
+  --br-accent: #8de4ff;
+}
+
+.br-theme-winter .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(8, 37, 75, 0.96) 0%,
+    rgba(22, 91, 133, 0.78) 45%,
+    rgba(8, 37, 75, 0.12) 100%
+  );
+}
+
+/* NEW YEAR: midnight blue and violet */
+.br-theme-newyear {
+  --br-accent: #e5c5ff;
+}
+
+.br-theme-newyear .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(27, 21, 75, 0.96) 0%,
+    rgba(71, 43, 132, 0.78) 45%,
+    rgba(27, 21, 75, 0.12) 100%
+  );
+}
+
+/* REPUBLIC DAY: green with saffron accent */
+.br-theme-republic {
+  --br-accent: #ffb15c;
+}
+
+.br-theme-republic .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(15, 75, 49, 0.96) 0%,
+    rgba(28, 93, 63, 0.80) 45%,
+    rgba(15, 75, 49, 0.16) 100%
+  );
+}
+
+/* REGULAR BANNERS: professional blue */
+.br-theme-default {
+  --br-accent: #f5bd4f;
+}
+
+.br-theme-default .br-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(12, 35, 75, 0.96) 0%,
+    rgba(25, 61, 113, 0.78) 45%,
+    rgba(12, 35, 75, 0.12) 100%
+  );
+}
+
+.br-brand {
+  position: absolute;
+  top: 20px;
+  left: 26px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.br-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 35px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17336b;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.br-global {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
 }
 
 .br-copy {
-  position: relative; z-index: 2; height: 100%; width: 54%;
-  padding: 26px 0 26px 26px;
-  display: flex; flex-direction: column; justify-content: center; gap: 8px;
+  width: min(590px, 68%);
+  padding: 70px 30px 36px;
+  box-sizing: border-box;
 }
-.br-title { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 700; }
-.br-offer { margin: 0; font-size: 16px; font-weight: 600; }
-.br-sub   { margin: 0; font-size: 13px; opacity: 0.8; }
+
+.br-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+
+.br-eyebrow {
+  margin: 15px 0 8px;
+  color: var(--br-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.br-title {
+  max-width: 560px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(27px, 3.1vw, 43px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+
+.br-sub {
+  max-width: 465px;
+  margin: 12px 0 20px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.br-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--br-accent);
+  color: #172033;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.br-cta:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.br-cta:focus-visible,
+.br-arrow:focus-visible,
+.br-dot:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.br-slide-count {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
 
 .br-arrow {
-  position: absolute; top: 46%; transform: translateY(-50%);
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #fff; color: #0f172a; border: 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.2s ease; cursor: pointer;
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+  background: rgba(15, 29, 51, 0.68);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
 }
-.br:hover .br-arrow, .br-arrow:focus-visible { opacity: 1; }
-.br-prev { left: 10px; } .br-next { right: 10px; }
 
-.br-dots { display: flex; justify-content: center; gap: 7px; margin-top: 14px; }
+.br-arrow:hover {
+  background: #17336b;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.br-prev {
+  left: 0;
+}
+
+.br-next {
+  right: 0;
+}
+
+.br-dots {
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+}
+
 .br-dot {
-  width: 7px; height: 7px; border-radius: 4px; border: 0; padding: 0;
-  background: #c4c9cf; cursor: pointer; transition: width 0.25s ease, background 0.25s ease;
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #cbd2dd;
+  cursor: pointer;
+  transition: width 180ms ease, background 180ms ease;
 }
-.br-dot-on { width: 20px; background: #2b8a5e; }
 
-.br-card:focus-visible, .br-dot:focus-visible { outline: 3px solid #0a84c6; outline-offset: 3px; }
+.br-dot-on {
+  width: 23px;
+  background: #17336b;
+}
 
-@media (max-width: 720px) {
-  .br-track { padding: 0 14px; scroll-padding: 0 14px; gap: 12px; }
-  .br-card { flex-basis: 84%; }
-  .br-title { font-size: 19px; }
-  .br-offer { font-size: 14px; }
-  .br-arrow { display: none; }
+@media (max-width: 768px) {
+  .br {
+    margin: 8px auto 18px;
+    padding: 0 26px 23px;
+  }
+
+  .br-track,
+  .br-media {
+    border-radius: 12px;
+  }
+
+  .br-media {
+    height: 340px;
+    min-height: 340px;
+    max-height: 340px;
+  }
+
+  .br-brand {
+    top: 16px;
+    left: 17px;
+  }
+
+  .br-logo {
+    width: 37px;
+    height: 31px;
+    font-size: 15px;
+  }
+
+  .br-global {
+    font-size: 10px;
+  }
+
+  .br-copy {
+    width: 90%;
+    padding: 66px 18px 26px;
+  }
+
+  .br-title {
+    font-size: clamp(25px, 5vw, 35px);
+  }
+
+  .br-sub {
+    max-width: 380px;
+    font-size: 13px;
+  }
+
+  .br-eyebrow {
+    font-size: 10px;
+  }
+
+  .br-chip {
+    font-size: 9px;
+  }
+
+  .br-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .br-prev {
+    left: -1px;
+  }
+
+  .br-next {
+    right: -1px;
+  }
+}
+
+@media (max-width: 420px) {
+  .br {
+    padding-right: 21px;
+    padding-left: 21px;
+  }
+
+  .br-media {
+    height: 330px;
+    min-height: 330px;
+    max-height: 330px;
+  }
+
+  .br-copy {
+    width: 100%;
+    padding: 65px 15px 25px;
+  }
+
+  .br-title {
+    font-size: 26px;
+  }
+
+  .br-sub {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .br-cta {
+    min-height: 39px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .br-slide-count {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .br-track {
+    scroll-behavior: auto;
+  }
+
+  .br-cta,
+  .br-arrow,
+  .br-dot {
+    transition: none;
+  }
+}
+
+/* Desktop and laptop */
+.br-media {
+  height: 410px;
+  min-height: 410px;
+  max-height: 410px;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .br-media {
+    height: 370px;
+    min-height: 370px;
+    max-height: 370px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 420px) {
+  .br-media {
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+}
+
+/* ==================================
+   FESTIVAL-SPECIFIC BANNER SIZES
+================================== */
+
+/* Default festival banner */
+.br-media {
+  height: 410px;
+  min-height: 410px;
+  max-height: 410px;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+/* DIWALI — large, glowing festive banner */
+.br-theme-diwali .br-media {
+  height: 460px;
+  min-height: 460px;
+  max-height: 460px;
+  background: linear-gradient(120deg, #35105e, #8b1d63, #ff9d00);
+}
+
+/* DUSSEHRA — bold saffron and maroon */
+.br-theme-dussehra .br-media {
+  height: 420px;
+  min-height: 420px;
+  max-height: 420px;
+  background: linear-gradient(120deg, #651616, #b93619, #f6a623);
+}
+
+/* HOLI — colorful and energetic */
+.br-theme-holi .br-media {
+  height: 440px;
+  min-height: 440px;
+  max-height: 440px;
+  background: linear-gradient(120deg, #ff1680, #762bdb, #ffb21c);
+}
+
+/* WINTER — cool blue theme */
+.br-theme-winter .br-media {
+  height: 380px;
+  min-height: 380px;
+  max-height: 380px;
+  background: linear-gradient(120deg, #092d50, #2787b9, #d8f4ff);
+}
+
+/* NEW YEAR — midnight celebration */
+.br-theme-newyear .br-media {
+  height: 450px;
+  min-height: 450px;
+  max-height: 450px;
+  background: linear-gradient(120deg, #101039, #39216d, #b53b8c);
+}
+
+/* REPUBLIC DAY — Indian tricolor */
+.br-theme-republic .br-media {
+  height: 420px;
+  min-height: 420px;
+  max-height: 420px;
+  background: linear-gradient(
+    to bottom,
+    #ff9933 0%,
+    #ffffff 50%,
+    #138808 100%
+  );
+}
+
+/* TABLETS */
+@media (max-width: 768px) {
+  .br-media {
+    height: 360px;
+    min-height: 360px;
+    max-height: 360px;
+  }
+
+  .br-theme-diwali .br-media {
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+
+  .br-theme-holi .br-media,
+  .br-theme-newyear .br-media {
+    height: 380px;
+    min-height: 380px;
+    max-height: 380px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 420px) {
+  .br-media {
+    height: 310px;
+    min-height: 310px;
+    max-height: 310px;
+  }
+
+  .br-theme-diwali .br-media {
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+
+  .br-theme-holi .br-media {
+    height: 340px;
+    min-height: 340px;
+    max-height: 340px;
+  }
+
+  .br-theme-newyear .br-media {
+    height: 340px;
+    min-height: 340px;
+    max-height: 340px;
+  }
+}
+
+/* =========================================
+   DUSSEHRA — PROFESSIONAL NAVY & GOLD THEME
+========================================= */
+
+.br-theme-dussehra .br-media {
+  background: linear-gradient(
+    115deg,
+    #10243a 0%,
+    #1c3852 55%,
+    #bda36b 100%
+  );
+  color: #fffdf5;
+  border: 1px solid rgba(212, 190, 135, 0.4);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Professional image overlay */
+.br-theme-dussehra .br-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 27, 45, 0.88) 0%,
+    rgba(16, 36, 58, 0.62) 45%,
+    rgba(16, 36, 58, 0.08) 100%
+  );
+}
+
+/* Keep banner content above the overlay */
+.br-theme-dussehra .br-media > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Dussehra headings */
+.br-theme-dussehra .br-media h1,
+.br-theme-dussehra .br-media h2,
+.br-theme-dussehra .br-media h3 {
+  color: #f0d9a0;
+  letter-spacing: 0.4px;
+}
+
+/* Supporting text */
+.br-theme-dussehra .br-media p {
+  color: #f5f0e4;
+}
+
+/* Professional CTA buttons */
+.br-theme-dussehra .br-media button {
+  background: #d7bd80;
+  color: #10243a;
+  border: 1px solid #ead8aa;
+  border-radius: 6px;
+  font-weight: 600;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.br-theme-dussehra .br-media button:hover {
+  background: #f0d9a0;
+  transform: translateY(-2px);
+}
+
+/* Dussehra banner images */
+.br-theme-dussehra .br-media img {
+  object-fit: cover;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .br-theme-dussehra .br-media::before {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 27, 45, 0.35) 0%,
+      rgba(10, 27, 45, 0.78) 100%
+    );
+  }
+}
+
+/* Mobile */
+@media (max-width: 420px) {
+  .br-theme-dussehra .br-media {
+    border-radius: 10px;
+  }
+
+  .br-theme-dussehra .br-media h1,
+  .br-theme-dussehra .br-media h2 {
+    letter-spacing: 0.2px;
+  }
+}
+
+/* DUSSEHRA — NO RED, NAVY BLUE & GOLD */
+
+.br-theme-dussehra .br-media {
+  background: linear-gradient(
+    120deg,
+    #0b1f33 0%,
+    #183c59 60%,
+    #c8b47c 100%
+  ) !important;
+  color: #fffdf5;
+  border: 1px solid #c8b47c;
+}
+
+/* Remove reddish overlay */
+.br-theme-dussehra .br-media::before {
+  background: linear-gradient(
+    90deg,
+    rgba(8, 25, 43, 0.88) 0%,
+    rgba(17, 47, 70, 0.60) 50%,
+    rgba(17, 47, 70, 0.08) 100%
+  ) !important;
+}
+
+/* Heading color */
+.br-theme-dussehra .br-media h1,
+.br-theme-dussehra .br-media h2,
+.br-theme-dussehra .br-media h3 {
+  color: #f0dba7 !important;
+}
+
+/* Description */
+.br-theme-dussehra .br-media p {
+  color: #f5f3eb !important;
+}
+
+/* Button */
+.br-theme-dussehra .br-media button {
+  background: #d8c18a !important;
+  color: #10243a !important;
+  border: 1px solid #ead9aa;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.br-theme-dussehra .br-media button:hover {
+  background: #f0dba7 !important;
 }

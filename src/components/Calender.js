@@ -1,110 +1,194 @@
-// Works out festival dates for ANY year, so nothing needs updating each year.
-//  - Hindu festivals: computed from the sun and moon (new-moon months, tithis, adhika months).
-//  - Eid / Bakrid: from the Islamic calendar built into the browser (Intl).
-//  - Fixed-date festivals (New Year, Sankranti, Republic Day...) are handled in festivals.js.
-// Accuracy is within a day. If a date differs from your panchang, fix it in OVERRIDES (festivals.js).
-
-const R = Math.PI / 180;
-const sin = (d) => Math.sin(d * R);
-const norm = (d) => ((d % 360) + 360) % 360;
-const IST = 5.5;                                  // hours ahead of UTC
-
-const jdUTC = (y, m, d, hUTC = 0) => Date.UTC(y, m - 1, d) / 86400000 + 2440587.5 + hUTC / 24;
-
-function sunLong(J) {                             // tropical, degrees
-  const T = (J - 2451545) / 36525;
-  const L0 = 280.46646 + 36000.76983 * T;
-  const M = 357.52911 + 35999.05029 * T;
-  const C = (1.914602 - 0.004817 * T) * sin(M) + 0.019993 * sin(2 * M) + 0.000289 * sin(3 * M);
-  return norm(L0 + C - 0.00569 - 0.00478 * sin(125.04 - 1934.136 * T));
-}
-
-function moonLong(J) {                            // tropical, degrees (Meeus, main terms)
-  const T = (J - 2451545) / 36525;
-  const Lp = 218.3164477 + 481267.88123421 * T;
-  const D = 297.8501921 + 445267.1114034 * T;
-  const M = 357.5291092 + 35999.0502909 * T;
-  const Mp = 134.9633964 + 477198.8675055 * T;
-  const F = 93.272095 + 483202.0175233 * T;
-  const s =
-    6.288774 * sin(Mp) + 1.274027 * sin(2 * D - Mp) + 0.658314 * sin(2 * D) + 0.213618 * sin(2 * Mp) -
-    0.185116 * sin(M) - 0.114332 * sin(2 * F) + 0.058793 * sin(2 * D - 2 * Mp) +
-    0.057066 * sin(2 * D - M - Mp) + 0.053322 * sin(2 * D + Mp) + 0.045758 * sin(2 * D - M) -
-    0.040923 * sin(M - Mp) - 0.03472 * sin(D) - 0.030383 * sin(M + Mp) + 0.015327 * sin(2 * D - 2 * F) -
-    0.012528 * sin(Mp + 2 * F) + 0.01098 * sin(Mp - 2 * F) + 0.010675 * sin(4 * D - Mp) +
-    0.010034 * sin(3 * Mp) + 0.008548 * sin(4 * D - 2 * Mp) - 0.007888 * sin(2 * D + M - Mp) -
-    0.006766 * sin(2 * D + M) - 0.005163 * sin(D - Mp);
-  return norm(Lp + s);
-}
-
-const elong = (J) => norm(moonLong(J) - sunLong(J));          // 0-360, 12 degrees = 1 tithi
-const ayanamsa = (J) => 23.853 + 0.013969 * ((J - 2451545) / 365.25);   // Lahiri
-const rashi = (J) => Math.floor(norm(sunLong(J) - ayanamsa(J)) / 30);   // 0 = Mesha
-
-function newMoonNear(J) {                         // refine to the nearest new moon
-  let t = J;
-  for (let i = 0; i < 8; i++) {
-    let e = elong(t); if (e > 180) e -= 360;
-    t -= e / 12.19;
-  }
-  return t;
-}
-
-// Lunar month (amanta) at time J: 0 = Chaitra ... 11 = Phalguna, plus adhika flag.
-function lunarMonth(J) {
-  const prev = newMoonNear(J - elong(J) / 12.19);
-  const next = newMoonNear(prev + 29.53);
-  const r0 = rashi(prev), r1 = rashi(next);
-  return { idx: (r0 + 1) % 12, adhika: r0 === r1 };
-}
-
-const pad = (n) => String(n).padStart(2, "0");
-const iso = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
-export const addDays = (s, n) => {
-  const [y, m, d] = s.split("-").map(Number);
-  const t = new Date(Date.UTC(y, m - 1, d + n));
-  return iso(t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate());
+const IMG = {
+  main: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1600&q=90",
+  phones: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1600&q=90",
+  laptop: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1600&q=90",
+  audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1600&q=90",
+  dussehra: "https://images.unsplash.com/photo-1604608672516-8c5c6b5e5c30?w=1600&q=90",
+  diwali: "https://images.unsplash.com/photo-1603905179139-d6f4f6e0b7d1?w=1600&q=90",
+  winter: "https://images.unsplash.com/photo-1517299321609-52687d1bc55a?w=1600&q=90",
+  newyear: "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1600&q=90",
+  republic: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&q=90",
+  holi: "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=1600&q=90",
 };
 
-/* Find the day in `year` when a tithi falls.
-   month: 0 Chaitra, 1 Vaishakha, ... 5 Bhadrapada, 6 Ashwin, 11 Phalguna
-   tithi: 1-15 shukla (waxing), 16-29 krishna, 30 amavasya
-   hour: IST hour at which the tithi must be running (6 = sunrise, 12 = noon, 14 = afternoon, 18.5 = evening) */
-export function tithiDay(year, { month, tithi, hour = 6 }) {
-  const at = (s) => { const [y, m, d] = s.split("-").map(Number); return jdUTC(y, m, d, hour - IST); };
-  const lo = 12 * (tithi - 1), hi = 12 * tithi;
-  let fallback = null;
-  for (let s = iso(year, 1, 1); s <= iso(year, 12, 31); s = addDays(s, 1)) {
-    const J = at(s);
-    const e = elong(J);
-    if (Math.floor(e / 12) + 1 === tithi) {
-      const mth = lunarMonth(J);
-      if (mth.idx === month && !mth.adhika) return s;
-    } else if (!fallback) {
-      // The tithi may start and end between two sunrises (a "skipped" tithi): use the day it starts.
-      const J2 = at(addDays(s, 1));
-      const d1 = ((e - lo + 540) % 360) - 180, d2 = ((elong(J2) - lo + 540) % 360) - 180;
-      if (d1 <= 0 && d2 >= 12) {
-        const mth = lunarMonth(J2);
-        if (mth.idx === month && !mth.adhika) fallback = s;
-      }
-    }
-  }
-  return fallback;
-}
+const makeBanner = (data) => ({
+  href: "/",
+  dark: false,
+  ...data,
+});
 
-/* Islamic calendar via Intl. Returns every Gregorian date in `year` on which the
-   Hijri date is (hMonth, hDay). Returns [] if the browser has no Islamic calendar. */
-export function hijriDays(year, hMonth, hDay) {
-  try {
-    const f = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", { day: "numeric", month: "numeric", timeZone: "UTC" });
-    const out = [];
-    for (let s = iso(year, 1, 1); s <= iso(year, 12, 31); s = addDays(s, 1)) {
-      const [y, m, d] = s.split("-").map(Number);
-      const p = f.formatToParts(new Date(Date.UTC(y, m - 1, d, 12)));
-      const mm = +p.find((x) => x.type === "month").value, dd = +p.find((x) => x.type === "day").value;
-      if (mm === hMonth && dd === hDay) out.push(s);
-    }
-    return out;
-  } catch { return []; }
+const REGULAR = [
+  makeBanner({
+    id: "main",
+    eyebrow: "YOUR TRUSTED ELECTRONICS PARTNER",
+    title: "Top Brands. Best Prices. Only for Businesses.",
+    offer: "Your trusted B2B electronics marketplace",
+    sub: "Discover smartphones, laptops, TVs and accessories at wholesale prices.",
+    chip: "B2B WHOLESALE",
+    image: IMG.main,
+    bg: ["#eff6ff", "#60a5fa"],
+    overlay: "rgba(239,246,255,0.97)",
+    accent: "#0758d5",
+    cta: "Shop Now",
+  }),
+
+  makeBanner({
+    id: "phones",
+    eyebrow: "SMARTPHONES & TABLETS",
+    title: "Smartphones for Your Business",
+    offer: "Better choice for your next restock",
+    sub: "Explore mobile phones and tablets from available suppliers.",
+    chip: "MOBILES & TABLETS",
+    image: IMG.phones,
+    bg: ["#10264a", "#1d4ed8"],
+    overlay: "rgba(16,38,74,0.96)",
+    accent: "#facc15",
+    dark: true,
+    cta: "Explore Phones",
+  }),
+
+  makeBanner({
+    id: "laptops",
+    eyebrow: "BUSINESS COMPUTING",
+    title: "Power Your Business with Technology",
+    offer: "Laptops for every business need",
+    sub: "Browse computing products and business electronics.",
+    chip: "LAPTOPS",
+    image: IMG.laptop,
+    bg: ["#e0f2fe", "#60a5fa"],
+    overlay: "rgba(224,242,254,0.97)",
+    accent: "#0758d5",
+    cta: "Explore Laptops",
+  }),
+
+  makeBanner({
+    id: "accessories",
+    eyebrow: "COMPLETE YOUR PRODUCT RANGE",
+    title: "Everything Your Customers Need",
+    offer: "Accessories and audio essentials",
+    sub: "Discover headphones, audio products and other electronics accessories.",
+    chip: "ACCESSORIES",
+    image: IMG.audio,
+    bg: ["#172554", "#475569"],
+    overlay: "rgba(23,37,84,0.96)",
+    accent: "#facc15",
+    dark: true,
+    cta: "Browse Accessories",
+  }),
+];
+
+const SEASONAL = {
+  default: makeBanner({
+    id: "default",
+    eyebrow: "BUILT FOR BUSINESS",
+    title: "Ready to Restock? Start Here.",
+    offer: "Source electronics in one place",
+    sub: "Explore product listings, stock availability and supplier details.",
+    chip: "BUSINESS ESSENTIALS",
+    image: IMG.main,
+    bg: ["#eff6ff", "#93c5fd"],
+    overlay: "rgba(239,246,255,0.97)",
+    accent: "#0758d5",
+    cta: "Browse Products",
+  }),
+
+  dussehra: makeBanner({
+    id: "dussehra",
+    eyebrow: "FESTIVE BUSINESS COLLECTION",
+    title: "Get Your Store Ready for Dussehra",
+    offer: "Celebrate new opportunities for your business",
+    sub: "Explore smartphones, laptops, TVs and accessories for your festive inventory.",
+    chip: "DUSSEHRA SPECIAL",
+    image: IMG.dussehra,
+    bg: ["#451a03", "#c2410c"],
+    overlay: "rgba(69,26,3,0.96)",
+    accent: "#fde047",
+    dark: true,
+    cta: "Explore Products",
+  }),
+
+  diwali: makeBanner({
+    id: "diwali",
+    eyebrow: "FESTIVE WHOLESALE COLLECTION",
+    title: "Light Up Your Sales This Diwali",
+    offer: "Make the festive season count",
+    sub: "Explore electronics for your store's festive inventory.",
+    chip: "DIWALI SPECIAL",
+    image: IMG.diwali,
+    bg: ["#1e1045", "#7c2d12"],
+    overlay: "rgba(30,16,69,0.95)",
+    accent: "#ffc928",
+    dark: true,
+    cta: "Shop Diwali Deals",
+  }),
+
+  holi: makeBanner({
+    id: "holi",
+    eyebrow: "A FRESH SEASON FOR BUSINESS",
+    title: "Colour Your Sales This Holi",
+    offer: "Bring fresh energy to your business",
+    sub: "Explore mobile phones, electronics and accessories.",
+    chip: "HOLI SPECIAL",
+    image: IMG.holi,
+    bg: ["#fce7f3", "#c4b5fd"],
+    overlay: "rgba(252,231,243,0.96)",
+    accent: "#db2777",
+    cta: "Shop Holi Deals",
+  }),
+
+  winter: makeBanner({
+    id: "winter",
+    eyebrow: "WINTER BUSINESS COLLECTION",
+    title: "Stay Ahead This Winter Season",
+    offer: "Fresh opportunities for your business",
+    sub: "Discover smartphones, laptops and accessories for your next restock.",
+    chip: "WINTER COLLECTION",
+    image: IMG.winter,
+    bg: ["#e0f2fe", "#7dd3fc"],
+    overlay: "rgba(224,242,254,0.96)",
+    accent: "#0758d5",
+    cta: "Shop Now",
+  }),
+
+  newyear: makeBanner({
+    id: "newyear",
+    eyebrow: "A NEW YEAR FOR YOUR BUSINESS",
+    title: "New Year. Bigger Opportunities.",
+    offer: "Start the year with smarter sourcing",
+    sub: "Find electronics to support your next business goals.",
+    chip: "NEW YEAR",
+    image: IMG.newyear,
+    bg: ["#0f172a", "#312e81"],
+    overlay: "rgba(15,23,42,0.96)",
+    accent: "#facc15",
+    dark: true,
+    cta: "Explore Products",
+  }),
+
+  republic: makeBanner({
+    id: "republic",
+    eyebrow: "REPUBLIC DAY COLLECTION",
+    title: "Power Your Business with New Possibilities",
+    offer: "Business-ready electronics",
+    sub: "Explore wholesale electronics listings for your store.",
+    chip: "REPUBLIC DAY",
+    image: IMG.republic,
+    bg: ["#f0fdf4", "#fed7aa"],
+    overlay: "rgba(240,253,244,0.97)",
+    accent: "#15803d",
+    cta: "Explore Products",
+  }),
+};
+
+export function getBanners(campaign) {
+  const campaignId = campaign?.id || "default";
+  const seasonalBanner = SEASONAL[campaignId] || SEASONAL.default;
+
+  return [
+    ...REGULAR,
+    {
+      ...seasonalBanner,
+      id: `season-${campaignId}`,
+    },
+  ];
 }

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { FileText, ShieldCheck, Package, Truck } from "lucide-react";
 import "./Policies.css";
 
 const POLICIES = {
   terms: {
     label: "Terms of Service",
+    icon: FileText,
     updated: "Last updated: 1 July 2026",
     sections: [
       {
@@ -31,6 +33,7 @@ const POLICIES = {
   },
   privacy: {
     label: "Privacy Policy",
+    icon: ShieldCheck,
     updated: "Last updated: 1 July 2026",
     sections: [
       {
@@ -57,6 +60,7 @@ const POLICIES = {
   },
   returns: {
     label: "Return & Refund Policy",
+    icon: Package,
     updated: "Last updated: 1 July 2026",
     sections: [
       {
@@ -79,6 +83,7 @@ const POLICIES = {
   },
   shipping: {
     label: "Shipping Policy",
+    icon: Truck,
     updated: "Last updated: 1 July 2026",
     sections: [
       {
@@ -107,6 +112,19 @@ export default function Policies() {
   const [active, setActive] = useState("terms");
   const policy = POLICIES[active];
 
+  // jump to one section of the current policy
+  const goToSection = (index) => {
+    document
+      .getElementById(`policy-${active}-${index}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // open another policy from the side panel
+  const openPolicy = (key) => {
+    setActive(key);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="page container policies">
       <div className="policies-crumb">
@@ -127,14 +145,63 @@ export default function Policies() {
         ))}
       </div>
 
-      <div className="card policies-content">
-        <span className="policies-updated">{policy.updated}</span>
-        {policy.sections.map((s) => (
-          <div className="policies-section" key={s.heading}>
-            <h3>{s.heading}</h3>
-            <p>{s.body}</p>
+      <div className="policies-layout">
+        {/* MAIN POLICY TEXT */}
+        <div className="card policies-content">
+          <span className="policies-updated">{policy.updated}</span>
+          {policy.sections.map((s, index) => (
+            <div
+              className="policies-section"
+              id={`policy-${active}-${index}`}
+              key={s.heading}
+            >
+              <h3>{s.heading}</h3>
+              <p>{s.body}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* SIDE PANEL */}
+        <aside className="policies-side">
+          {/* 1. ON THIS PAGE */}
+          <div className="card policies-side-card">
+            <h4 className="policies-side-title">On this page</h4>
+
+            <ul className="policies-toc">
+              {policy.sections.map((s, index) => (
+                <li key={s.heading}>
+                  <button type="button" onClick={() => goToSection(index)}>
+                    {s.heading}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
-        ))}
+
+          {/* 2. LEGAL PAGES */}
+          <div className="card policies-side-card">
+            <h4 className="policies-side-title">Legal pages</h4>
+
+            <ul className="policies-links">
+              {TABS.map((key) => {
+                const Icon = POLICIES[key].icon;
+
+                return (
+                  <li key={key}>
+                    <button
+                      type="button"
+                      className={active === key ? "active" : ""}
+                      onClick={() => openPolicy(key)}
+                    >
+                      <Icon size={16} />
+                      <span>{POLICIES[key].label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   );

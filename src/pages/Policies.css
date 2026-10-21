@@ -1,17 +1,48 @@
-.policies-crumb { font-size: 13px; color: var(--slate-light); margin-bottom: 12px; }
-.policies-crumb a { color: var(--signal); }
-.policies-crumb span:last-child { color: var(--ink); font-weight: 600; }
+/* Policies page */
+.policies {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  box-sizing: border-box;
+}
 
-.policies h1 { margin-bottom: 6px; }
-.policies-sub { color: var(--slate); font-size: 14px; margin-bottom: 24px; max-width: 560px; }
+.policies-crumb {
+  font-size: 13px;
+  color: var(--slate-light);
+  margin-bottom: 12px;
+}
 
+.policies-crumb a {
+  color: var(--signal);
+}
+
+.policies-crumb span:last-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.policies h1 {
+  margin-bottom: 6px;
+}
+
+.policies-sub {
+  color: var(--slate);
+  font-size: 14px;
+  margin-bottom: 20px;
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+/* Policy tabs */
 .policies-tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   border-bottom: 1px solid var(--paper-line);
   overflow-x: auto;
 }
+
 .policies-tabs button {
   padding: 10px 16px;
   font-size: 13px;
@@ -19,16 +50,193 @@
   color: var(--slate);
   border-bottom: 2px solid transparent;
   white-space: nowrap;
+  flex-shrink: 0;
 }
+
 .policies-tabs button.active {
   color: var(--signal);
   border-bottom-color: var(--signal);
 }
 
-.policies-content { padding: 28px; max-width: 720px; }
-.policies-updated { display: block; font-size: 12px; color: var(--slate-light); margin-bottom: 20px; }
+/* Main content and sidebar */
+.policies-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+  max-width: none;
+}
 
-.policies-section { margin-bottom: 24px; }
-.policies-section:last-child { margin-bottom: 0; }
-.policies-section h3 { font-size: 15px; margin-bottom: 8px; }
-.policies-section p { font-size: 14px; color: var(--slate); line-height: 1.7; }
+.policies-content {
+  padding: 24px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.policies-updated {
+  display: block;
+  font-size: 12px;
+  color: var(--slate-light);
+  margin-bottom: 18px;
+}
+
+.policies-section {
+  margin-bottom: 20px;
+  scroll-margin-top: 100px;
+}
+
+.policies-section:last-child {
+  margin-bottom: 0;
+}
+
+.policies-section h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.policies-section p {
+  font-size: 14px;
+  color: var(--slate);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Sidebar */
+.policies-side {
+  position: sticky;
+  top: 85px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.policies-side-card {
+  padding: 16px 18px;
+  box-sizing: border-box;
+}
+
+.policies-side-title {
+  margin: 0 0 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+/* Sidebar lists */
+.policies-toc,
+.policies-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.policies-toc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.policies-toc button {
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--slate);
+  cursor: pointer;
+}
+
+.policies-toc button:hover {
+  background: var(--paper-dim);
+  color: var(--signal);
+}
+
+/* Legal pages */
+.policies-links {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.policies-links button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 9px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.policies-links button svg {
+  flex-shrink: 0;
+  color: var(--signal);
+}
+
+.policies-links button:hover {
+  background: var(--paper-dim);
+}
+
+.policies-links button.active {
+  background: var(--signal-tint);
+  color: var(--signal);
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .policies {
+    padding: 20px;
+  }
+
+  .policies-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 16px;
+  }
+
+  .policies-content {
+    padding: 20px;
+  }
+
+  .policies-side-card {
+    padding: 15px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 680px) {
+  .policies {
+    padding: 16px;
+  }
+
+  .policies-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .policies-side {
+    position: static;
+  }
+
+  .policies-content {
+    padding: 18px;
+  }
+
+  .policies-tabs button {
+    padding: 10px 12px;
+  }
+
+  .policies-sub {
+    margin-bottom: 16px;
+  }
+}
