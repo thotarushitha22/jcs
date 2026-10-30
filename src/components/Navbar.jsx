@@ -13,7 +13,6 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import LocationPicker from "./LocationPicker";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -26,23 +25,14 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // STRICT SESSION CHECK
   const token = localStorage.getItem("token");
-
-  const currentUser = token
-    ? user || JSON.parse(localStorage.getItem("user") || "{}")
-    : null;
+  const currentUser = token ? user || JSON.parse(localStorage.getItem("user") || "{}") : null;
 
   const userRole = String(currentUser?.role || "").toLowerCase();
   const userEmail = String(currentUser?.email || "").toLowerCase();
 
   const isMerchant = userRole === "merchant" || userRole === "seller";
-
-  // STRICT ADMIN CHECK
-  const isAdmin =
-    token &&
-    userEmail === "thotarushitha22@gmail.com" &&
-    userRole === "admin";
+  const isAdmin = token && userEmail === "thotarushitha22@gmail.com" && userRole === "admin";
 
   useEffect(() => {
     const onClickOutside = (e) => {
@@ -50,15 +40,10 @@ export default function Navbar() {
         setMenuOpen(false);
       }
     };
-
     document.addEventListener("mousedown", onClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  // Sync search input with URL if they navigate back
   useEffect(() => {
     setSearchText(searchParams.get("search") || "");
   }, [searchParams]);
@@ -66,9 +51,7 @@ export default function Navbar() {
   const handleSearch = (e) => {
     e.preventDefault();
     const query = searchText.trim();
-
     if (query) {
-      // CHANGED: Navigate to /products instead of /
       navigate(`/products?search=${encodeURIComponent(query)}`);
     } else {
       navigate("/products");
@@ -83,23 +66,19 @@ export default function Navbar() {
 
   return (
     <header className="nav">
-      {/* ================= TOP NAVBAR ================= */}
       <div className="nav-row-top">
-        {/* BRAND + LOCATION */}
+        {/* BRAND ONLY (Location Removed) */}
         <div className="nav-left">
           <Link to="/" className="brand">
             <span className="brand-mark">JCS</span>
             <span className="brand-word">Global</span>
           </Link>
-
-          <LocationPicker />
         </div>
 
         {/* SEARCH */}
         <div className="nav-search-wrap" data-tour="search">
           <form className="nav-search" onSubmit={handleSearch}>
             <Search size={20} />
-
             <input
               type="search"
               value={searchText}
@@ -110,98 +89,50 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* ICONS (wishlist, cart, account) */}
+        {/* ICONS */}
         <div className="nav-actions">
-          {/* WISHLIST */}
-          <Link
-            to="/wishlist"
-            className="icon-btn"
-            aria-label="Wishlist"
-            title="Wishlist"
-          >
+          <Link to="/wishlist" className="icon-btn" aria-label="Wishlist">
             <Heart size={22} />
           </Link>
 
-          {/* CART */}
-          <Link
-            to="/cart"
-            className="icon-btn cart-icon-btn"
-            aria-label="Cart"
-            data-tour="cart"
-          >
+          <Link to="/cart" className="icon-btn cart-icon-btn" aria-label="Cart">
             <ShoppingCart size={22} />
-
             {count > 0 && <span className="cart-count">{count}</span>}
           </Link>
 
-          {/* ACCOUNT MENU */}
           {currentUser?.email ? (
             <div className="account-menu-wrap" ref={menuRef}>
               <button
                 type="button"
                 className="icon-btn"
-                aria-label="Account menu"
                 onClick={() => setMenuOpen((prev) => !prev)}
-                data-tour="account"
               >
                 <UserRound size={22} />
               </button>
 
               {menuOpen && (
                 <div className="account-menu">
-                  {/* MY ACCOUNT */}
-                  <Link
-                    to="/account"
-                    className="account-menu-item"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <UserCircle size={18} />
-                    My Account
+                  <Link to="/account" className="account-menu-item" onClick={() => setMenuOpen(false)}>
+                    <UserCircle size={18} /> My Account
                   </Link>
-
-                  {/* MERCHANT */}
                   {isMerchant && (
-                    <Link
-                      to="/merchant"
-                      className="account-menu-item"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <Store size={18} />
-                      Merchant Dashboard
+                    <Link to="/merchant" className="account-menu-item" onClick={() => setMenuOpen(false)}>
+                      <Store size={18} /> Merchant Dashboard
                     </Link>
                   )}
-
-                  {/* ADMIN */}
                   {isAdmin && (
-                    <Link
-                      to="/admin"
-                      className="account-menu-item"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <ShieldCheck size={18} />
-                      Admin Dashboard
+                    <Link to="/admin" className="account-menu-item" onClick={() => setMenuOpen(false)}>
+                      <ShieldCheck size={18} /> Admin Dashboard
                     </Link>
                   )}
-
-                  {/* SIGN OUT */}
-                  <button
-                    type="button"
-                    className="account-menu-item"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut size={18} />
-                    Sign Out
+                  <button type="button" className="account-menu-item" onClick={handleSignOut}>
+                    <LogOut size={18} /> Sign Out
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="icon-btn"
-              aria-label="Sign in"
-              data-tour="account"
-            >
+            <Link to="/login" className="icon-btn" aria-label="Sign in">
               <UserRound size={22} />
             </Link>
           )}

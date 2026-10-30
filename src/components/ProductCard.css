@@ -10,8 +10,8 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  height: auto;
-  align-self: start;
+  height: 100%;              /* Fill the grid cell */
+  align-self: stretch;       /* Match heights across the row */
   overflow: hidden;
   border-radius: 8px;
   background: #fff;
@@ -31,7 +31,7 @@
   position: relative;
   display: block;
   width: 100%;
-  height: 190px;
+  height: 200px;             /* Slightly taller to accommodate padding */
   flex-shrink: 0;
   overflow: hidden;
   background: #fff;
@@ -41,9 +41,15 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
-  padding: 10px;
+  object-fit: contain;       /* Prevents cropping */
+  padding: 24px;             /* COMPRESSES the image by pushing it inward */
   box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+/* Zoom effect on hover */
+.p-card:hover .p-image-wrap img {
+  transform: scale(1.06);
 }
 
 /* Wishlist (top-right of image) */
@@ -94,6 +100,7 @@
 .p-body {
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 6px;
   padding: 12px;
   min-width: 0;
@@ -148,6 +155,7 @@
   flex-wrap: nowrap;
   gap: 6px;
   margin: 2px 0 0;
+  overflow: hidden;
 }
 
 .p-tag {
@@ -170,7 +178,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: auto; /* Pushes this row to the bottom */
   padding-top: 8px;
   border-top: 1px solid var(--paper-line, #e5e7eb);
   font-size: 11px;
@@ -210,17 +218,40 @@
 }
 
 /* ---- merged storage / colour options (no extra height) ---- */
-.p-from { font-size: 12px; color: #6b7a8c; margin-right: 2px; }
-.p-tags { overflow: hidden; }
-.p-tag-link { text-decoration: none; }
-.p-tag-link:hover { border-color: #2563eb; color: #2563eb; }
-.p-swatches { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; }
-.p-swatch {
-  width: 14px; height: 14px; border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.25); display: inline-block;
+.p-from { 
+  font-size: 12px; 
+  color: #6b7a8c; 
+  margin-right: 2px; 
 }
-.p-swatch:hover { outline: 2px solid #2563eb; outline-offset: 1px; }
-/* Add at the END of ProductCard.css */
+
+.p-tag-link { 
+  text-decoration: none; 
+}
+
+.p-tag-link:hover { 
+  border-color: #2563eb; 
+  color: #2563eb; 
+}
+
+.p-swatches { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 5px; 
+  margin-left: auto; 
+}
+
+.p-swatch {
+  width: 14px; 
+  height: 14px; 
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.25); 
+  display: inline-block;
+}
+
+.p-swatch:hover { 
+  outline: 2px solid #2563eb; 
+  outline-offset: 1px; 
+}
 
 /* Colour swatches are buttons now */
 button.p-swatch {
@@ -228,6 +259,7 @@ button.p-swatch {
   appearance: none;
   cursor: pointer;
 }
+
 .p-swatch-active {
   outline: 2px solid #2563eb;
   outline-offset: 2px;

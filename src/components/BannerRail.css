@@ -2,9 +2,9 @@
   --br-accent: #f5bd4f;
   position: relative;
   width: 100%;
-  max-width: 1440px;
-  margin: 12px auto 22px;
-  padding: 0 42px 25px;
+  max-width: 100vw; /* Stretches full screen */
+  margin: 0; /* Removed top/bottom margin */
+  padding: 0; /* Removed side padding */
   box-sizing: border-box;
   font-family: inherit;
 }
@@ -17,7 +17,7 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  border-radius: 16px;
+  border-radius: 0; /* Removed rounded corners */
   overscroll-behavior-x: contain;
 }
 
@@ -38,11 +38,12 @@
   isolation: isolate;
   display: flex;
   align-items: center;
+  width: 100%;
   height: 410px;
   min-height: 410px;
   max-height: 410px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 0; /* Full width look */
   background: #10223d;
   color: #ffffff;
   transition: height 0.3s ease;
@@ -156,8 +157,8 @@
 ========================================= */
 .br-brand {
   position: absolute;
-  top: 20px;
-  left: 26px;
+  top: 24px;
+  left: 48px; /* Moved in from the screen edge */
   display: flex;
   align-items: center;
   gap: 7px;
@@ -186,7 +187,7 @@
 
 .br-copy {
   width: min(590px, 68%);
-  padding: 70px 30px 36px;
+  padding: 80px 48px 40px; /* Increased padding since it's full width */
   box-sizing: border-box;
 }
 
@@ -265,8 +266,8 @@
 
 .br-slide-count {
   position: absolute;
-  right: 20px;
-  bottom: 18px;
+  right: 48px; /* Moved in from the screen edge */
+  bottom: 24px;
   color: rgba(255, 255, 255, 0.88);
   font-size: 11px;
   font-weight: 800;
@@ -276,37 +277,16 @@
 /* =========================================
    NAVIGATION ARROWS AND DOTS
 ========================================= */
+
+/* Hide the arrows completely */
 .br-arrow {
-  position: absolute;
-  z-index: 3;
-  top: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  transform: translateY(-50%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 50%;
-  background: rgba(15, 29, 51, 0.68);
-  color: #ffffff;
-  cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease;
+  display: none !important;
 }
-
-.br-arrow:hover {
-  background: #17336b;
-  transform: translateY(-50%) scale(1.05);
-}
-
-.br-prev { left: 0; }
-.br-next { right: 0; }
 
 .br-dots {
   position: absolute;
   right: 0;
-  bottom: 3px;
+  bottom: 10px;
   left: 0;
   display: flex;
   justify-content: center;
@@ -334,34 +314,29 @@
    RESPONSIVE DESIGN
 ========================================= */
 @media (max-width: 768px) {
-  .br { margin: 8px auto 18px; padding: 0 26px 23px; }
-  .br-track, .br-media { border-radius: 12px; }
   .br-media { height: 370px; min-height: 370px; max-height: 370px; }
   .br-theme-dussehra .br-media { height: 380px; min-height: 380px; max-height: 380px; }
   
-  .br-brand { top: 16px; left: 17px; }
+  .br-brand { top: 20px; left: 24px; }
   .br-logo { width: 37px; height: 31px; font-size: 15px; }
   .br-global { font-size: 10px; }
-  .br-copy { width: 90%; padding: 66px 18px 26px; }
+  .br-copy { width: 90%; padding: 70px 24px 26px; }
   .br-title { font-size: clamp(25px, 5vw, 35px); }
   .br-sub { max-width: 380px; font-size: 13px; }
   .br-eyebrow { font-size: 10px; }
   .br-chip { font-size: 9px; }
-  .br-arrow { width: 30px; height: 30px; }
-  .br-prev { left: -1px; }
-  .br-next { right: -1px; }
+  .br-slide-count { right: 24px; bottom: 16px; }
 }
 
 @media (max-width: 420px) {
-  .br { padding-right: 21px; padding-left: 21px; }
   .br-media { height: 350px; min-height: 350px; max-height: 350px; }
   .br-theme-dussehra .br-media { height: 350px; min-height: 350px; max-height: 350px; }
   
-  .br-copy { width: 100%; padding: 65px 15px 25px; }
+  .br-copy { width: 100%; padding: 65px 16px 25px; }
   .br-title { font-size: 26px; }
   .br-sub { font-size: 12px; line-height: 1.5; }
   .br-cta { min-height: 39px; padding: 0 12px; font-size: 12px; }
-  .br-slide-count { right: 12px; bottom: 12px; }
+  .br-slide-count { right: 16px; bottom: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

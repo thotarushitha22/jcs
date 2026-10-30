@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Loader2, ShieldAlert, CheckCircle2, MapPin } from "lucide-react";
+import { Loader2, CheckCircle2, MapPin } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
@@ -75,7 +75,6 @@ export default function Checkout() {
       
       let addresses = [];
       
-      // 1. Try user-specific or guest storage keys first
       if (userId) {
         const storageKey = `jcs_addresses_${userId}`;
         const savedAddresses = localStorage.getItem(storageKey);
@@ -87,7 +86,6 @@ export default function Checkout() {
         }
       }
 
-      // 2. Fallback: check general address storage keys if user-specific key is empty
       if (addresses.length === 0) {
         const generalKeys = ["jcs_addresses_guest", "addresses", "saved_addresses", "jcs_addresses", "user_addresses"];
         for (const key of generalKeys) {
@@ -109,7 +107,6 @@ export default function Checkout() {
         addresses[0] ||
         null;
 
-      // Pull customer/user name from saved address first, fallback to user profile name
       const finalName =
         defaultAddress?.name ||
         userData?.name ||
@@ -323,7 +320,7 @@ export default function Checkout() {
       }
       if (!razorpayData?.keyId) {
         throw new Error(
-          "Razorpay Test Key ID was not returned by the server."
+          "Razorpay Key ID was not returned by the server."
         );
       }
 
@@ -378,7 +375,7 @@ export default function Checkout() {
 
             await createJCSOrder({
               paymentStatus: "PAID",
-              paymentMethodLabel: "Razorpay Test",
+              paymentMethodLabel: "Razorpay",
               razorpayOrderId:
                 razorpayResponse.razorpay_order_id,
               razorpayPaymentId:
@@ -396,7 +393,7 @@ export default function Checkout() {
               navigate("/orders", {
                 state: {
                   justPlaced: true,
-                  paymentMethod: "Razorpay Test",
+                  paymentMethod: "Razorpay",
                   paymentStatus: "PAID",
                   razorpayOrderId:
                     razorpayResponse.razorpay_order_id,
@@ -527,30 +524,6 @@ export default function Checkout() {
 
   return (
     <div className="page container checkout">
-      {paymentMethod === "razorpay_sandbox" && (
-        <div
-          className="sandbox-banner"
-          style={{
-            background: "#fef3c7",
-            border: "1px solid #f59e0b",
-            padding: "10px 16px",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            color: "#92400e",
-            fontSize: "14px",
-          }}
-        >
-          <ShieldAlert size={18} />
-          <span>
-            <strong>Razorpay Test Mode:</strong> This is a sandbox
-            payment. No real money will be charged.
-          </span>
-        </div>
-      )}
-
       <h1>Checkout</h1>
 
       <form
@@ -769,10 +742,9 @@ export default function Checkout() {
                 }
               />
               <span>
-                <strong>💳 Razorpay Test Payment</strong>
+                <strong>💳 Razorpay</strong>
                 <small>
-                  UPI, Cards and other Razorpay test payment
-                  methods.
+                  UPI, Cards, and Netbanking.
                 </small>
               </span>
             </label>

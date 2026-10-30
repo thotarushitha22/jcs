@@ -9,7 +9,7 @@ import "./BannerRail.css";
 
 const AUTO_SLIDE_MS = 5000;
 const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=85";
+  "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1600&q=85";
 
 const CAMPAIGNS = [
   {
@@ -17,7 +17,7 @@ const CAMPAIGNS = [
     name: "Dussehra",
     start: "2026-10-11",
     end: "2026-10-21",
-    theme: "dussehra", // <--- Changed from "warm" to "dussehra"
+    theme: "dussehra",
     slides: [
       {
         eyebrow: "DUSSEHRA SPECIAL",
@@ -33,7 +33,7 @@ const CAMPAIGNS = [
         offer: "Discover Something Better",
         description: "Find technology for your home and business.",
         button: "Shop Electronics",
-        image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=85",
+        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=85",
       },
       {
         eyebrow: "FESTIVE SHOPPING",
@@ -41,7 +41,7 @@ const CAMPAIGNS = [
         offer: "Deals Across Top Categories",
         description: "Browse electronics for work, home and entertainment.",
         button: "View Products",
-        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=85",
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=85",
       },
       {
         eyebrow: "FESTIVE COLLECTION",
@@ -49,7 +49,7 @@ const CAMPAIGNS = [
         offer: "Smart Choices Start Here",
         description: "Discover products for your next upgrade.",
         button: "Explore Collection",
-        image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1600&q=85",
+        image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=85",
       },
       {
         eyebrow: "DUSSEHRA CELEBRATION",
@@ -74,7 +74,8 @@ const CAMPAIGNS = [
         offer: "Diwali Electronics Specials",
         description: "Celebrate brighter with new technology and entertainment.",
         button: "Shop Diwali Deals",
-        image: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?auto=format&fit=crop&w=1600&q=85",
+        // Replaced cinema seats with a sleek Laptop image
+        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=85",
       },
       {
         eyebrow: "FESTIVE TECH DEALS",
@@ -82,6 +83,7 @@ const CAMPAIGNS = [
         offer: "Explore Electronics for Everyone",
         description: "Discover technology for your home and business.",
         button: "Explore Deals",
+        // Replaced with Smartphone image
         image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=85",
       },
       {
@@ -90,6 +92,7 @@ const CAMPAIGNS = [
         offer: "Smart Gifts. Great Choices.",
         description: "Explore devices and useful tech accessories.",
         button: "Find Gifts",
+        // Replaced with Headphones/Audio image
         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=85",
       },
       {
