@@ -1,34 +1,63 @@
 /* =========================
-   NAVBAR
+   NAVBAR BASE
 ========================= */
 
 .nav {
-  background: #fff;
+  background: #0f172a; /* Dark background to match your screenshot */
   border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 40;
 }
 
-.nav-topbar {
-  height: 4px;
-  background: linear-gradient(90deg, var(--ink) 0%, var(--signal) 100%);
-}
-
 .nav-row-top {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* 🚨 THIS pushes brand left and icons right */
   gap: 18px;
   height: 76px;
   padding: 0 32px;
 }
 
+/* =========================
+   BRAND LOGO
+========================= */
+
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 18px;
   flex-shrink: 0;
 }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 24px;
+  font-weight: 500;
+  color: #ffffff; /* White text */
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.brand-text strong {
+  font-weight: 900;
+  color: #ffffff; /* White text for "GLOBAL" */
+}
+
+/* =========================
+   SEARCH BAR
+========================= */
 
 .nav-search-wrap {
   flex: 1 1 auto;
@@ -38,60 +67,16 @@
   margin: 0 10px;
 }
 
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-shrink: 0;
-}
-
-/* =========================
-   BRAND LOGO (Image + Text)
-========================= */
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Space between icon and text */
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.brand-logo-img {
-  height: 42px; /* Adjust this to make the icon bigger/smaller */
-  width: auto;
-  object-fit: contain;
-}
-
-.brand-text {
-  font-family: var(--font-display, 'Inter', sans-serif);
-  font-size: 24px;
-  font-weight: 500; /* Regular weight for "JCS" */
-  color: #0f172a; /* Dark navy color */
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.brand-text strong {
-  font-weight: 900; /* Bold weight for "GLOBAL" */
-  color: #0f172a;
-}
-
-/* =========================
-   SEARCH BAR
-========================= */
-
 .nav-search {
   width: 100%;
   max-width: 850px;
-  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
   background: #ffffff;
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   padding: 14px 18px;
-  color: var(--slate-light);
+  color: #64748b;
 }
 
 .nav-search input {
@@ -100,28 +85,19 @@
   border: none;
   background: transparent;
   font-size: 16px;
-  color: var(--ink);
-}
-
-.nav-search input::placeholder {
-  font-size: 16px;
-  color: var(--slate-light);
-}
-
-.nav-search input:focus {
+  color: #0f172a;
   outline: none;
 }
 
 /* =========================
-   NAVIGATION ICONS
+   ICONS (WISHLIST, CART, PROFILE)
 ========================= */
 
 .nav-actions {
-  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 7px;
-  flex-shrink: 0; /* Prevents icons from squishing off-screen */
+  gap: 8px; /* Space between the 3 icons */
+  flex-shrink: 0; /* 🚨 THIS IS CRITICAL: Prevents them from disappearing */
 }
 
 .icon-btn {
@@ -132,13 +108,16 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--slate);
+  color: #ffffff; /* White icons */
   transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .icon-btn:hover {
-  color: var(--signal);
-  background: var(--paper-dim);
+  color: #3b82f6;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .icon-btn svg {
@@ -146,14 +125,13 @@
   height: 22px;
 }
 
-/* Cart count */
+/* Cart count badge */
 .cart-count {
   position: absolute;
   top: -2px;
   right: -2px;
-  background: var(--amber);
-  color: var(--ink);
-  font-family: var(--font-mono);
+  background: #f59e0b;
+  color: #0f172a;
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
@@ -171,18 +149,14 @@
   position: relative;
 }
 
-.account-icon-btn.icon-btn {
-  color: var(--signal);
-}
-
 .account-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  background: #fff;
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 8px rgba(11, 18, 32, 0.08), 0 16px 32px -16px rgba(11, 18, 32, 0.25);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(11, 18, 32, 0.08);
   padding: 8px;
   min-width: 200px;
   z-index: 50;
@@ -194,10 +168,10 @@
   gap: 11px;
   width: 100%;
   padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 15px;
   font-weight: 500;
-  color: var(--ink);
+  color: #0f172a;
   text-align: left;
   background: transparent;
   border: none;
@@ -205,42 +179,19 @@
 }
 
 .account-menu-item:hover {
-  background: var(--paper-dim);
-}
-
-.account-menu-item svg {
-  width: 20px;
-  height: 20px;
-  color: var(--slate-light);
-  flex-shrink: 0;
+  background: #f1f5f9;
 }
 
 /* =========================
-   RESPONSIVE FIXES
+   MOBILE RESPONSIVENESS
 ========================= */
-
-@media (min-width: 1500px) {
-  .nav-search { max-width: 950px; }
-  .nav-row-top { padding: 0 40px; }
-}
-
-@media (max-width: 1100px) {
-  .nav-row-top { padding: 0 24px; gap: 14px; }
-  .nav-search { max-width: 600px; }
-  .brand-logo-img { height: 36px; }
-  .brand-text { font-size: 20px; }
-  .nav-right { gap: 14px; }
-}
 
 @media (max-width: 900px) {
-  /* Hide the search bar to make room for icons */
-  .nav-search { display: none; }
-  .nav-row-top { height: 70px; }
+  /* Hide the search bar entirely on mobile to make room */
+  .nav-search-wrap {
+    display: none; 
+  }
 }
-
-/* =========================
-   MOBILE
-========================= */
 
 @media (max-width: 720px) {
   .nav-row-top {
@@ -250,16 +201,16 @@
   }
 
   .brand-logo-img {
-    height: 30px; 
-  }
-  
-  .brand-text {
-    font-size: 18px;
+    height: 32px; /* Smaller logo on mobile */
   }
 
-  /* Keep icons tight and visible */
+  .brand-text {
+    font-size: 18px; /* Smaller text on mobile */
+  }
+
+  /* Keep the icons tight and visible */
   .nav-actions {
-    gap: 4px; 
+    gap: 4px;
   }
 
   .icon-btn {
@@ -271,17 +222,4 @@
     width: 20px;
     height: 20px;
   }
-}
-.brand-text {
-  font-family: var(--font-display, 'Inter', sans-serif);
-  font-size: 24px;
-  font-weight: 500; 
-  color: #ffffff; /* Changed "JCS" to white */
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.brand-text strong {
-  font-weight: 900; 
-  color: #ffffff; /* Changed "GLOBAL" to white */
 }

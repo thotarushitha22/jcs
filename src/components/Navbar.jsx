@@ -68,17 +68,11 @@ export default function Navbar() {
     <header className="nav">
       <div className="nav-row-top">
         
-        {/* 🚨 NEW: Image Icon + Custom Text Logo */}
+        {/* BRAND */}
         <div className="nav-left">
           <Link to="/" className="brand">
-            <img 
-              src="/jcs-logo.png" 
-              alt="JCS Global Icon" 
-              className="brand-logo-img" 
-            />
-            <span className="brand-text">
-              JCS <strong>GLOBAL</strong>
-            </span>
+            <img src="/jcs-logo.png" alt="JCS Global Icon" className="brand-logo-img" />
+            <span className="brand-text">JCS <strong>GLOBAL</strong></span>
           </Link>
         </div>
 
@@ -96,7 +90,7 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* ICONS */}
+        {/* ICONS (WISHLIST, CART, PROFILE) */}
         <div className="nav-actions">
           <Link to="/wishlist" className="icon-btn" aria-label="Wishlist">
             <Heart size={22} />
