@@ -67,16 +67,33 @@ export default function Home() {
       <BannerRail />
 
       <section style={{ padding: "20px", maxWidth: "1400px", margin: "0 auto", marginBottom: "96px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontSize: "28px", fontWeight: "800", color: "#111827", margin: 0 }}>
+        
+        {/* 🚨 FIXED: Added flexWrap and gap so it stacks nicely on mobile */}
+        <div 
+          style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: "center", 
+            marginBottom: "24px",
+            flexWrap: "wrap",
+            gap: "12px"
+          }}
+        >
+          <h2 style={{ fontSize: "26px", fontWeight: "800", color: "#111827", margin: 0, lineHeight: 1.2 }}>
             {urlSearchQuery ? `Search Results for "${urlSearchQuery}"` : "Featured Products"}
           </h2>
           
           <Link 
             to="/products"
             style={{ 
-              textDecoration: "none", color: "#2563eb", fontSize: "16px", fontWeight: "600", 
-              display: "flex", alignItems: "center", gap: "6px" 
+              textDecoration: "none", 
+              color: "#2563eb", 
+              fontSize: "15px", 
+              fontWeight: "600", 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "6px",
+              whiteSpace: "nowrap" 
             }}
           >
             View All →
@@ -99,7 +116,7 @@ export default function Home() {
             className="grid" 
             style={{ 
               display: "grid", 
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", 
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", 
               gap: "20px" 
             }}
           >
