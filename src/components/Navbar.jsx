@@ -67,11 +67,18 @@ export default function Navbar() {
   return (
     <header className="nav">
       <div className="nav-row-top">
-        {/* BRAND ONLY (Location Removed) */}
+        
+        {/* 🚨 NEW: Image Icon + Custom Text Logo */}
         <div className="nav-left">
           <Link to="/" className="brand">
-            <span className="brand-mark">JCS</span>
-            <span className="brand-word">Global</span>
+            <img 
+              src="/jcs-logo.png" 
+              alt="JCS Global Icon" 
+              className="brand-logo-img" 
+            />
+            <span className="brand-text">
+              JCS <strong>GLOBAL</strong>
+            </span>
           </Link>
         </div>
 

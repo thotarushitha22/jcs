@@ -10,15 +10,10 @@
   z-index: 40;
 }
 
-/* Top blue line */
 .nav-topbar {
   height: 4px;
   background: linear-gradient(90deg, var(--ink) 0%, var(--signal) 100%);
 }
-
-/* =========================
-   TOP NAVIGATION ROW
-========================= */
 
 .nav-row-top {
   display: flex;
@@ -28,7 +23,6 @@
   padding: 0 32px;
 }
 
-/* Left section */
 .nav-left {
   display: flex;
   align-items: center;
@@ -36,7 +30,6 @@
   flex-shrink: 0;
 }
 
-/* Search section */
 .nav-search-wrap {
   flex: 1 1 auto;
   display: flex;
@@ -45,7 +38,6 @@
   margin: 0 10px;
 }
 
-/* Right section */
 .nav-right {
   display: flex;
   align-items: center;
@@ -54,67 +46,39 @@
 }
 
 /* =========================
-   JCS GLOBAL LOGO
+   BRAND LOGO (Image + Text)
 ========================= */
 
 .brand {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-size: 27px;
-  font-weight: 800;
-  color: var(--ink);
-  flex-shrink: 0;
-}
-
-.brand-mark {
-  background: var(--signal);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 5px;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-}
-
-/* =========================
-   DELIVERY LOCATION
-========================= */
-
-.nav-location {
-  display: flex;
   align-items: center;
-  gap: 9px;
-  color: var(--slate);
+  gap: 12px; /* Space between icon and text */
+  text-decoration: none;
   flex-shrink: 0;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
 }
 
-.nav-location:hover {
-  background: var(--paper-dim);
+.brand-logo-img {
+  height: 42px; /* Adjust this to make the icon bigger/smaller */
+  width: auto;
+  object-fit: contain;
 }
 
-.nav-location span {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.35;
+.brand-text {
+  font-family: var(--font-display, 'Inter', sans-serif);
+  font-size: 24px;
+  font-weight: 500; /* Regular weight for "JCS" */
+  color: #0f172a; /* Dark navy color */
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-.nav-location small {
-  font-size: 13px;
-  color: var(--slate-light);
-}
-
-.nav-location strong {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
+.brand-text strong {
+  font-weight: 900; /* Bold weight for "GLOBAL" */
+  color: #0f172a;
 }
 
 /* =========================
-   EXTENDED SEARCH BAR
+   SEARCH BAR
 ========================= */
 
 .nav-search {
@@ -157,7 +121,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  flex-shrink: 0; /* 🚨 PREVENTS ICONS FROM SQUISHING */
+  flex-shrink: 0; /* Prevents icons from squishing off-screen */
 }
 
 .icon-btn {
@@ -263,44 +227,37 @@
 @media (max-width: 1100px) {
   .nav-row-top { padding: 0 24px; gap: 14px; }
   .nav-search { max-width: 600px; }
-  .brand { font-size: 24px; }
-  .nav-location strong { font-size: 14px; }
+  .brand-logo-img { height: 36px; }
+  .brand-text { font-size: 20px; }
   .nav-right { gap: 14px; }
 }
 
 @media (max-width: 900px) {
   /* Hide the search bar to make room for icons */
   .nav-search { display: none; }
-  
-  /* Hide location text, keep icon */
-  .nav-location span { display: none; }
-  
   .nav-row-top { height: 70px; }
 }
 
 /* =========================
-   MOBILE (THE FIX)
+   MOBILE
 ========================= */
 
 @media (max-width: 720px) {
   .nav-row-top {
     height: 64px;
     padding: 0 16px;
-    gap: 10px; /* Reduced gap */
+    gap: 10px;
   }
 
-  .brand {
-    font-size: 20px;
+  .brand-logo-img {
+    height: 30px; 
+  }
+  
+  .brand-text {
+    font-size: 18px;
   }
 
-  .brand-mark {
-    padding: 3px 7px;
-  }
-
-  /* 🚨 REMOVED display: none from .nav-account */
-  /* The profile icon is now visible */
-
-  /* Keep icons tight */
+  /* Keep icons tight and visible */
   .nav-actions {
     gap: 4px; 
   }
@@ -314,29 +271,17 @@
     width: 20px;
     height: 20px;
   }
-  
-  .sell-pill {
-    display: none; /* Hide sell pill on mobile to save space if needed */
-  }
+}
+.brand-text {
+  font-family: var(--font-display, 'Inter', sans-serif);
+  font-size: 24px;
+  font-weight: 500; 
+  color: #ffffff; /* Changed "JCS" to white */
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-/* =========================
-   DELIVER TO - readable on the dark green navbar
-========================= */
-
-.nav .nav-location > svg,
-.nav .nav-location > .lucide {
-  color: #b7d9c6 !important;
-}
-
-.nav .nav-location > span > small {
-  color: #b7d9c6 !important;
-}
-
-.nav .nav-location > span > strong {
-  color: #ffffff !important;
-}
-
-.nav .nav-location:hover {
-  background: rgba(255, 255, 255, 0.1);
+.brand-text strong {
+  font-weight: 900; 
+  color: #ffffff; /* Changed "GLOBAL" to white */
 }
