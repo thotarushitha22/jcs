@@ -689,3 +689,39 @@ body,
 [class*="location"] [class*="header"] p {
   color: #d5eadf !important;
 }
+/* Hide mobile filter button on desktop */
+.mobile-filter-btn {
+  display: none !important;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS FOR PRODUCTS PAGE
+========================================= */
+@media (max-width: 900px) {
+  /* Show the Filters button on mobile */
+  .mobile-filter-btn {
+    display: flex !important;
+  }
+
+  /* Transform the sidebar into a slide-out drawer */
+  .products-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Hide off-screen by default */
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    border-radius: 0 !important;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+  }
+
+  /* Slide it in when open */
+  .products-sidebar.mobile-open {
+    left: 0;
+  }
+
+  /* Show the close button inside the drawer */
+  .mobile-close-filter {
+    display: flex !important;
+  }
+}

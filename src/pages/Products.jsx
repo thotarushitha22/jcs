@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp, SlidersHorizontal, X } from "lucide-react";
 import { fetchProducts } from "../api/products";
 import ProductCard from "../components/ProductCard";
 import { groupProducts } from "../utils/variants";
@@ -18,7 +19,6 @@ export default function Products() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Read search from URL (from top navbar)
   const urlSearchQuery = searchParams.get("search") || "";
 
   const [categories] = useState(myCategories);
@@ -32,10 +32,21 @@ export default function Products() {
   const [activeDiscount, setActiveDiscount] = useState("all");
   const [sort, setSort] = useState("relevance");
   
-  // Sidebar search state
   const [sidebarSearch, setSidebarSearch] = useState(urlSearchQuery);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Keep sidebar search box synced with URL
+  // Accordion state
+  const [openSections, setOpenSections] = useState({
+    categories: true,
+    brands: true,
+    price: true,
+    discount: true,
+  });
+
+  const toggleSection = (section) => {
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
   useEffect(() => {
     setSidebarSearch(urlSearchQuery);
   }, [urlSearchQuery]);
@@ -84,7 +95,6 @@ export default function Products() {
   const filteredProducts = useMemo(() => {
     let resultList = [...products];
 
-    // 1. Category Filter
     if (activeCategory !== "all") {
       const selectedCategory = normalizeCategory(activeCategory);
       const categoryAliases = {
@@ -102,7 +112,6 @@ export default function Products() {
       });
     }
 
-    // 2. Brand Filter
     if (activeBrand !== "all") {
       resultList = resultList.filter((product) => {
         const productBrand = normalizeCategory(product.brand || product.manufacturer || product.title || product.name || "");
@@ -110,7 +119,6 @@ export default function Products() {
       });
     }
 
-    // 3. Price Filter
     if (activePriceRange !== "all") {
       resultList = resultList.filter((product) => {
         const price = Number(product.price || product.cost || 0);
@@ -123,7 +131,6 @@ export default function Products() {
       });
     }
 
-    // 4. Discount Filter
     if (activeDiscount !== "all") {
       resultList = resultList.filter((product) => {
         const discount = Number(product.discount || product.discountPercentage || product.off || 0);
@@ -131,7 +138,6 @@ export default function Products() {
       });
     }
 
-    // 5. SEARCH FILTER (Uses URL first, then sidebar)
     const query = urlSearchQuery.trim() || sidebarSearch.trim();
     if (query) {
       const q = normalizeCategory(query);
@@ -144,7 +150,6 @@ export default function Products() {
       });
     }
 
-    // 6. Sorting
     if (sort === "price-asc") resultList.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
     if (sort === "price-desc") resultList.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
 
@@ -153,7 +158,6 @@ export default function Products() {
 
   const displayProducts = useMemo(() => groupProducts(filteredProducts), [filteredProducts]);
 
-  // Handle typing in sidebar search
   const handleSidebarSearch = (e) => {
     const val = e.target.value;
     setSidebarSearch(val);
@@ -164,48 +168,82 @@ export default function Products() {
     }
   };
 
+  const FilterSection = ({ title, sectionKey, children }) => (
+    <div style={{ marginBottom: "20px", borderBottom: "1px solid #f1f5f9", paddingBottom: "10px" }}>
+      <button
+        onClick={() => toggleSection(sectionKey)}
+        style={{
+          width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
+          background: "transparent", border: "none", padding: "10px 0",
+          fontSize: "15px", fontWeight: "700", color: "#111827", cursor: "pointer", textAlign: "left"
+        }}
+      >
+        {title}
+        {openSections[sectionKey] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+      </button>
+      <div style={{ display: openSections[sectionKey] ? "flex" : "none", flexDirection: "column", gap: "12px", marginTop: "10px" }}>
+        {children}
+      </div>
+    </div>
+  );
+
   return (
-    /* Main container - locked to screen height */
-    <div style={{ backgroundColor: "#f8fafc", height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ backgroundColor: "#f8fafc", minHeight: "calc(100vh - 64px)", display: "flex", flexDirection: "column", position: "relative" }}>
       
-      {/* Fixed Top Bar */}
-      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", padding: "24px 24px 10px 24px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      {/* Top Bar */}
+      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", padding: "24px 24px 10px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <button 
+              onClick={() => navigate(-1)}
+              style={{ 
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: "40px", height: "40px", borderRadius: "50%", 
+                border: "1px solid #e2e8f0", backgroundColor: "#ffffff", 
+                cursor: "pointer", color: "#0f172a", fontSize: "18px", fontWeight: "bold", flexShrink: 0
+              }}
+            >
+              &lt;
+            </button>
+            <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+              {urlSearchQuery ? `Search for "${urlSearchQuery}"` : "Products"}
+            </h2>
+          </div>
+
+          {/* 🚨 Mobile Filter Button */}
           <button 
-            onClick={() => navigate(-1)}
-            style={{ 
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: "40px", height: "40px", borderRadius: "50%", 
-              border: "1px solid #e2e8f0", backgroundColor: "#ffffff", 
-              cursor: "pointer", color: "#0f172a", fontSize: "18px", fontWeight: "bold",
-              transition: "all 0.2s ease", flexShrink: 0
+            className="mobile-filter-btn"
+            onClick={() => setIsMobileFilterOpen(true)}
+            style={{
+              display: "none", alignItems: "center", gap: "6px", backgroundColor: "#fff",
+              padding: "8px 14px", borderRadius: "6px", border: "1px solid #e2e8f0",
+              fontWeight: "600", fontSize: "14px", cursor: "pointer"
             }}
           >
-            &lt;
+            <SlidersHorizontal size={16} /> Filters
           </button>
-          <h2 style={{ fontSize: "26px", fontWeight: "800", color: "#0f172a", margin: 0 }}>
-            {urlSearchQuery ? `Search Results for "${urlSearchQuery}"` : "Products"}
-          </h2>
         </div>
       </div>
 
-      {/* Main Content Area (Sidebar + Grid) */}
-      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", display: "flex", gap: "32px", padding: "0 24px 24px 24px", flex: 1, overflow: "hidden" }}>
+      {/* Main Content Area */}
+      <div style={{ maxWidth: "1440px", width: "100%", margin: "0 auto", display: "flex", gap: "32px", padding: "0 24px 24px 24px", flex: 1 }}>
         
-        {/* SIDEBAR (Fixed height, scrolls if needed) */}
+        {/* 🚨 SIDEBAR (Becomes a fixed drawer on mobile) */}
         <aside 
+          className={`products-sidebar ${isMobileFilterOpen ? "mobile-open" : ""}`}
           style={{ 
-            width: "280px", 
-            flexShrink: 0, 
-            backgroundColor: "#fff", 
-            borderRadius: "12px", 
-            border: "1px solid #e5e7eb", 
-            padding: "24px",
-            overflowY: "auto",
-            height: "100%"
+            width: "280px", flexShrink: 0, backgroundColor: "#fff", borderRadius: "12px", 
+            border: "1px solid #e5e7eb", padding: "24px", overflowY: "auto"
           }}
         >
-          {/* Sort Dropdown */}
+          {/* Mobile Close Button */}
+          <div className="mobile-close-filter" style={{ display: "none", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Filters</h3>
+            <button onClick={() => setIsMobileFilterOpen(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              <X size={24} />
+            </button>
+          </div>
+
           <select 
             value={sort} 
             onChange={(e) => setSort(e.target.value)} 
@@ -216,89 +254,59 @@ export default function Products() {
             <option value="price-desc">Price: High to Low</option>
           </select>
 
-          {/* Search Bar */}
-          <div style={{ position: "relative", marginBottom: "28px" }}>
-            <svg style={{ position: "absolute", left: "10px", top: "10px", color: "#9ca3af" }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+          <div style={{ position: "relative", marginBottom: "20px" }}>
             <input 
-              type="text" 
-              placeholder="Search products..." 
-              value={sidebarSearch}
-              onChange={handleSidebarSearch}
-              style={{ width: "100%", padding: "10px 10px 10px 34px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", fontSize: "14px" }}
+              type="text" placeholder="Search products..." value={sidebarSearch} onChange={handleSidebarSearch}
+              style={{ width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", fontSize: "14px" }}
             />
           </div>
 
-          {/* Categories */}
-          <h4 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "#111827" }}>Category</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-              <input type="radio" name="category" checked={activeCategory === "all"} onChange={() => setActiveCategory("all")} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-              All categories
+          <FilterSection title="Category" sectionKey="categories">
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+              <input type="radio" name="category" checked={activeCategory === "all"} onChange={() => setActiveCategory("all")} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} /> All categories
             </label>
             {categories.map((category) => (
-              <label key={category.id} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-                <input type="radio" name="category" checked={activeCategory === category.slug} onChange={() => setActiveCategory(category.slug)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-                {category.name}
+              <label key={category.id} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+                <input type="radio" name="category" checked={activeCategory === category.slug} onChange={() => setActiveCategory(category.slug)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} /> {category.name}
               </label>
             ))}
-          </div>
+          </FilterSection>
 
-          {/* Brands */}
-          <h4 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "#111827" }}>Brands</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-              <input type="radio" name="brand" checked={activeBrand === "all"} onChange={() => setActiveBrand("all")} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-              All Brands
+          <FilterSection title="Brands" sectionKey="brands">
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+              <input type="radio" name="brand" checked={activeBrand === "all"} onChange={() => setActiveBrand("all")} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} /> All Brands
             </label>
             {availableBrands.map((brand) => (
-              <label key={brand} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-                <input type="radio" name="brand" checked={activeBrand === brand} onChange={() => setActiveBrand(brand)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-                {brand}
+              <label key={brand} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+                <input type="radio" name="brand" checked={activeBrand === brand} onChange={() => setActiveBrand(brand)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} /> {brand}
               </label>
             ))}
-          </div>
+          </FilterSection>
 
-          {/* Price */}
-          <h4 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "#111827" }}>Price</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
+          <FilterSection title="Price" sectionKey="price">
             {[
               { label: "Any Price", val: "all" },
               { label: "Under ₹1,000", val: "under-1000" },
               { label: "₹1,000 - ₹5,000", val: "1000-5000" },
-              { label: "₹5,000 - ₹10,000", val: "5000-10000" },
-              { label: "₹10,000 - ₹20,000", val: "10000-20000" },
               { label: "Over ₹20,000", val: "over-20000" }
             ].map((item) => (
-              <label key={item.val} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-                <input type="radio" name="price" checked={activePriceRange === item.val} onChange={() => setActivePriceRange(item.val)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-                {item.label}
+              <label key={item.val} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+                <input type="radio" name="price" checked={activePriceRange === item.val} onChange={() => setActivePriceRange(item.val)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} /> {item.label}
               </label>
             ))}
-          </div>
-
-          {/* Discount */}
-          <h4 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "#111827" }}>Discount</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {[
-              { label: "All Discounts", val: "all" },
-              { label: "10% Off or more", val: "10" },
-              { label: "25% Off or more", val: "25" },
-              { label: "35% Off or more", val: "35" },
-              { label: "50% Off or more", val: "50" }
-            ].map((item) => (
-              <label key={item.val} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-                <input type="radio" name="discount" checked={activeDiscount === item.val} onChange={() => setActiveDiscount(item.val)} style={{ width: "16px", height: "16px", accentColor: "#2563eb" }} />
-                {item.label}
-              </label>
-            ))}
-          </div>
+          </FilterSection>
         </aside>
 
-        {/* PRODUCTS GRID (Only this scrolls) */}
-        <div style={{ flex: 1, minWidth: 0, overflowY: "auto", height: "100%", paddingRight: "10px" }}>
-          
+        {/* Overlay for mobile (darkens background) */}
+        {isMobileFilterOpen && (
+          <div 
+            onClick={() => setIsMobileFilterOpen(false)}
+            style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999 }}
+          />
+        )}
+
+        {/* PRODUCTS GRID */}
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ color: "#6b7280", fontSize: "14px", fontWeight: "500" }}>
               {loading ? "Loading…" : `${displayProducts.length} results`}
@@ -318,7 +326,7 @@ export default function Products() {
               </button>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px", paddingBottom: "40px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px", paddingBottom: "40px" }}>
               {displayProducts.map((product, index) => (
                 <ProductCard key={product.id || product._id || index} product={product} />
               ))}
