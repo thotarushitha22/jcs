@@ -11,14 +11,9 @@
 }
 
 /* Top blue line */
-
 .nav-topbar {
   height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--ink) 0%,
-    var(--signal) 100%
-  );
+  background: linear-gradient(90deg, var(--ink) 0%, var(--signal) 100%);
 }
 
 /* =========================
@@ -34,7 +29,6 @@
 }
 
 /* Left section */
-
 .nav-left {
   display: flex;
   align-items: center;
@@ -42,8 +36,7 @@
   flex-shrink: 0;
 }
 
-/* Search section gets maximum available space */
-
+/* Search section */
 .nav-search-wrap {
   flex: 1 1 auto;
   display: flex;
@@ -53,7 +46,6 @@
 }
 
 /* Right section */
-
 .nav-right {
   display: flex;
   align-items: center;
@@ -129,26 +121,20 @@
   width: 100%;
   max-width: 850px;
   min-width: 0;
-
   display: flex;
   align-items: center;
   gap: 12px;
-
   background: #ffffff;
   border-radius: var(--radius-sm);
-
   padding: 14px 18px;
-
   color: var(--slate-light);
 }
 
 .nav-search input {
   flex: 1;
   min-width: 0;
-
   border: none;
   background: transparent;
-
   font-size: 16px;
   color: var(--ink);
 }
@@ -163,138 +149,27 @@
 }
 
 /* =========================
-   LANGUAGE
-========================= */
-
-.nav-language {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-/* =========================
-   ACCOUNT
-========================= */
-
-.nav-account {
-  flex-shrink: 0;
-}
-
-.nav-account a {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.35;
-  text-align: right;
-}
-
-.nav-account small {
-  font-size: 13px;
-  color: var(--slate-light);
-}
-
-.nav-account strong {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--signal);
-}
-
-/* =========================
-   NAVIGATION BUTTON
-========================= */
-
-.nav-btn {
-  padding: 11px 20px;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-/* =========================
-   BOTTOM NAVIGATION ROW
-========================= */
-
-.nav-row-bottom {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  height: 58px;
-
-  border-top: none;
-
-  padding: 0 24px;
-}
-
-/* Navigation links */
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 26px;
-}
-
-.nav-links a {
-  color: var(--slate);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.nav-links a:hover {
-  color: var(--signal);
-}
-
-.nav-links a.active {
-  color: var(--signal);
-  font-weight: 700;
-}
-
-/* =========================
-   SELL TO JCS GLOBAL
-========================= */
-
-.sell-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-
-  background: var(--verified-tint);
-  color: var(--verified);
-
-  font-size: 15px;
-  font-weight: 700;
-
-  padding: 9px 17px;
-
-  border-radius: 999px;
-}
-
-.sell-pill:hover {
-  background: #d0f0dc;
-}
-
-/* =========================
    NAVIGATION ICONS
 ========================= */
 
 .nav-actions {
   margin-left: auto;
-
   display: flex;
   align-items: center;
-
   gap: 7px;
+  flex-shrink: 0; /* 🚨 PREVENTS ICONS FROM SQUISHING */
 }
 
 .icon-btn {
   position: relative;
-
   width: 44px;
   height: 44px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   color: var(--slate);
+  transition: all 0.2s ease;
 }
 
 .icon-btn:hover {
@@ -308,29 +183,19 @@
 }
 
 /* Cart count */
-
 .cart-count {
   position: absolute;
-
   top: -2px;
   right: -2px;
-
   background: var(--amber);
   color: var(--ink);
-
   font-family: var(--font-mono);
-
   font-size: 11px;
   font-weight: 700;
-
   line-height: 1;
-
   padding: 4px 6px;
-
   border-radius: 999px;
-
   min-width: 18px;
-
   text-align: center;
 }
 
@@ -348,45 +213,31 @@
 
 .account-menu {
   position: absolute;
-
   top: calc(100% + 10px);
   right: 0;
-
   background: #fff;
-
   border: 1px solid var(--paper-line);
-
   border-radius: var(--radius);
-
-  box-shadow:
-    0 4px 8px rgba(11, 18, 32, 0.08),
-    0 16px 32px -16px rgba(11, 18, 32, 0.25);
-
+  box-shadow: 0 4px 8px rgba(11, 18, 32, 0.08), 0 16px 32px -16px rgba(11, 18, 32, 0.25);
   padding: 8px;
-
   min-width: 200px;
-
   z-index: 50;
 }
 
 .account-menu-item {
   display: flex;
   align-items: center;
-
   gap: 11px;
-
   width: 100%;
-
   padding: 12px 14px;
-
   border-radius: var(--radius-sm);
-
   font-size: 16px;
   font-weight: 500;
-
   color: var(--ink);
-
   text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .account-menu-item:hover {
@@ -396,126 +247,81 @@
 .account-menu-item svg {
   width: 20px;
   height: 20px;
-
   color: var(--slate-light);
-
   flex-shrink: 0;
 }
 
 /* =========================
-   LARGE DESKTOP
+   RESPONSIVE FIXES
 ========================= */
 
 @media (min-width: 1500px) {
-  .nav-search {
-    max-width: 950px;
-  }
-
-  .nav-row-top {
-    padding: 0 40px;
-  }
+  .nav-search { max-width: 950px; }
+  .nav-row-top { padding: 0 40px; }
 }
 
-/* =========================
-   TABLET
-========================= */
-
 @media (max-width: 1100px) {
-  .nav-row-top {
-    padding: 0 24px;
-    gap: 14px;
-  }
-
-  .nav-search {
-    max-width: 600px;
-  }
-
-  .brand {
-    font-size: 24px;
-  }
-
-  .nav-location strong {
-    font-size: 14px;
-  }
-
-  .nav-right {
-    gap: 14px;
-  }
+  .nav-row-top { padding: 0 24px; gap: 14px; }
+  .nav-search { max-width: 600px; }
+  .brand { font-size: 24px; }
+  .nav-location strong { font-size: 14px; }
+  .nav-right { gap: 14px; }
 }
 
 @media (max-width: 900px) {
-  .nav-search {
-    display: none;
-  }
-
-  .nav-location span {
-    display: none;
-  }
-
-  .nav-row-top {
-    height: 70px;
-  }
-
-  .nav-account small,
-  .nav-account strong {
-    font-size: 13px;
-  }
+  /* Hide the search bar to make room for icons */
+  .nav-search { display: none; }
+  
+  /* Hide location text, keep icon */
+  .nav-location span { display: none; }
+  
+  .nav-row-top { height: 70px; }
 }
 
 /* =========================
-   MOBILE
+   MOBILE (THE FIX)
 ========================= */
 
 @media (max-width: 720px) {
   .nav-row-top {
     height: 64px;
     padding: 0 16px;
-    gap: 12px;
-  }
-
-  .nav-row-bottom {
-    height: 54px;
-    padding: 0 16px;
-  }
-
-  .nav-links {
-    display: none;
+    gap: 10px; /* Reduced gap */
   }
 
   .brand {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .brand-mark {
     padding: 3px 7px;
   }
 
-  .nav-right {
-    gap: 8px;
-  }
+  /* 🚨 REMOVED display: none from .nav-account */
+  /* The profile icon is now visible */
 
-  .nav-account {
-    display: none;
-  }
-
-  .sell-pill {
-    font-size: 13px;
-    padding: 8px 13px;
+  /* Keep icons tight */
+  .nav-actions {
+    gap: 4px; 
   }
 
   .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
   }
 
   .icon-btn svg {
     width: 20px;
     height: 20px;
   }
+  
+  .sell-pill {
+    display: none; /* Hide sell pill on mobile to save space if needed */
+  }
 }
+
 /* =========================
    DELIVER TO - readable on the dark green navbar
-   (beats the [class*="location"] rule in Home.css)
 ========================= */
 
 .nav .nav-location > svg,
