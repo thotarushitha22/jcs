@@ -503,7 +503,7 @@ export default function ProductDetail() {
 
           </div>
 
-          {/* TRUST BOXES (Now filling the empty space on the right) */}
+          {/* TRUST BOXES */}
           <div className="pd-trust">
             <div className="pd-trust-item">
               <span>🛡️</span>

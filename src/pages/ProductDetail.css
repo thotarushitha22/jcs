@@ -10,7 +10,6 @@
 }
 
 /* Loading */
-
 .pd-loading {
   min-height: 500px;
   display: flex;
@@ -21,7 +20,6 @@
 }
 
 /* Back */
-
 .pd-back {
   display: inline-block;
   margin-bottom: 12px;
@@ -56,22 +54,22 @@
   flex-direction: column;
   gap: 12px;
   position: sticky;
-  top: 96px; /* Sticky so the image stays visible when scrolling */
+  top: 96px;
   align-self: start;
 }
 
 .pd-image {
   width: 100%;
-  /* Make the image stretch to fill the space on the left */
   height: 700px;
-  min-height: calc(100vh - 200px); 
+  min-height: calc(100vh - 200px);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: hidden; /* Prevents zoom from breaking layout */
   background: #f8fafc;
   border-radius: 12px;
   position: relative;
+  cursor: zoom-in;
 }
 
 .pd-image img {
@@ -79,11 +77,12 @@
   height: 90%;
   object-fit: contain;
   display: block;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease-in-out;
+  transform-origin: center center;
 }
 
-.pd-image img:hover {
-  transform: scale(1.02);
+.pd-image:hover img {
+  transform: scale(1.5); 
 }
 
 .pd-no-image {
@@ -92,7 +91,6 @@
 }
 
 /* Thumbnails */
-
 .pd-thumbs {
   display: flex;
   gap: 12px;
@@ -167,7 +165,6 @@
 }
 
 /* Rating */
-
 .pd-rating {
   display: flex;
   align-items: center;
@@ -600,7 +597,6 @@
 }
 
 /* Questions */
-
 .pd-qa-head {
   display: flex;
   align-items: center;
@@ -619,10 +615,9 @@
 }
 
 /* ===================================
-   PERFECT GRID: CONTROLS ON LEFT, BOX ON RIGHT
+   PERFECT GRID
 =================================== */
 
-/* Stock box and quantity sit side by side */
 .pd-top-row {
   display: flex;
   align-items: flex-end;
@@ -634,7 +629,6 @@
   margin: 0;
 }
 
-/* Use the empty space: buying controls on the left, About box on the right */
 .pd-buy-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -647,13 +641,11 @@
   min-width: 0;
 }
 
-/* Storage + colour stay under the pincode box (left side) */
 .pd-buy-left .pd-variants {
   flex-direction: column;
   gap: 10px;
 }
 
-/* About this product box fills the right side */
 .pd-buy-right .pd-quick {
   max-width: none;
   margin-top: 0;
@@ -705,7 +697,6 @@
   font-weight: 650;
 }
 
-/* Trust Bar (Now placed on the right side to fill space) */
 .pd-trust {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -767,76 +758,59 @@
 }
 
 /* ===================================
-   RESPONSIVE
+   RESPONSIVE FIXES (THE FIX)
 =================================== */
 
 @media (max-width: 1250px) {
-  .pd {
-    padding: 20px 28px 50px;
-  }
-  .pd-grid {
-    grid-template-columns: minmax(420px, 1fr) minmax(440px, 1fr);
-    gap: 30px;
-  }
-  .pd-image {
-    height: 500px;
-    min-height: 500px;
-  }
+  .pd { padding: 20px 28px 50px; }
+  .pd-grid { grid-template-columns: minmax(400px, 1fr) minmax(400px, 1fr); gap: 30px; }
+  .pd-image { height: 500px; min-height: 500px; }
 }
 
 @media (max-width: 1000px) {
-  .pd-buy-row {
-    grid-template-columns: 1fr;
-  }
-  .pd-buy-right {
-    margin-top: 20px;
-  }
+  .pd-buy-row { grid-template-columns: 1fr; }
+  .pd-buy-right { margin-top: 20px; }
 }
 
+/* 🚨 MOBILE FIX */
 @media (max-width: 900px) {
-  .pd-grid {
-    grid-template-columns: 1fr;
-  }
-  .pd-gallery {
-    position: static;
-  }
-  .pd-trust {
-    grid-template-columns: 1fr;
-  }
+  .pd-grid { grid-template-columns: 1fr; gap: 24px; }
+  .pd-gallery { position: static; }
+  
+  /* Fix Image Container */
+  .pd-image { height: auto; max-height: 500px; min-height: 300px; width: 100%; }
+  .pd-image img { width: 100%; height: 100%; max-height: 500px; object-fit: contain; }
+  
+  .pd-trust { grid-template-columns: 1fr; }
 }
 
+/* 🚨 PHONE FIX */
 @media (max-width: 650px) {
-  .pd {
-    padding: 15px 14px 40px;
-  }
-  .pd-image {
-    height: 400px;
-    min-height: 400px;
-  }
-  .pd-title {
-    font-size: 28px;
-  }
-  .pd-price {
-    font-size: 32px;
-  }
-  .pd-cta-row {
-    flex-direction: column;
-  }
-  .pd-cta {
-    width: 100%;
-    max-width: 100%;
-  }
-}
-/* ===================================
-   CUSTOMER REVIEWS HEADER FIX (NAVY BLUE)
-=================================== */
+  .pd { padding: 15px 14px 40px; overflow-x: hidden; }
+  
+  /* Fix Image Container */
+  .pd-image { height: auto; max-height: 350px; min-height: 250px; }
+  .pd-image img { width: 100%; height: 100%; max-height: 350px; object-fit: contain; transform: none !important; }
+  .pd-image:hover img { transform: none !important; } /* Disable zoom on mobile */
 
-/* Header Background */
+  .pd-title { font-size: 24px; line-height: 1.2; }
+  .pd-price { font-size: 28px; }
+  .pd-mrp { font-size: 15px; }
+  
+  .pd-cta-row { flex-direction: column; gap: 12px; }
+  .pd-cta { width: 100%; max-width: 100%; }
+  
+  .pd-spec-grid { grid-template-columns: 1fr; }
+  .pd-highlights-row { width: 100%; max-width: 100%; }
+  .pd-info .pd-quick-grid { grid-template-columns: 1fr; }
+}
+
+/* Reviews Header */
 .reviews-header,
 .customer-reviews-header,
 .reviews-section h3 {
-  background-color: #0f172a !important; /* Navy Blue */
-  color: #ffffff !important;           /* White Text */
+  background-color: #0f172a !important; 
+  color: #ffffff !important;           
   padding: 16px 20px !important;
   display: flex !important;
   align-items: center !important;
@@ -844,7 +818,6 @@
   border-radius: 8px 8px 0 0 !important;
 }
 
-/* Header Title Text */
 .reviews-header h2,
 .reviews-header h3,
 .reviews-header span,
@@ -855,11 +828,10 @@
   margin: 0 !important;
 }
 
-/* Write a Review Button */
 .reviews-header button,
 .write-review-btn {
-  background-color: #2563eb !important; /* Bright Blue */
-  color: #ffffff !important;           /* White Text */
+  background-color: #2563eb !important; 
+  color: #ffffff !important;           
   border: none !important;
   padding: 8px 16px !important;
   border-radius: 6px !important;
@@ -872,25 +844,7 @@
   transition: background-color 0.2s ease !important;
 }
 
-/* Hover Effect */
 .reviews-header button:hover,
 .write-review-btn:hover {
-  background-color: #1d4ed8 !important; /* Darker Blue */
-}
-/* ===================================
-   PRODUCT IMAGE ZOOM EFFECT
-=================================== */
-
-.pd-image {
-  overflow: hidden !important;
-  cursor: zoom-in;
-}
-
-.pd-image img {
-  transition: transform 0.4s ease-in-out !important;
-  transform-origin: center center;
-}
-
-.pd-image:hover img {
-  transform: scale(1.5); /* Adjust this number to change zoom strength */
+  background-color: #1d4ed8 !important; 
 }
