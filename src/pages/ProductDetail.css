@@ -7,6 +7,7 @@
   max-width: 1850px;
   margin: 0 auto;
   padding: 15px 40px 30px;
+  overflow-x: hidden; /* 🚨 PREVENTS HORIZONTAL SCROLL ON ALL SCREENS */
 }
 
 /* Loading */
@@ -65,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* Prevents zoom from breaking layout */
+  overflow: hidden;
   background: #f8fafc;
   border-radius: 12px;
   position: relative;
@@ -758,7 +759,7 @@
 }
 
 /* ===================================
-   RESPONSIVE FIXES (THE FIX)
+   RESPONSIVE FIXES
 =================================== */
 
 @media (max-width: 1250px) {
@@ -772,7 +773,7 @@
   .pd-buy-right { margin-top: 20px; }
 }
 
-/* 🚨 MOBILE FIX */
+/* 🚨 TABLET & MOBILE FIX */
 @media (max-width: 900px) {
   .pd-grid { grid-template-columns: 1fr; gap: 24px; }
   .pd-gallery { position: static; }
@@ -784,67 +785,43 @@
   .pd-trust { grid-template-columns: 1fr; }
 }
 
-/* 🚨 PHONE FIX */
+/* 🚨 PHONE SPECIFIC FIX */
 @media (max-width: 650px) {
-  .pd { padding: 15px 14px 40px; overflow-x: hidden; }
+  .pd { 
+    padding: 15px 14px 40px; 
+    overflow-x: hidden; /* Force hide horizontal scroll */
+  }
+
+  .pd-grid {
+    gap: 16px;
+  }
   
   /* Fix Image Container */
   .pd-image { height: auto; max-height: 350px; min-height: 250px; }
   .pd-image img { width: 100%; height: 100%; max-height: 350px; object-fit: contain; transform: none !important; }
-  .pd-image:hover img { transform: none !important; } /* Disable zoom on mobile */
+  .pd-image:hover img { transform: none !important; }
 
+  /* Typography scaling */
   .pd-title { font-size: 24px; line-height: 1.2; }
   .pd-price { font-size: 28px; }
   .pd-mrp { font-size: 15px; }
+  .pd-per { font-size: 12px; }
+  .pd-ids { font-size: 12px; word-break: break-all; }
   
+  /* Stack buttons */
   .pd-cta-row { flex-direction: column; gap: 12px; }
   .pd-cta { width: 100%; max-width: 100%; }
-  
+
+  /* Fix layout grids */
   .pd-spec-grid { grid-template-columns: 1fr; }
   .pd-highlights-row { width: 100%; max-width: 100%; }
   .pd-info .pd-quick-grid { grid-template-columns: 1fr; }
-}
-
-/* Reviews Header */
-.reviews-header,
-.customer-reviews-header,
-.reviews-section h3 {
-  background-color: #0f172a !important; 
-  color: #ffffff !important;           
-  padding: 16px 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-.reviews-header h2,
-.reviews-header h3,
-.reviews-header span,
-.reviews-header .title {
-  color: #ffffff !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-}
-
-.reviews-header button,
-.write-review-btn {
-  background-color: #2563eb !important; 
-  color: #ffffff !important;           
-  border: none !important;
-  padding: 8px 16px !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  transition: background-color 0.2s ease !important;
-}
-
-.reviews-header button:hover,
-.write-review-btn:hover {
-  background-color: #1d4ed8 !important; 
+  
+  /* Pincode Row */
+  .pd-delivery { flex-wrap: wrap; height: auto; padding: 8px; }
+  .pd-delivery input { min-height: 36px; }
+  
+  /* Side padding for sections to prevent cutoff */
+  .pd-section { padding: 18px 0; }
+  .pd-overview { font-size: 14px; }
 }
