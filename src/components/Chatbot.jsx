@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  MessageCircle,
   X,
   Send,
   Bot,
@@ -8,7 +7,7 @@ import {
   Sparkles,
   RotateCcw,
   ChevronDown,
-} from "lucide-react";
+} from "lucide-react"; // 🚨 Removed MessageCircle, added Bot
 import "./Chatbot.css";
 
 const API_URL = "https://jcs-server-1.onrender.com/api/chat";
@@ -162,7 +161,8 @@ export default function Chatbot() {
           onClick={() => setOpen(true)}
           aria-label="Open JCS Global AI Assistant"
         >
-          <MessageCircle size={25} />
+          {/* 🚨 CHANGED ICON HERE */}
+          <Bot size={28} className="chatbot-launcher-icon" />
         </button>
       )}
 
@@ -323,7 +323,6 @@ export default function Chatbot() {
                 maxLength={2000}
                 disabled={loading}
               />
-
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
