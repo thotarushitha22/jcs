@@ -55,7 +55,7 @@ export default function Cart() {
           <div className="summary-line"><span>GST (18%)</span><span className="mono">₹{gst.toLocaleString("en-IN")}</span></div>
           <div className="summary-line summary-total"><span>Total</span><span className="mono">₹{(subtotal + gst).toLocaleString("en-IN")}</span></div>
           <button className="btn btn-primary btn-block" onClick={() => navigate("/checkout")}>
-            Proceed to checkout
+            Proceed
           </button>
         </aside>
       </div>
